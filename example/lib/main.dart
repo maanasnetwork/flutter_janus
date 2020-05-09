@@ -1,58 +1,82 @@
+import 'dart:core';
+
 import 'package:flutter/material.dart';
-import 'dart:async';
+// import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter/services.dart';
-import 'package:flutterjanus/flutterjanus.dart';
+import 'src/api_test/api_test_menu.dart';
+import 'src/route_item.dart';
+import 'src/janus_demo/janus_demo_menu.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(new MyApp());
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _MyAppState createState() => new _MyAppState();
+}
+
+enum DialogDemoAction {
+  cancel,
+  connect,
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  List<RouteItem> items;
+  // SharedPreferences _prefs;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
-    initPlatformState();
+    _initItems();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await Flutterjanus.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+  _buildRow(context, item) {
+    return ListBody(children: <Widget>[
+      ListTile(
+        title: Text(item.title),
+        onTap: () => item.push(context),
+        trailing: Icon(Icons.arrow_right),
+      ),
+      Divider()
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Text('Running on device: $_platformVersion\n'),
-        ),
-      ),
+    return new MaterialApp(
+      home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('Flutter-Janus'),
+          ),
+          body: new ListView.builder(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(0.0),
+              itemCount: items.length,
+              itemBuilder: (context, i) {
+                return _buildRow(context, items[i]);
+              })),
     );
+  }
+
+  _initItems() {
+    items = <RouteItem>[
+      RouteItem(
+          title: 'API Tests',
+          subtitle: 'API Tests.',
+          push: (BuildContext context) {
+            Navigator.push(
+                context,
+                new MaterialPageRoute(
+                    builder: (BuildContext context) => new ApiTestMenu()));
+          }),
+      RouteItem(
+          title: 'Janus Demos',
+          subtitle: 'Janus Demos.',
+          push: (BuildContext context) {
+            Navigator.push(
+                context,
+                new MaterialPageRoute(
+                    builder: (BuildContext context) => new JanusDemoMenu()));
+          }),
+    ];
   }
 }
