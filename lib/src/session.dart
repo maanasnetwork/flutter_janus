@@ -38,26 +38,51 @@ class Session {
 
   final GatewayCallbacks gatewayCallbacks;
 
-  Session(
-      {this.server,
-      this.iceServers,
-      this.iceTransportPolicy,
-      this.bundlePolicy,
-      this.ipv6Support,
-      this.withCredentials,
-      this.maxPollEvents,
-      this.token,
-      this.apiSecret,
-      this.destroyOnUnload,
-      this.keepAlivePeriod,
-      this.longPollTimeout,
-      this.gatewayCallbacks}) {
+  Session(this.gatewayCallbacks) {
+    this.server =
+        gatewayCallbacks.server != null ? gatewayCallbacks.server : null;
+    this.iceServers = gatewayCallbacks.iceServers != null
+        ? gatewayCallbacks.iceServers
+        : this.iceServers;
+    this.iceTransportPolicy = gatewayCallbacks.iceTransportPolicy != null
+        ? gatewayCallbacks.iceTransportPolicy
+        : null;
+    this.bundlePolicy = gatewayCallbacks.bundlePolicy != null
+        ? gatewayCallbacks.bundlePolicy
+        : null;
+    this.ipv6Support = gatewayCallbacks.ipv6Support != null
+        ? gatewayCallbacks.ipv6Support
+        : null;
+    this.withCredentials = gatewayCallbacks.withCredentials != null
+        ? gatewayCallbacks.withCredentials
+        : null;
+    this.maxPollEvents = gatewayCallbacks.maxPollEvents != null
+        ? gatewayCallbacks.maxPollEvents
+        : this.maxPollEvents;
+    this.token = gatewayCallbacks.token != null ? gatewayCallbacks.token : null;
+    this.apiSecret =
+        gatewayCallbacks.apiSecret != null ? gatewayCallbacks.apiSecret : null;
+    this.destroyOnUnload = gatewayCallbacks.destroyOnUnload != null
+        ? gatewayCallbacks.destroyOnUnload
+        : this.destroyOnUnload;
+    this.keepAlivePeriod = gatewayCallbacks.keepAlivePeriod != null
+        ? gatewayCallbacks.keepAlivePeriod
+        : null;
+    this.longPollTimeout = gatewayCallbacks.longPollTimeout != null
+        ? gatewayCallbacks.longPollTimeout
+        : null;
+
     if (!Janus.initDone) {
       if (gatewayCallbacks.error is Function)
         gatewayCallbacks.error("Plugin not initialized");
+      return;
     }
     Janus.log("Plugin initialized: " + Janus.initDone.toString());
 
+    if (gatewayCallbacks.server == null) {
+      gatewayCallbacks.error("Invalid server url");
+      return;
+    }
     if (Janus.isArray(this.server)) {
       Janus.log("Multiple servers provided (" +
           this.server.length +

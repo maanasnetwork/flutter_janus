@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutterjanus/src/callbacks.dart';
 import 'dart:core';
 
+import 'package:flutterjanus/src/callbacks.dart';
 import 'package:flutterjanus/src/janus.dart';
 import 'package:flutterjanus/src/session.dart';
 
@@ -26,9 +26,8 @@ class _JanusSessionTestState extends State<JanusSessionTest> {
           options: {"debug": "vdebug"},
           callback: () => {_text = "Janus Init Callback: Janus initialised."});
       GatewayCallbacks gatewayCallbacks = GatewayCallbacks();
-      Session session = Session(
-          server: "http://fusion.minelytics.in:8088/janus",
-          gatewayCallbacks: gatewayCallbacks);
+      gatewayCallbacks.server = "http://fusion.minelytics.in:8088/janus";
+      Session session = Session(gatewayCallbacks);
       Janus.log(session);
       // Janus.log(Callbacks.error.runtimeType);
     });

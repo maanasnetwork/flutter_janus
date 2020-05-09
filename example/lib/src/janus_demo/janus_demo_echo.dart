@@ -6,6 +6,8 @@ import 'package:flutterjanus/src/janus.dart';
 import 'package:flutterjanus/src/session.dart';
 import 'package:flutterjanus/src/plugin.dart';
 
+import 'signal.dart';
+
 class JanusEcho extends StatefulWidget {
   static String tag = 'janus_demo_echo';
 
@@ -28,8 +30,9 @@ class _JanusEchoState extends State<JanusEcho> {
 
   bool doSimulcast = false;
   bool doSimulcast2 = false;
-  String acodec = 'opus';
-  String vcodec = 'vp8';
+  String acodec;
+  String vcodec;
+  bool simulcastStarted = false;
 
   Session _session;
   Plugin _plugin;
@@ -49,10 +52,11 @@ class _JanusEchoState extends State<JanusEcho> {
         callback: () => Janus.log("Janus Init Callback: Janus initialised."));
 
     GatewayCallbacks gatewayCallbacks = GatewayCallbacks();
+    gatewayCallbacks.server = this.server;
     gatewayCallbacks.success = () => _attach();
     gatewayCallbacks.error = (error) => Janus.log(error.toString());
     gatewayCallbacks.destroyed = () => deactivate();
-    _session = Session(server: server, gatewayCallbacks: gatewayCallbacks);
+    this._session = Session(gatewayCallbacks);
   }
 
   @override
@@ -67,12 +71,6 @@ class _JanusEchoState extends State<JanusEcho> {
     callbacks.opaqueId = opaqueId;
     callbacks.success = () {};
   }
-
-  _hangUp() {}
-
-  _switchCamera() {}
-
-  _muteMic() {}
 
   _buildRow(context, peer) {}
 
@@ -98,17 +96,17 @@ class _JanusEchoState extends State<JanusEcho> {
                   children: <Widget>[
                     FloatingActionButton(
                       child: const Icon(Icons.switch_camera),
-                      onPressed: _switchCamera,
+                      onPressed: Signal.switchCamera,
                     ),
                     FloatingActionButton(
-                      onPressed: _hangUp,
+                      onPressed: Signal.hangUp,
                       tooltip: 'Hangup',
                       child: new Icon(Icons.call_end),
                       backgroundColor: Colors.pink,
                     ),
                     FloatingActionButton(
                       child: const Icon(Icons.mic_off),
-                      onPressed: _muteMic,
+                      onPressed: Signal.muteMic,
                     )
                   ]))
           : null,
