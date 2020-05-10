@@ -117,7 +117,7 @@ class Session {
 
   destroy(GatewayCallbacks callbacks) => destroySession(callbacks: callbacks);
 
-  attach(Session session, Plugin plugin, Callbacks callbacks) =>
+  attach(Plugin plugin, Callbacks callbacks) =>
       plugin.attach(session: this, callbacks: callbacks);
 
   eventHandler() {
@@ -125,7 +125,7 @@ class Session {
       return;
     }
     Janus.debug('Long poll...');
-    if (this.connected) {
+    if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       return;
     }
@@ -133,7 +133,7 @@ class Session {
         "/" +
         this.sessionId +
         "?rid=" +
-        (new DateTime.now()).millisecondsSinceEpoch;
+        (new DateTime.now()).millisecondsSinceEpoch.toString();
     Janus.log(longpoll);
     if (this.maxev > 0) longpoll = longpoll + "&maxev=" + this.maxev;
     if (this.token != null)
@@ -539,7 +539,8 @@ class Session {
       }
       Janus.sessions[this.sessionId] = this;
       eventHandler();
-      callbacks.success(this); // return session to the success callback
+      callbacks
+          .success(this.sessionId); // return session to the success callback
     };
     httpCallbacks.error = (textStatus, errorThrown) {
       Janus.error(textStatus + ":" + errorThrown); // FIXME
