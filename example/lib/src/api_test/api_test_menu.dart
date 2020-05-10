@@ -5,8 +5,6 @@ import 'loopback_sample.dart';
 import 'get_user_media_sample.dart';
 import 'data_channel_sample.dart';
 
-import 'janus_test.dart';
-import 'session_test.dart';
 import '../route_item.dart';
 
 typedef void RouteCallback(BuildContext context);
@@ -38,33 +36,6 @@ final List<RouteItem> items = <RouteItem>[
             context,
             new MaterialPageRoute(
                 builder: (BuildContext context) => new DataChannelSample()));
-      }),
-  RouteItem(
-      title: 'Janus Test',
-      subtitle: 'janusTest',
-      push: (BuildContext context) {
-        Navigator.push(
-            context,
-            new MaterialPageRoute(
-                builder: (BuildContext context) => new JanusTest()));
-      }),
-  RouteItem(
-      title: 'Janus Session Test',
-      subtitle: 'janusSessionTest',
-      push: (BuildContext context) {
-        Navigator.push(
-            context,
-            new MaterialPageRoute(
-                builder: (BuildContext context) => new JanusSessionTest()));
-      }),
-  RouteItem(
-      title: 'Janus Plugin Test',
-      subtitle: 'janusPluginTest',
-      push: (BuildContext context) {
-        Navigator.push(
-            context,
-            new MaterialPageRoute(
-                builder: (BuildContext context) => new JanusSessionTest()));
       }),
 ];
 

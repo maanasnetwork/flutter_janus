@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutterjanus/src/callbacks.dart';
 import 'dart:core';
@@ -5,8 +7,6 @@ import 'package:flutter_webrtc/webrtc.dart';
 import 'package:flutterjanus/src/janus.dart';
 import 'package:flutterjanus/src/session.dart';
 import 'package:flutterjanus/src/plugin.dart';
-
-import 'signal.dart';
 
 class JanusEcho extends StatefulWidget {
   static String tag = 'janus_demo_echo';
@@ -18,7 +18,7 @@ class JanusEcho extends StatefulWidget {
 }
 
 class _JanusEchoState extends State<JanusEcho> {
-  String server = "http://fusion.minelytics.in:8088/janus";
+  String server = "https://fusion.minelytics.in:8089/janus";
   var janus;
   var echotest;
   String opaqueId = "echotest-" + Janus.randomString(12);
@@ -36,6 +36,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   Session _session;
   Plugin _plugin;
+  Map<String, dynamic> _handle;
 
   List<dynamic> _peers;
   var _selfId;
@@ -47,16 +48,13 @@ class _JanusEchoState extends State<JanusEcho> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Janus.init(
-        options: {"debug": "vdebug"},
-        callback: () => Janus.log("Janus Init Callback: Janus initialised."));
-
+    Janus.init(options: {"debug": "vdebug"}, callback: null);
     GatewayCallbacks gatewayCallbacks = GatewayCallbacks();
     gatewayCallbacks.server = this.server;
-    gatewayCallbacks.success = () => _attach();
+    gatewayCallbacks.success = _attach;
     gatewayCallbacks.error = (error) => Janus.log(error.toString());
     gatewayCallbacks.destroyed = () => deactivate();
-    this._session = Session(gatewayCallbacks);
+    Session(gatewayCallbacks); // async httpd call
   }
 
   @override
@@ -65,12 +63,102 @@ class _JanusEchoState extends State<JanusEcho> {
     super.deactivate();
   }
 
-  void _attach() {
+  void _attach(Session session) {
+    this._session = session;
     Callbacks callbacks = Callbacks();
     callbacks.plugin = "janus.plugin.echotest";
     callbacks.opaqueId = opaqueId;
-    callbacks.success = () {};
+    callbacks.success = _success;
+    callbacks.error = _error;
+    callbacks.consentDialog = _consentDialog;
+    callbacks.iceState = _iceState;
+    callbacks.mediaState = _mediaState;
+    callbacks.webrtcState = _webrtcState;
+    callbacks.slowLink = _slowLink;
+    callbacks.onmessage = _onmessage;
+    callbacks.onlocalstream = _onlocalstream;
+    callbacks.onremotestream = _onremotestream;
+    callbacks.ondataopen = _ondataopen;
+    callbacks.ondata = _ondata;
+    callbacks.oncleanup = _oncleanup;
+    this._plugin = Plugin();
+    this._plugin.attach(session: this._session, callbacks: callbacks);
   }
+
+  _success(pluginHandle) {
+    Map<String, dynamic> body = {"audio": true, "video": true};
+    this._handle = pluginHandle;
+    if (this.acodec != null) body['audiocodec'] = this.acodec;
+    if (this.vcodec != null) body['videocodec'] = this.vcodec;
+    Janus.debug("Sending message (" + jsonEncode(body) + ")");
+    this._handle['send']({"message": body});
+    Janus.debug("Trying a createOffer too (audio/video sendrecv)");
+    this._handle['createOffer']({
+      "media": {"data": true},
+      "simulcast": doSimulcast,
+      "simulcast2": doSimulcast2,
+      "success": (jsep) {
+        Janus.debug("Got SDP!");
+        Janus.debug(jsep);
+        this._handle['send']({"message": body, "jsep": jsep});
+      },
+      "error": (error) {
+        Janus.error("WebRTC error:", error);
+        Janus.log("WebRTC error... " + jsonEncode(error));
+      }
+    });
+  }
+
+  _error(error) {
+    Janus.log("  -- Error attaching plugin...", error.toString());
+  }
+
+  _consentDialog(bool on) {
+    Janus.debug("Consent dialog should be " + (on ? "on" : "off") + " now");
+  }
+
+  _iceState(String state) {
+    Janus.log("ICE state changed to " + state);
+  }
+
+  _mediaState(String medium, bool on) {
+    Janus.log(
+        "Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+  }
+
+  _webrtcState(bool on) {
+    Janus.log("Janus says our WebRTC PeerConnection is " +
+        (on ? "up" : "down") +
+        " now");
+  }
+
+  _slowLink(bool uplink, lost) {
+    Janus.warn("Janus reports problems " +
+        (uplink ? "sending" : "receiving") +
+        " packets on this PeerConnection (" +
+        lost +
+        " lost packets)");
+  }
+
+  _onmessage(msg, jsep) {}
+
+  _onlocalstream(MediaStream stream) {}
+
+  _onremotestream(MediaStream stream) {}
+
+  _ondataopen(data) {}
+
+  _ondata(data) {}
+
+  _oncleanup() {
+    Janus.log(" ::: Got a cleanup notification :::");
+  }
+
+  _hangUp() {}
+
+  _switchCamera() {}
+
+  _muteMic() {}
 
   _buildRow(context, peer) {}
 
@@ -96,17 +184,17 @@ class _JanusEchoState extends State<JanusEcho> {
                   children: <Widget>[
                     FloatingActionButton(
                       child: const Icon(Icons.switch_camera),
-                      onPressed: Signal.switchCamera,
+                      onPressed: _switchCamera,
                     ),
                     FloatingActionButton(
-                      onPressed: Signal.hangUp,
+                      onPressed: _hangUp,
                       tooltip: 'Hangup',
                       child: new Icon(Icons.call_end),
                       backgroundColor: Colors.pink,
                     ),
                     FloatingActionButton(
                       child: const Icon(Icons.mic_off),
-                      onPressed: Signal.muteMic,
+                      onPressed: _muteMic,
                     )
                   ]))
           : null,

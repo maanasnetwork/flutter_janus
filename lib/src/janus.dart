@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 import 'package:random_string/random_string.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -36,16 +36,22 @@ class Janus {
       endOfCandidates; // https://github.com/meetecho/janus-gateway/issues/1670
 
   static String debugLevel;
-  static Logger logger;
+  static var logger;
   static int methodCount = 0;
   static int errorMethodCount = 0;
 
-  static debug(msg, [err, stackTrace]) => logger.finer(msg, err, stackTrace);
-  static vdebug(msg, [err, stackTrace]) => logger.fine(msg, err, stackTrace);
-  static log(msg, [err, stackTrace]) => logger.info(msg, err, stackTrace);
-  static warn(msg, [err, stackTrace]) => logger.warning(msg, err, stackTrace);
-  static error(msg, [err, stackTrace]) => logger.severe(msg, err, stackTrace);
-  static trace(msg, [err, stackTrace]) => logger.shout(msg, err, stackTrace);
+  static vdebug(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.v(msg, err, stackTrace);
+  static debug(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.d(msg, err, stackTrace);
+  static log(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.i(msg, err, stackTrace);
+  static warn(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.w(msg, err, stackTrace);
+  static error(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.e(msg, err, stackTrace);
+  static trace(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+      logger.wtf(msg, err, stackTrace);
 
   static bool initDone = false;
 
@@ -57,11 +63,11 @@ class Janus {
 
   static init({@required Map options, Function callback}) {
     if (initDone) {
-      log("Library alreaday Initialised");
+      Janus.log("Library alreaday Initialised");
       if (callback is Function) callback();
     } else {
-      logger = Logger('Janus');
-      log("Initializing library");
+      logger = Logger();
+      Janus.log("Initializing library");
       initDone = true;
       if (callback is Function) callback();
     }
@@ -88,7 +94,8 @@ class Janus {
       // 'headers': 'Accept': 'application/json, text/plain, */*',
       'cache': 'no-cache'
     };
-    if (options['withCredentials'] != null) {
+    Janus.log(options.toString());
+    if (options['withCredentials']) {
       if ((options['withCredentials']).length > 0) {
         fetchOptions['credentials'] = 'include';
       } else {
@@ -116,19 +123,17 @@ class Janus {
         .timeout(Duration(seconds: timeout),
             onTimeout: () =>
                 Janus.error('Request timed out: ' + timeout.toString()))
-        .then((response) => {
-              if (response.statusCode == 200)
-                {
-                  if (callbacks.success is Function)
-                    callbacks.success(jsonDecode(response.body))
-                }
-              else
-                {
-                  callbacks.error('API call failed ',
-                      response.statusCode.toString() + response.body)
-                }
-            })
-        .catchError((error) => {Janus.error('Internal Error' + error)});
+        .then((response) {
+      if (response.statusCode == 200) {
+        if (callbacks.success is Function) {
+          callbacks.success(jsonDecode(response.body));
+        }
+      } else {
+        callbacks.error(
+            'API call failed ', response.statusCode.toString() + response.body);
+      }
+    }).catchError(
+            (error) => {Janus.error('Internal Error' + error.toString())});
   }
 
   static listDevices(Function callback, Map config) {

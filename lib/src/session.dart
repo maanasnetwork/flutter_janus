@@ -518,7 +518,7 @@ class Session {
 
     GatewayCallbacks httpCallbacks = GatewayCallbacks();
     httpCallbacks.success = (json) {
-      Janus.debug(json);
+      Janus.debug(json.toString());
       if (json["janus"] != "success") {
         Janus.error("Ooops: " +
             json["error"].code +
@@ -531,14 +531,15 @@ class Session {
       this.sessionId = json["session_id"] != null
           ? json["session_id"].toString()
           : json['data']["id"].toString();
+
       if (reconnect) {
         Janus.log("Claimed session: " + this.sessionId);
       } else {
         Janus.log("Created session: " + this.sessionId);
       }
-      // Janus.sessions[this.sessionId] = that;
+      Janus.sessions[this.sessionId] = this;
       eventHandler();
-      callbacks.success();
+      callbacks.success(this); // return session to the success callback
     };
     httpCallbacks.error = (textStatus, errorThrown) {
       Janus.error(textStatus + ":" + errorThrown); // FIXME
@@ -560,7 +561,6 @@ class Session {
       else
         callbacks.error(textStatus + ": " + errorThrown);
     };
-
     Janus.httpAPICall(
         server,
         {

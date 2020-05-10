@@ -95,13 +95,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.12"
-  logging:
+  logger:
     dependency: "direct main"
     description:
-      name: logging
+      name: logger
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.11.4"
+    version: "0.9.1"
   matcher:
     dependency: transitive
     description:
