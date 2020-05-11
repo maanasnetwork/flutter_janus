@@ -65,7 +65,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   void _attach(String sessionId) {
     this._session = Janus.sessions[sessionId];
-    Janus.log(this._session.sessionId);
+
     Callbacks callbacks = Callbacks();
     callbacks.plugin = "janus.plugin.echotest";
     callbacks.opaqueId = opaqueId;
@@ -82,8 +82,7 @@ class _JanusEchoState extends State<JanusEcho> {
     callbacks.ondataopen = _ondataopen;
     callbacks.ondata = _ondata;
     callbacks.oncleanup = _oncleanup;
-    this._plugin = Plugin();
-    this._plugin.attach(session: this._session, callbacks: callbacks);
+    this._session.attach(callbacks: callbacks);
   }
 
   _success(pluginHandle) {
