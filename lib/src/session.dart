@@ -35,7 +35,7 @@ class Session {
 
   bool connected = false;
   String sessionId;
-  Map<String, Map> pluginHandles;
+  Map<String, Plugin> pluginHandles;
   int retries = 0;
   Map<String, dynamic> transactions;
 
@@ -207,7 +207,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -216,7 +216,7 @@ class Session {
       var candidate = json["candidate"];
       Janus.debug("Got a trickled candidate on session " + this.sessionId);
       Janus.debug(candidate);
-      var config = pluginHandle['webrtcStuff'];
+      var config = pluginHandle.webrtcStuff;
       // TODO RTCPeerConnection config['pc']
       if (config['pc'] && config['remoteSdp']) {
         // Add candidate right now
@@ -232,9 +232,9 @@ class Session {
         // We didn't do setRemoteDescription (trickle got here before the offer?)
         Janus.debug(
             "We didn't do setRemoteDescription (trickle got here before the offer?), caching candidate");
-        if (config.candidates == null) config.candidates = [];
+        if (config['candidates'] == null) config['candidates'] = [];
         config['candidates'].add(candidate);
-        Janus.debug(config.candidates);
+        Janus.debug(config['candidates']);
       }
     } else if (json["janus"] == "webrtcup") {
       // The PeerConnection with the server is up! Notify this
@@ -245,12 +245,12 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
       }
-      pluginHandle['webrtcState'](true);
+      pluginHandle.webrtcState(true);
       return;
     } else if (json["janus"] == "hangup") {
       // A plugin asked the core to hangup a PeerConnection on one of our handles
@@ -261,13 +261,13 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
       }
-      pluginHandle['webrtcState'](false, json["reason"]);
-      pluginHandle['hangup']();
+      pluginHandle.webrtcState(false, json["reason"]);
+      pluginHandle.hangup({});
     } else if (json["janus"] == "detached") {
       // A plugin asked the core to detach one of our handles
       Janus.debug("Got a detached event on session " + this.sessionId);
@@ -277,14 +277,14 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         // Don't warn here because destroyHandle causes this situation.
         return;
       }
-      pluginHandle['detached'] = true;
-      pluginHandle['ondetached']();
-      pluginHandle['detach']();
+      pluginHandle.detached = true;
+      pluginHandle.ondetached();
+      pluginHandle.detach(sender, null);
     } else if (json["janus"] == "media") {
       // Media started/stopped flowing
       Janus.debug("Got a media event on session " + this.sessionId);
@@ -294,12 +294,12 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
       }
-      pluginHandle['mediaState'](json["type"], json["receiving"]);
+      pluginHandle.mediaState(json["type"], json["receiving"]);
     } else if (json["janus"] == "slowlink") {
       Janus.debug("Got a slowlink event on session " + this.sessionId);
       Janus.debug(json);
@@ -309,12 +309,12 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
       }
-      pluginHandle['slowLink'](json["uplink"], json["lost"]);
+      pluginHandle.slowLink(json["uplink"], json["lost"]);
     } else if (json["janus"] == "error") {
       // Oops, something wrong happened
       Janus.error(
@@ -347,7 +347,7 @@ class Session {
           ")");
       var data = plugindata["data"];
       Janus.debug(data);
-      Map<String, dynamic> pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender];
       if (pluginHandle == null) {
         Janus.warn("This handle is not attached to this session");
         return;
@@ -357,7 +357,7 @@ class Session {
         Janus.debug("Handling SDP as well...");
         Janus.debug(jsep);
       }
-      var callback = pluginHandle['onmessage'];
+      var callback = pluginHandle.onmessage;
       if (callback is Function) {
         Janus.debug("Notifying application...");
         // Send to callback specified when attaching plugin handle
@@ -593,8 +593,7 @@ class Session {
     }
     if (cleanupHandles) {
       this.pluginHandles.forEach((handleId, handle) {
-        // TODO
-        // Plugin.destroyHandle(sessionId, handleId, { 'noRequest': true }); // FIXME
+        handle.detach(handleId, {'noRequest': true}); // FIXME
       });
     }
     if (!this.connected) {
@@ -747,71 +746,13 @@ class Session {
         }
         String handleId = json["data"]["id"];
         Janus.log("Created handle: " + handleId);
-        Map<String, dynamic> pluginHandle = {
-          'session': this,
-          'plugin': plugin,
-          'id': handleId,
-          'token': handleToken,
-          'detached': false,
-          'webrtcStuff': {
-            'started': false,
-            'myStream': null,
-            'streamExternal': false,
-            'remoteStream': null,
-            'mySdp': null,
-            'mediaConstraints': null,
-            'pc': null,
-            'dataChannel': {},
-            'dtmfSender': null,
-            'trickle': true,
-            'iceDone': false,
-            'volume': {'value': null, 'timer': null},
-            'bitrate': {
-              'value': null,
-              'bsnow': null,
-              'bsbefore': null,
-              'tsnow': null,
-              'tsbefore': null,
-              'timer': null
-            }
-          },
-          'getId': () => handleId,
-          'getPlugin': () => plugin,
-          'getVolume': () => getVolume(handleId, true),
-          'getRemoteVolume': () => getVolume(handleId, true),
-          'getLocalVolume': () => getVolume(handleId, false),
-          'isAudioMuted': () => isMuted(handleId, false),
-          'muteAudio': () => mute(handleId, false, true),
-          'unmuteAudio': () => mute(handleId, false, false),
-          'isVideoMuted': () => isMuted(handleId, true),
-          'muteVideo': () => mute(handleId, true, true),
-          'unmuteVideo': () => mute(handleId, true, false),
-          'getBitrate': () => getBitrate(handleId),
-          'send': (callbacks) => sendMessage(handleId, callbacks),
-          'data': (callbacks) => sendData(handleId, callbacks),
-          'dtmf': (callbacks) => sendDtmf(handleId, callbacks),
-          'consentDialog': callbacks.consentDialog,
-          'iceState': callbacks.iceState,
-          'mediaState': callbacks.mediaState,
-          'webrtcState': callbacks.webrtcState,
-          'slowLink': callbacks.slowLink,
-          'onmessage': callbacks.onmessage,
-          'createOffer': (callbacks) =>
-              prepareWebrtc(handleId, true, callbacks),
-          'createAnswer': (callbacks) =>
-              prepareWebrtc(handleId, false, callbacks),
-          'handleRemoteJsep': (callbacks) =>
-              prepareWebrtcPeer(handleId, callbacks),
-          'onlocalstream': callbacks.onlocalstream,
-          'onremotestream': callbacks.onremotestream,
-          'ondata': callbacks.ondata,
-          'ondataopen': callbacks.ondataopen,
-          'oncleanup': callbacks.oncleanup,
-          'ondetached': callbacks.ondetached,
-          'hangup': (sendRequest) =>
-              cleanupWebrtc(handleId, sendRequest == true),
-          'detach': (callbacks) => destroyHandle(handleId, callbacks)
-        };
+        // Initialise plugin
+        Plugin pluginHandle = Plugin(
+            session: this,
+            plugin: plugin,
+            handleId: handleId,
+            handleToken: handleToken,
+            callbacks: callbacks);
 
         this.pluginHandles[handleId] = pluginHandle;
         callbacks.success(pluginHandle);
@@ -836,69 +777,13 @@ class Session {
       }
       String handleId = json.data["id"];
       Janus.log("Created handle: " + handleId);
-      Map<String, dynamic> pluginHandle = {
-        'session': this,
-        'plugin': plugin,
-        'id': handleId,
-        'token': handleToken,
-        'detached': false,
-        'webrtcStuff': {
-          'started': false,
-          'myStream': null,
-          'streamExternal': false,
-          'remoteStream': null,
-          'mySdp': null,
-          'mediaConstraints': null,
-          'pc': null,
-          'dataChannel': {},
-          'dtmfSender': null,
-          'trickle': true,
-          'iceDone': false,
-          'volume': {'value': null, 'timer': null},
-          'bitrate': {
-            'value': null,
-            'bsnow': null,
-            'bsbefore': null,
-            'tsnow': null,
-            'tsbefore': null,
-            'timer': null
-          }
-        },
-        'getId': () => handleId,
-        'getPlugin': () => plugin,
-        'getVolume': () => getVolume(handleId, true),
-        'getRemoteVolume': () => getVolume(handleId, true),
-        'getLocalVolume': () => getVolume(handleId, false),
-        'isAudioMuted': () => isMuted(handleId, false),
-        'muteAudio': () => mute(handleId, false, true),
-        'unmuteAudio': () => mute(handleId, false, false),
-        'isVideoMuted': () => isMuted(handleId, true),
-        'muteVideo': () => mute(handleId, true, true),
-        'unmuteVideo': () => mute(handleId, true, false),
-        'getBitrate': () => getBitrate(handleId),
-        'send': (callbacks) => sendMessage(handleId, callbacks),
-        'data': (callbacks) => sendData(handleId, callbacks),
-        'dtmf': (callbacks) => sendDtmf(handleId, callbacks),
-        'consentDialog': callbacks.consentDialog,
-        'iceState': callbacks.iceState,
-        'mediaState': callbacks.mediaState,
-        'webrtcState': callbacks.webrtcState,
-        'slowLink': callbacks.slowLink,
-        'onmessage': callbacks.onmessage,
-        'createOffer': (callbacks) => prepareWebrtc(handleId, true, callbacks),
-        'createAnswer': (callbacks) =>
-            prepareWebrtc(handleId, false, callbacks),
-        'handleRemoteJsep': (callbacks) =>
-            prepareWebrtcPeer(handleId, callbacks),
-        'onlocalstream': callbacks.onlocalstream,
-        'onremotestream': callbacks.onremotestream,
-        'ondata': callbacks.ondata,
-        'ondataopen': callbacks.ondataopen,
-        'oncleanup': callbacks.oncleanup,
-        'ondetached': callbacks.ondetached,
-        'hangup': (sendRequest) => cleanupWebrtc(handleId, sendRequest == true),
-        'detach': (callbacks) => destroyHandle(handleId, callbacks)
-      };
+      // Initialise plugin
+      Plugin pluginHandle = Plugin(
+          session: this,
+          plugin: plugin,
+          handleId: handleId,
+          handleToken: handleToken,
+          callbacks: callbacks);
 
       this.pluginHandles[handleId] = pluginHandle;
       callbacks.success(pluginHandle);
@@ -929,8 +814,8 @@ class Session {
       callbacks.error("Is the server down? (connected=false)");
       return;
     }
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
@@ -943,7 +828,8 @@ class Session {
       "body": message,
       "transaction": transaction
     };
-    if (pluginHandle['token']) request["token"] = pluginHandle['token'];
+    if (pluginHandle.handleToken != null)
+      request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
     if (jsep) request["jsep"] = jsep;
     Janus.debug("Sending message to plugin (handle=" + handleId + "):");
@@ -1049,8 +935,8 @@ class Session {
       Janus.warn("Is the server down? (connected=false)");
       return;
     }
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return;
     }
@@ -1060,7 +946,8 @@ class Session {
       "candidate": candidate,
       "transaction": Janus.randomString(12)
     };
-    if (pluginHandle['token']) request["token"] = pluginHandle['token'];
+    if (pluginHandle.handleToken != null)
+      request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
     Janus.vdebug("Sending trickle candidate (handle=" + handleId + "):");
     Janus.vdebug(request);
@@ -1100,16 +987,16 @@ class Session {
 
   // Private method to create a data channel
   createDataChannel(String handleId, dclabel, incoming, pendingData) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     var onDataChannelMessage = (event) {
       Janus.log('Received message on data channel:' + event.toString());
       var label = event.target.label;
-      pluginHandle['ondata'](event.data, label);
+      pluginHandle.ondata(event.data, label);
     };
     var onDataChannelStateChange = (event) {
       Janus.log('Received state change on data channel:' + event.toString());
@@ -1134,7 +1021,7 @@ class Session {
           config['dataChannel'][label]['pending'] = [];
         }
         // Notify the open data channel
-        pluginHandle['ondataopen'](label);
+        pluginHandle.ondataopen(label);
       }
     };
     var onDataChannelError = (error) => {
@@ -1160,13 +1047,13 @@ class Session {
 
   // Private method to send a data channel message
   sendData(String handleId, Callbacks callbacks) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     var data = callbacks.text || callbacks.data;
     if (!data) {
       Janus.warn("Invalid data");
@@ -1194,13 +1081,13 @@ class Session {
 
   // Private method to send a DTMF tone
   sendDtmf(String handleId, Callbacks callbacks) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (config['dtmfSender'] == null) {
       // Create the DTMF sender the proper way, if possible
       if (config['pc']) {
@@ -1264,8 +1151,8 @@ class Session {
         noRequest.toString() +
         ")");
     cleanupWebrtc(handleId, false);
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       // Plugin was already detached by Janus, calling detach again will return a handle not found error, so just exit here
       this.pluginHandles.remove(handleId);
       callbacks.success();
@@ -1286,7 +1173,8 @@ class Session {
       "janus": "detach",
       "transaction": Janus.randomString(12)
     };
-    if (pluginHandle['token']) request["token"] = pluginHandle['token'];
+    if (pluginHandle.handleToken != null)
+      request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
     if (this.websockets != null) {
       request["session_id"] = this.sessionId;
@@ -1328,13 +1216,13 @@ class Session {
 
   // WebRTC stuff
   streamsDone(String handleId, jsep, Map media, callbacks, MediaStream stream) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     Janus.debug("streamsDone:" + stream.toString());
     if (stream != null) {
       Janus.debug("  -- Audio tracks:" + stream.getAudioTracks().toString());
@@ -1484,7 +1372,7 @@ class Session {
           ")");
       config['pc']['oniceconnectionstatechange'] = (e) {
         if (config['pc'])
-          pluginHandle['iceState'](config['pc'].iceConnectionState);
+          pluginHandle.iceState(config['pc'].iceConnectionState);
       };
       config['pc'].onIceCandidate = (event) {
         if (event.candidate == null ||
@@ -1518,14 +1406,14 @@ class Session {
         Janus.debug(event);
         if (!event.streams) return;
         config['remoteStream'] = event.streams[0];
-        pluginHandle['onremotestream'](config['remoteStream']);
+        pluginHandle.onremotestream(config['remoteStream']);
         if (event.track.onended) return;
         Janus.log("Adding onended callback to track:" + event.track);
         event.track.onended = (ev) {
           Janus.log("Remote track muted/removed:" + ev);
           if (config['remoteStream']) {
             config['remoteStream'].removeTrack(ev.target);
-            pluginHandle['onremotestream'](config['remoteStream']);
+            pluginHandle.onremotestream(config['remoteStream']);
           }
         };
         event.track.onmute = event.track.onended;
@@ -1533,7 +1421,7 @@ class Session {
           Janus.log("Remote track flowing again:" + ev);
           try {
             config['remoteStream'].addTrack(ev.target);
-            pluginHandle['onremotestream'](config['remoteStream']);
+            pluginHandle.onremotestream(config['remoteStream']);
           } catch (e) {
             Janus.error(e);
           }
@@ -1593,7 +1481,7 @@ class Session {
     }
     // If there's a new local stream, let's notify the application
     if (config['myStream']) {
-      pluginHandle['onlocalstream'](config['myStream']);
+      pluginHandle.onlocalstream(config['myStream']);
     }
     // Create offer/answer now
     if (!jsep) {
@@ -1639,13 +1527,13 @@ class Session {
         ? callbacks.media
         : {'audio': true, 'video': true};
     Map media = callbacks.media;
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || !pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     config['trickle'] = isTrickleEnabled(callbacks.trickle);
     // Are we updating a session?
     if (config['pc'] == null) {
@@ -1790,7 +1678,7 @@ class Session {
       // If we're updating and keeping all tracks, let's skip the getUserMedia part
       if ((isAudioSendEnabled(media) && media['keepAudio']) &&
           (isVideoSendEnabled(media) && media['keepVideo'])) {
-        pluginHandle['consentDialog'](false);
+        pluginHandle.consentDialog(false);
         streamsDone(handleId, jsep, media, callbacks, config['myStream']);
         return;
       }
@@ -1882,7 +1770,7 @@ class Session {
       }
       // Skip the getUserMedia part
       config['streamExternal'] = true;
-      pluginHandle['consentDialog'](false);
+      pluginHandle.consentDialog(false);
       streamsDone(handleId, jsep, media, callbacks, stream);
       return;
     }
@@ -1892,7 +1780,7 @@ class Session {
         return;
       }
       Map<String, dynamic> constraints = {'mandatory': {}, 'optional': []};
-      pluginHandle['consentDialog'](true);
+      pluginHandle.consentDialog(true);
       bool audioSupport = isAudioSendEnabled(media);
       if (audioSupport && media != null && media['audio'] is bool)
         bool audioSupport = media['audio'];
@@ -1979,7 +1867,7 @@ class Session {
             }
             constraints['audio'] = media['captureDesktopAudio'];
             navigator.getDisplayMedia(constraints).then((MediaStream stream) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               if (isAudioSendEnabled(media) && !media['keepAudio']) {
                 navigator.getUserMedia({'audio': true, 'video': false}).then(
                     (audioStream) {
@@ -1990,7 +1878,7 @@ class Session {
                 streamsDone(handleId, jsep, media, callbacks, stream);
               }
             }).catchError((error) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error(error);
             });
             return;
@@ -1998,7 +1886,7 @@ class Session {
           // We're going to try and use the extension for Chrome 34+, the old approach
           // for older versions of Chrome, or the experimental support in Firefox 33+
           callbackUserMedia(error, stream) {
-            pluginHandle['consentDialog'](false);
+            pluginHandle.consentDialog(false);
             if (error) {
               callbacks.error(error);
             } else {
@@ -2020,7 +1908,7 @@ class Session {
                 gsmCallback(null, stream);
               }
             }).catchError((error) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               gsmCallback(error);
             });
           }
@@ -2052,7 +1940,7 @@ class Session {
               // Chrome 34+ requires an extension
               // Janus.extension.getScreen((error, sourceId) {
               //   if (error) {
-              //     pluginHandle['consentDialog'](false);
+              //     pluginHandle.consentDialog(false);
               //     return callbacks.error(error);
               //   }
               //   constraints = {
@@ -2108,7 +1996,7 @@ class Session {
               Map<String, String> error = {'type': 'NavigatorUserMediaError'};
               error['name'] =
                   'Your version of Firefox does not support screen sharing, please install Firefox 33 (or more recent versions)';
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error(error);
               return;
             }
@@ -2139,16 +2027,16 @@ class Session {
             var haveVideoDevice = videoSend ? videoExist : false;
             if (!haveAudioDevice && !haveVideoDevice) {
               // FIXME Should we really give up, or just assume recvonly for both?
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error('No capture device found');
               return false;
             } else if (!haveAudioDevice && needAudioDevice) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error(
                   'Audio capture is required, but no capture device found');
               return false;
             } else if (!haveVideoDevice && needVideoDevice) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error(
                   'Video capture is required, but no capture device found');
               return false;
@@ -2161,14 +2049,14 @@ class Session {
           };
           Janus.debug("getUserMedia constraints", gumConstraints);
           if (!gumConstraints['audio'] && !gumConstraints['video']) {
-            pluginHandle['consentDialog'](false);
+            pluginHandle.consentDialog(false);
             streamsDone(handleId, jsep, media, callbacks, callbacks.stream);
           } else {
             navigator.getUserMedia(gumConstraints).then((stream) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               streamsDone(handleId, jsep, media, callbacks, stream);
             }).catchError((error) {
-              pluginHandle['consentDialog'](false);
+              pluginHandle.consentDialog(false);
               callbacks.error({
                 'code': error.code,
                 'name': error.name,
@@ -2177,7 +2065,7 @@ class Session {
             });
           }
         }).catchError((error) {
-          pluginHandle['consentDialog'](false);
+          pluginHandle.consentDialog(false);
           callbacks.error('enumerateDevices error', error);
         });
       }
@@ -2189,13 +2077,13 @@ class Session {
 
   prepareWebrtcPeer(handleId, callbacks) {
     var jsep = callbacks.jsep;
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (jsep != null) {
       if (config['pc']) {
         Janus.warn(
@@ -2231,13 +2119,13 @@ class Session {
   }
 
   createOffer(handleId, media, callbacks, customizeSdp) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     bool simulcast = (callbacks.simulcast == true);
     if (!simulcast) {
       Janus.log(
@@ -2467,13 +2355,13 @@ class Session {
   }
 
   createAnswer(handleId, media, callbacks, customizedSdp) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     var simulcast = (callbacks['simulcast'] == true);
     if (!simulcast) {
       Janus.log("Creating answer (iceDone=" + config['iceDone'] + ")");
@@ -2740,11 +2628,11 @@ class Session {
 
   sendSDP(handleId, callbacks) {
     var pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle, not sending anything");
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     Janus.log("Sending offer/answer SDP...");
     if (config['mySdp'] == null) {
       Janus.warn("Local SDP instance is invalid, not sending anything...");
@@ -2761,13 +2649,13 @@ class Session {
   }
 
   getVolume(handleId, remote) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return 0;
     }
     var stream = remote ? "remote" : "local";
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (!config['volume'][stream]) config['volume'][stream] = {'value': 0};
     // Start getting the volume, if audioLevel in getStats is supported (apparently
     // they're only available in Chrome/Safari right now: https://webrtc-stats.callstats.io/)
@@ -2807,12 +2695,12 @@ class Session {
   }
 
   isMuted(handleId, video) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return true;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (config['pc'] == null) {
       Janus.warn("Invalid PeerConnection");
       return true;
@@ -2841,12 +2729,12 @@ class Session {
   }
 
   mute(handleId, video, mute) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return false;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (config['pc'] == null) {
       Janus.warn("Invalid PeerConnection");
       return false;
@@ -2877,12 +2765,12 @@ class Session {
   }
 
   getBitrate(handleId) {
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
-    if (pluginHandle == null || pluginHandle['webrtcStuff'] == null) {
+    Plugin pluginHandle = this.pluginHandles[handleId];
+    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return "Invalid handle";
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (config['pc']) return "Invalid PeerConnection";
     // Start getting the bitrate, if getStats is supported
     if (config['pc'].getStats() != null) {
@@ -2953,12 +2841,12 @@ class Session {
 
   cleanupWebrtc(handleId, hangupRequest) {
     Janus.log("Cleaning WebRTC stuff");
-    Map<String, dynamic> pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId];
     if (pluginHandle == null) {
       // Nothing to clean
       return;
     }
-    Map<String, dynamic> config = pluginHandle['webrtcStuff'];
+    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     if (config != null) {
       if (hangupRequest == true) {
         // Send a hangup request (we don't really care about the response)
@@ -2966,7 +2854,8 @@ class Session {
           "janus": "hangup",
           "transaction": Janus.randomString(12)
         };
-        if (pluginHandle['token']) request["token"] = pluginHandle['token'];
+        if (pluginHandle.handleToken != null)
+          request["token"] = pluginHandle.handleToken;
         if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
         Janus.debug("Sending hangup request (handle=" + handleId + "):");
         Janus.debug(request);
@@ -3033,7 +2922,7 @@ class Session {
       config['dataChannel'] = {};
       config['dtmfSender'] = null;
     }
-    pluginHandle['oncleanup']();
+    pluginHandle.oncleanup();
   }
 
   // Helper method to munge an SDP to enable simulcasting (Chrome only)

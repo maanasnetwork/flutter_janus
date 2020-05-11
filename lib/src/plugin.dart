@@ -8,11 +8,6 @@ import 'session.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 
 class Plugin {
-  String plugin;
-  String handleId;
-  String token;
-  bool detached;
-
   Map<String, dynamic> webrtcStuff = {
     'started': false,
     'myStream': null,
@@ -36,10 +31,20 @@ class Plugin {
     }
   };
 
+  bool detached;
+
   final Session session;
   final Callbacks callbacks;
+  final String plugin;
+  final String handleId;
+  final String handleToken;
 
-  Plugin(this.session, this.callbacks);
+  Plugin(
+      {this.session,
+      this.plugin,
+      this.handleId,
+      this.handleToken,
+      this.callbacks});
 
   getId() => handleId;
   getPlugin() => plugin;
@@ -57,25 +62,27 @@ class Plugin {
   data(callbacks) => this.session.sendData(handleId, callbacks);
   dtmf(callbacks) => this.session.sendDtmf(handleId, callbacks);
 
-  consentDialog() => callbacks.consentDialog();
-  iceState() => callbacks.iceState();
-  mediaState() => callbacks.mediaState();
-  webrtcState() => callbacks.webrtcState();
-  slowLink() => callbacks.slowLink();
-  onmessage() => callbacks.onmessage();
+  consentDialog(bool state) => callbacks.consentDialog(state);
+  iceState(bool state) => callbacks.iceState(state);
+  mediaState(mediaType, mediaReciving) =>
+      callbacks.mediaState(mediaType, mediaReciving);
+  webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);
+  slowLink(uplink, lost) => callbacks.slowLink(uplink, lost);
+  onmessage(data, jsep) => callbacks.onmessage(data, jsep);
   createOffer(callbacks) =>
       this.session.prepareWebrtc(handleId, true, callbacks);
   createAnswer(callbacks) =>
       this.session.prepareWebrtc(handleId, false, callbacks);
   handleRemoteJsep(callbacks) =>
       this.session.prepareWebrtcPeer(handleId, callbacks);
-  onlocalstream() => callbacks.onlocalstream();
-  onremotestream() => callbacks.onremotestream();
-  ondata() => callbacks.ondata();
-  ondataopen() => callbacks.ondataopen();
+  onlocalstream(MediaStream stream) => callbacks.onlocalstream(stream);
+  onremotestream(MediaStream stream) => callbacks.onremotestream(stream);
+  ondata(event, data) => callbacks.ondata(event, data);
+  ondataopen(label) => callbacks.ondataopen(label);
   oncleanup() => callbacks.oncleanup();
   ondetached() => callbacks.ondetached();
   hangup(sendRequest) =>
       this.session.cleanupWebrtc(handleId, sendRequest == true);
-  detach(callbacks) => this.session.destroyHandle(handleId, callbacks);
+  detach(String handleId, callbacks) =>
+      this.session.destroyHandle(handleId, callbacks);
 }
