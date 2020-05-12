@@ -821,7 +821,8 @@ class Session {
       callbacks.error("Invalid handle");
       return;
     }
-    var message = callbacks.message;
+
+    Map<String, dynamic> message = callbacks.message;
     var jsep = callbacks.jsep;
     var transaction = Janus.randomString(12);
     Map<String, dynamic> request = {

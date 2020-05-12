@@ -91,7 +91,10 @@ class _JanusEchoState extends State<JanusEcho> {
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
-    echotest.send({"message": body});
+    // Create am empty callback for the message
+    Callbacks callbacks = Callbacks();
+    callbacks.message = body;
+    echotest.send(callbacks);
     Janus.debug("Trying a createOffer too (audio/video sendrecv)");
     echotest.createOffer({
       "media": {"data": true},
