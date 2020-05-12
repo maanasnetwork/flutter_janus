@@ -85,15 +85,15 @@ class _JanusEchoState extends State<JanusEcho> {
     this._session.attach(callbacks: callbacks);
   }
 
-  _success(pluginHandle) {
+  _success(Plugin pluginHandle) {
+    Plugin echotest = pluginHandle;
     Map<String, dynamic> body = {"audio": true, "video": true};
-    this._handle = pluginHandle;
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
-    this._handle['send']({"message": body});
+    echotest.send({"message": body});
     Janus.debug("Trying a createOffer too (audio/video sendrecv)");
-    this._handle['createOffer']({
+    echotest.createOffer({
       "media": {"data": true},
       "simulcast": doSimulcast,
       "simulcast2": doSimulcast2,

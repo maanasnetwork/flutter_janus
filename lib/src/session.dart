@@ -35,7 +35,7 @@ class Session {
 
   bool connected = false;
   String sessionId;
-  Map<String, Plugin> pluginHandles;
+  Map<String, Plugin> pluginHandles = {};
   int retries = 0;
   Map<String, dynamic> transactions;
 
@@ -284,7 +284,7 @@ class Session {
       }
       pluginHandle.detached = true;
       pluginHandle.ondetached();
-      pluginHandle.detach(sender, null);
+      pluginHandle.detach(null);
     } else if (json["janus"] == "media") {
       // Media started/stopped flowing
       Janus.debug("Got a media event on session " + this.sessionId);
@@ -593,7 +593,7 @@ class Session {
     }
     if (cleanupHandles) {
       this.pluginHandles.forEach((handleId, handle) {
-        handle.detach(handleId, {'noRequest': true}); // FIXME
+        handle.detach({'noRequest': true}); // FIXME
       });
     }
     if (!this.connected) {
@@ -732,7 +732,7 @@ class Session {
     if (handleToken != null) request["token"] = handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
 
-    if (this.websockets != null) {
+    if (this.websockets) {
       this.transactions[transaction] = (json) {
         Janus.debug(json);
         if (json["janus"] != "success") {
@@ -775,8 +775,9 @@ class Session {
             .error("Ooops: " + json["error"].code + " " + json["error"].reason);
         return;
       }
-      String handleId = json.data["id"];
+      String handleId = json["data"]["id"].toString();
       Janus.log("Created handle: " + handleId);
+
       // Initialise plugin
       Plugin pluginHandle = Plugin(
           session: this,
@@ -823,7 +824,7 @@ class Session {
     var message = callbacks.message;
     var jsep = callbacks.jsep;
     var transaction = Janus.randomString(12);
-    Map<String, String> request = {
+    Map<String, dynamic> request = {
       "janus": "message",
       "body": message,
       "transaction": transaction
@@ -831,7 +832,7 @@ class Session {
     if (pluginHandle.handleToken != null)
       request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
-    if (jsep) request["jsep"] = jsep;
+    if (jsep != null) request["jsep"] = jsep;
     Janus.debug("Sending message to plugin (handle=" + handleId + "):");
     Janus.debug(request);
     if (this.websockets) {

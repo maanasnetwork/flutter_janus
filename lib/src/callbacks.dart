@@ -26,7 +26,7 @@ class Callbacks {
   String transaction;
   Map<String, String> request;
 
-  dynamic message;
+  Map<String, dynamic> message;
   dynamic jsep;
   dynamic text;
   dynamic data;

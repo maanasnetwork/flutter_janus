@@ -48,19 +48,19 @@ class Plugin {
 
   getId() => handleId;
   getPlugin() => plugin;
-  getVolume() => this.session.getVolume(handleId, true);
-  getRemoteVolume() => this.session.getVolume(handleId, true);
-  getLocalVolume() => this.session.getVolume(handleId, false);
-  isAudioMuted() => this.session.isMuted(handleId, false);
-  muteAudio() => this.session.mute(handleId, false, true);
-  unmuteAudio() => this.session.mute(handleId, false, false);
-  isVideoMuted() => this.session.isMuted(handleId, true);
-  muteVideo() => this.session.mute(handleId, true, true);
-  unmuteVideo() => this.session.mute(handleId, true, false);
-  getBitrate() => this.session.getBitrate(handleId);
-  send(callbacks) => this.session.sendMessage(handleId, callbacks);
-  data(callbacks) => this.session.sendData(handleId, callbacks);
-  dtmf(callbacks) => this.session.sendDtmf(handleId, callbacks);
+  getVolume() => this.session.getVolume(this.handleId, true);
+  getRemoteVolume() => this.session.getVolume(this.handleId, true);
+  getLocalVolume() => this.session.getVolume(this.handleId, false);
+  isAudioMuted() => this.session.isMuted(this.handleId, false);
+  muteAudio() => this.session.mute(this.handleId, false, true);
+  unmuteAudio() => this.session.mute(this.handleId, false, false);
+  isVideoMuted() => this.session.isMuted(this.handleId, true);
+  muteVideo() => this.session.mute(this.handleId, true, true);
+  unmuteVideo() => this.session.mute(this.handleId, true, false);
+  getBitrate() => this.session.getBitrate(this.handleId);
+  send(callbacks) => this.session.sendMessage(this.handleId, callbacks);
+  data(callbacks) => this.session.sendData(this.handleId, callbacks);
+  dtmf(callbacks) => this.session.sendDtmf(this.handleId, callbacks);
 
   consentDialog(bool state) => callbacks.consentDialog(state);
   iceState(bool state) => callbacks.iceState(state);
@@ -70,11 +70,11 @@ class Plugin {
   slowLink(uplink, lost) => callbacks.slowLink(uplink, lost);
   onmessage(data, jsep) => callbacks.onmessage(data, jsep);
   createOffer(callbacks) =>
-      this.session.prepareWebrtc(handleId, true, callbacks);
+      this.session.prepareWebrtc(this.handleId, true, callbacks);
   createAnswer(callbacks) =>
-      this.session.prepareWebrtc(handleId, false, callbacks);
+      this.session.prepareWebrtc(this.handleId, false, callbacks);
   handleRemoteJsep(callbacks) =>
-      this.session.prepareWebrtcPeer(handleId, callbacks);
+      this.session.prepareWebrtcPeer(this.handleId, callbacks);
   onlocalstream(MediaStream stream) => callbacks.onlocalstream(stream);
   onremotestream(MediaStream stream) => callbacks.onremotestream(stream);
   ondata(event, data) => callbacks.ondata(event, data);
@@ -82,7 +82,6 @@ class Plugin {
   oncleanup() => callbacks.oncleanup();
   ondetached() => callbacks.ondetached();
   hangup(sendRequest) =>
-      this.session.cleanupWebrtc(handleId, sendRequest == true);
-  detach(String handleId, callbacks) =>
-      this.session.destroyHandle(handleId, callbacks);
+      this.session.cleanupWebrtc(this.handleId, sendRequest == true);
+  detach(callbacks) => this.session.destroyHandle(this.handleId, callbacks);
 }
