@@ -29,12 +29,14 @@ class Callbacks {
   Map<String, dynamic> message;
   dynamic jsep;
   dynamic text;
+  Map<String, dynamic> media;
   dynamic data;
   dynamic label;
   dynamic dtmf;
   dynamic noRequest;
   dynamic rtcConstraints;
-  dynamic simulcast2;
+  bool simulcast;
+  bool simulcast2;
 
   Function success = () => {};
   Function error = () => {};

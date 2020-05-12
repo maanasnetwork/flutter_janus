@@ -162,10 +162,12 @@ class Session {
 
   // Private event handler: this will trigger plugin callbacks, if set
   handleEvent(json, [skipTimeout]) {
+    Janus.log("Event triggirred");
+    Janus.debug(json);
     retries = 0;
-    if (this.websockets && this.sessionId != null && skipTimeout != true)
+    if (!this.websockets && this.sessionId != null && skipTimeout != true)
       eventHandler();
-    if (this.websockets && Janus.isArray(json)) {
+    if (!this.websockets && Janus.isArray(json)) {
       // We got an array: it means we passed a maxev > 1, iterate on all objects
       for (var i = 0; i < json.length; i++) {
         handleEvent(json[i], true);
@@ -913,7 +915,7 @@ class Session {
         return;
       }
       // If we got here, the plugin decided to handle the request asynchronously
-      callbacks.success();
+      if (callbacks.success is Function) callbacks.success();
     };
 
     httpCallbacks.error = (textStatus, errorThrown) {
@@ -1515,6 +1517,7 @@ class Session {
 
   prepareWebrtc(handleId, offer, callbacks) {
     var jsep = callbacks.jsep;
+
     if (offer && jsep) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");

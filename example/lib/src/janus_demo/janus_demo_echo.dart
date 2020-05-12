@@ -87,6 +87,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _success(Plugin pluginHandle) {
     Plugin echotest = pluginHandle;
+
     Map<String, dynamic> body = {"audio": true, "video": true};
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
@@ -95,21 +96,22 @@ class _JanusEchoState extends State<JanusEcho> {
     Callbacks callbacks = Callbacks();
     callbacks.message = body;
     echotest.send(callbacks);
+    callbacks.media = {"data": true};
+    callbacks.simulcast = doSimulcast;
+    callbacks.simulcast2 = doSimulcast2;
+    callbacks.success = (jsep) {
+      Janus.debug("Got SDP!");
+      Janus.debug(jsep);
+      callbacks.message = body;
+      callbacks.jsep = jsep;
+      echotest.send(callbacks);
+    };
+    callbacks.error = (error) {
+      Janus.error("WebRTC error:", error);
+      Janus.log("WebRTC error... " + jsonEncode(error));
+    };
     Janus.debug("Trying a createOffer too (audio/video sendrecv)");
-    echotest.createOffer({
-      "media": {"data": true},
-      "simulcast": doSimulcast,
-      "simulcast2": doSimulcast2,
-      "success": (jsep) {
-        Janus.debug("Got SDP!");
-        Janus.debug(jsep);
-        this._handle['send']({"message": body, "jsep": jsep});
-      },
-      "error": (error) {
-        Janus.error("WebRTC error:", error);
-        Janus.log("WebRTC error... " + jsonEncode(error));
-      }
-    });
+    echotest.createOffer(callbacks: callbacks);
   }
 
   _error(error) {

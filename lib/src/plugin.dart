@@ -69,7 +69,7 @@ class Plugin {
   webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);
   slowLink(uplink, lost) => callbacks.slowLink(uplink, lost);
   onmessage(data, jsep) => callbacks.onmessage(data, jsep);
-  createOffer(callbacks) =>
+  createOffer({Callbacks callbacks}) =>
       this.session.prepareWebrtc(this.handleId, true, callbacks);
   createAnswer(callbacks) =>
       this.session.prepareWebrtc(this.handleId, false, callbacks);
