@@ -1,3 +1,5 @@
+import 'package:flutter_webrtc/webrtc.dart';
+
 class GatewayCallbacks {
   var server;
   List iceServers = [
@@ -29,7 +31,7 @@ class Callbacks {
   Map<String, dynamic> message;
   dynamic jsep;
   dynamic text;
-  Map<String, dynamic> media;
+  Map<String, dynamic> media = {"audio": true, "video": true};
   dynamic data;
   dynamic label;
   dynamic dtmf;
@@ -37,6 +39,8 @@ class Callbacks {
   dynamic rtcConstraints;
   bool simulcast;
   bool simulcast2;
+  bool trickle = true;
+  MediaStream stream;
 
   Function success = () => {};
   Function error = () => {};

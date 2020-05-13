@@ -162,7 +162,6 @@ class Session {
 
   // Private event handler: this will trigger plugin callbacks, if set
   handleEvent(json, [skipTimeout]) {
-    Janus.log("Event triggirred");
     Janus.debug(json);
     retries = 0;
     if (!this.websockets && this.sessionId != null && skipTimeout != true)
@@ -204,7 +203,7 @@ class Session {
       return;
     } else if (json["janus"] == "trickle") {
       // We got a trickle candidate from Janus
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -242,7 +241,7 @@ class Session {
       // The PeerConnection with the server is up! Notify this
       Janus.debug("Got a webrtcup event on session " + this.sessionId);
       Janus.debug(json);
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -258,7 +257,7 @@ class Session {
       // A plugin asked the core to hangup a PeerConnection on one of our handles
       Janus.debug("Got a hangup event on session " + this.sessionId);
       Janus.debug(json);
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -274,7 +273,7 @@ class Session {
       // A plugin asked the core to detach one of our handles
       Janus.debug("Got a detached event on session " + this.sessionId);
       Janus.debug(json);
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -291,7 +290,7 @@ class Session {
       // Media started/stopped flowing
       Janus.debug("Got a media event on session " + this.sessionId);
       Janus.debug(json);
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -306,7 +305,7 @@ class Session {
       Janus.debug("Got a slowlink event on session " + this.sessionId);
       Janus.debug(json);
       // Trouble uplink or downlink
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -332,7 +331,7 @@ class Session {
     } else if (json["janus"] == "event") {
       Janus.debug("Got a plugin event on session " + this.sessionId);
       Janus.debug(json);
-      var sender = json["sender"];
+      String sender = json["sender"].toString();
       if (sender == null) {
         Janus.warn("Missing sender...");
         return;
@@ -1518,7 +1517,7 @@ class Session {
   prepareWebrtc(handleId, offer, callbacks) {
     var jsep = callbacks.jsep;
 
-    if (offer && jsep) {
+    if (offer && jsep != null) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");
       return;
@@ -1527,11 +1526,12 @@ class Session {
       callbacks.error("A valid JSEP is required for createAnswer");
       return;
     }
+
     /* Check that callbacks.media is a (not null) Object */
     callbacks.media = (callbacks.media != null)
         ? callbacks.media
         : {'audio': true, 'video': true};
-    Map media = callbacks.media;
+    Map<String, dynamic> media = callbacks.media;
     Plugin pluginHandle = this.pluginHandles[handleId];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
@@ -1581,6 +1581,7 @@ class Session {
           media['removeAudio'] = false;
           media['audioSend'] = true;
         }
+
         if (!config['myStream']) {
           // No media stream: if we were asked to replace, it's actually an "add"
           if (media['replaceAudio']) {
@@ -1688,8 +1689,9 @@ class Session {
         return;
       }
     }
+
     // If we're updating, check if we need to remove/replace one of the tracks
-    if (media['update'] && !config['streamExternal']) {
+    if (media['update'] && config['streamExternal'] == null) {
       if (media['removeAudio'] || media['replaceAudio']) {
         if (config['myStream'] != null &&
             config['myStream'].getAudioTracks() != null &&
@@ -1749,9 +1751,10 @@ class Session {
         }
       }
     }
+
     // Was a MediaStream object passed, or do we need to take care of that?
-    if (callbacks.stream) {
-      var stream = callbacks.stream;
+    if (callbacks.stream != null) {
+      MediaStream stream = callbacks.stream;
       Janus.log("MediaStream provided by the application");
       Janus.debug(stream);
       // If this is an update, let's check if we need to release the previous stream
@@ -1779,6 +1782,7 @@ class Session {
       streamsDone(handleId, jsep, media, callbacks, stream);
       return;
     }
+
     if (isAudioSendEnabled(media) || isVideoSendEnabled(media)) {
       if (!Janus.isGetUserMediaAvailable()) {
         callbacks.error("getUserMedia not available");
@@ -1790,8 +1794,8 @@ class Session {
       if (audioSupport && media != null && media['audio'] is bool)
         bool audioSupport = media['audio'];
 
-      String videoSupport = isVideoSendEnabled(media);
-      if (videoSupport != null && media != null) {
+      bool videoSupport = isVideoSendEnabled(media);
+      if (videoSupport && media != null) {
         bool simulcast = (callbacks.simulcast == true);
         bool simulcast2 = (callbacks.simulcast2 == true);
         if ((simulcast || simulcast2) && !jsep && !media['video'])
@@ -2009,6 +2013,7 @@ class Session {
           return;
         }
       }
+
       // If we got here, we're not screensharing
       if (media == null || media['video'] != 'screen') {
         // Check whether all media sources are actually available or not
@@ -2071,6 +2076,8 @@ class Session {
           }
         }).catchError((error) {
           pluginHandle.consentDialog(false);
+          Janus.log('error here');
+          Janus.log(error);
           callbacks.error('enumerateDevices error', error);
         });
       }
@@ -2943,7 +2950,7 @@ class Session {
 
   // Helper methods to parse a media object
   isAudioSendEnabled(Map<String, dynamic> media) {
-    Janus.debug("isAudioSendEnabled:", media);
+    Janus.debug("isAudioSendEnabled:", media.toString());
     if (media == null) return true; // Default
     if (media['audio'] == false) return false; // Generic audio has precedence
     if (media['audioSend'] == null) return true; // Default
@@ -2951,7 +2958,7 @@ class Session {
   }
 
   isAudioSendRequired(Map<String, dynamic> media) {
-    Janus.debug("isAudioSendRequired:", media);
+    Janus.debug("isAudioSendRequired:", media.toString());
     if (media == null) return false; // Default
     if (media['audio'] == false || media['audioSend'] == false)
       return false; // If we're not asking to capture audio, it's not required
@@ -2960,7 +2967,7 @@ class Session {
   }
 
   isAudioRecvEnabled(Map<String, dynamic> media) {
-    Janus.debug("isAudioRecvEnabled:", media);
+    Janus.debug("isAudioRecvEnabled:", media.toString());
     if (media == null) return true; // Default
     if (media['audio'] == false) return false; // Generic audio has precedence
     if (media['audioRecv'] == null) return true; // Default
@@ -2968,7 +2975,7 @@ class Session {
   }
 
   isVideoSendEnabled(Map<String, dynamic> media) {
-    Janus.debug("isVideoSendEnabled:", media);
+    Janus.debug("isVideoSendEnabled:", media.toString());
     if (media == null) return true; // Default
     if (media['video'] == false) return false; // Generic video has precedence
     if (media['videoSend'] == null) return true; // Default
@@ -3021,7 +3028,7 @@ class Session {
   }
 
   isTrickleEnabled(bool trickle) {
-    Janus.debug("isTrickleEnabled:", trickle.toString());
+    Janus.debug("isTrickleEnabled:" + trickle.toString());
     return (trickle == false) ? false : true;
   }
 

@@ -96,7 +96,9 @@ class _JanusEchoState extends State<JanusEcho> {
     Callbacks callbacks = Callbacks();
     callbacks.message = body;
     echotest.send(callbacks);
-    callbacks.media = {"data": true};
+    // No media provided: by default, it's sendrecv for audio and video
+    // Let's negotiate data channels as well
+    callbacks.media["data"] = true;
     callbacks.simulcast = doSimulcast;
     callbacks.simulcast2 = doSimulcast2;
     callbacks.success = (jsep) {
