@@ -1689,7 +1689,7 @@ class Session {
       // If we're updating and keeping all tracks, let's skip the getUserMedia part
       if ((isAudioSendEnabled(media) && media['keepAudio']) &&
           (isVideoSendEnabled(media) && media['keepVideo'])) {
-        pluginHandle.consentDialog(false);
+        // pluginHandle.consentDialog(false);
         streamsDone(handleId, jsep, media, callbacks, config['myStream']);
         return;
       }
@@ -1783,7 +1783,7 @@ class Session {
       }
       // Skip the getUserMedia part
       config['streamExternal'] = true;
-      pluginHandle.consentDialog(false);
+      // pluginHandle.consentDialog(false);
       streamsDone(handleId, jsep, media, callbacks, stream);
       return;
     }
@@ -1794,7 +1794,7 @@ class Session {
         return;
       }
       Map<String, dynamic> constraints = {'mandatory': {}, 'optional': []};
-      pluginHandle.consentDialog(true);
+      // pluginHandle.consentDialog(true);
       bool audioSupport = isAudioSendEnabled(media);
       if (audioSupport && media != null && media['audio'] is bool)
         bool audioSupport = media['audio'];
@@ -1881,7 +1881,7 @@ class Session {
             }
             constraints['audio'] = media['captureDesktopAudio'];
             navigator.getDisplayMedia(constraints).then((MediaStream stream) {
-              pluginHandle.consentDialog(false);
+              //pluginHandle.consentDialog(false);
               if (isAudioSendEnabled(media) && !media['keepAudio']) {
                 navigator.getUserMedia({'audio': true, 'video': false}).then(
                     (audioStream) {
@@ -1892,7 +1892,7 @@ class Session {
                 streamsDone(handleId, jsep, media, callbacks, stream);
               }
             }).catchError((error) {
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error(error);
             });
             return;
@@ -1900,7 +1900,7 @@ class Session {
           // We're going to try and use the extension for Chrome 34+, the old approach
           // for older versions of Chrome, or the experimental support in Firefox 33+
           callbackUserMedia(error, stream) {
-            pluginHandle.consentDialog(false);
+            // pluginHandle.consentDialog(false);
             if (error) {
               callbacks.error(error);
             } else {
@@ -1922,7 +1922,7 @@ class Session {
                 gsmCallback(null, stream);
               }
             }).catchError((error) {
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               gsmCallback(error);
             });
           }
@@ -2010,7 +2010,7 @@ class Session {
               Map<String, String> error = {'type': 'NavigatorUserMediaError'};
               error['name'] =
                   'Your version of Firefox does not support screen sharing, please install Firefox 33 (or more recent versions)';
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error(error);
               return;
             }
@@ -2043,38 +2043,51 @@ class Session {
             var haveVideoDevice = videoSend ? videoExist : false;
             if (!haveAudioDevice && !haveVideoDevice) {
               // FIXME Should we really give up, or just assume recvonly for both?
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error('No capture device found');
               return false;
             } else if (!haveAudioDevice && needAudioDevice) {
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error(
                   'Audio capture is required, but no capture device found');
               return false;
             } else if (!haveVideoDevice && needVideoDevice) {
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error(
                   'Video capture is required, but no capture device found');
               return false;
             }
           }
 
-          var gumConstraints = {
+          Map<String, dynamic> gumConstraints = {
             'audio': (audioExist && !media['keepAudio']) ? audioSupport : false,
             'video': (videoExist && !media['keepVideo']) ? videoSupport : false
           };
           Janus.debug("getUserMedia constraints", gumConstraints);
           if (!gumConstraints['audio'] && !gumConstraints['video']) {
-            pluginHandle.consentDialog(false);
+            // pluginHandle.consentDialog(false);
             streamsDone(handleId, jsep, media, callbacks, callbacks.stream);
           } else {
+            // Override mediaConstraints
+            if (gumConstraints['video']) {
+              gumConstraints['video'] = {
+                "mandatory": {
+                  "minWidth":
+                      '1280', // Provide your own width, height and frame rate here
+                  "minHeight": '720',
+                  "minFrameRate": '30',
+                },
+                "facingMode": "user",
+                "optional": [],
+              };
+            }
+            Janus.debug(gumConstraints);
             navigator.getUserMedia(gumConstraints).then((stream) {
-              Janus.log(stream);
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               streamsDone(handleId, jsep, media, callbacks, stream);
             }).catchError((error) {
               Janus.log(error);
-              pluginHandle.consentDialog(false);
+              // pluginHandle.consentDialog(false);
               callbacks.error({
                 'code': error.code,
                 'name': error.name,
@@ -2083,8 +2096,7 @@ class Session {
             });
           }
         }).catchError((error) {
-          pluginHandle.consentDialog(false);
-          Janus.log('error here');
+          // pluginHandle.consentDialog(false);
           Janus.log(error);
           callbacks.error('enumerateDevices error', error);
         });
