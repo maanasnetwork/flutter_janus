@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:logger/logger.dart';
 import 'package:random_string/random_string.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'callbacks.dart';
 import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutterjanus/flutterjanus.dart';
 
 class Janus {
   // A number of variable and functions are not relevant
@@ -12,7 +12,7 @@ class Janus {
   // between janus.js and the flutter_janus
 
   // List of sessions
-  static Map<String, dynamic> sessions = {};
+  static Map<String, Session> sessions = {};
 
   // Extension
   static bool isExtensionEnable() => true;
@@ -26,11 +26,6 @@ class Janus {
   // Old dependencies
   static Map useOldDependencies = {};
 
-  // Default functions
-  static noop() {
-    return () => {};
-  }
-
   static String dataChanDefaultLabel = "JanusDataChannel";
   static String
       endOfCandidates; // https://github.com/meetecho/janus-gateway/issues/1670
@@ -40,18 +35,34 @@ class Janus {
   static int methodCount = 0;
   static int errorMethodCount = 0;
 
-  static vdebug(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
-      logger.v(msg, err, stackTrace);
-  static debug(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+  static vdebug(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    logger.v(msg, err, stackTrace);
+  }
+
+  static debug(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    if (debugLevel == 'all' || debugLevel == 'debug')
       logger.d(msg, err, stackTrace);
-  static log(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+  }
+
+  static log(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    if (debugLevel == 'all' || debugLevel == 'log')
       logger.i(msg, err, stackTrace);
-  static warn(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+  }
+
+  static warn(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    if (debugLevel == 'all' || debugLevel == 'warn')
       logger.w(msg, err, stackTrace);
-  static error(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+  }
+
+  static error(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    if (debugLevel == 'all' || debugLevel == 'error')
       logger.e(msg, err, stackTrace);
-  static trace(dynamic msg, [dynamic err, StackTrace stackTrace]) =>
+  }
+
+  static trace(dynamic msg, [dynamic err, StackTrace stackTrace]) {
+    if (debugLevel == 'all' || debugLevel == 'trace')
       logger.wtf(msg, err, stackTrace);
+  }
 
   static bool initDone = false;
 
@@ -62,10 +73,11 @@ class Janus {
   };
 
   static init({@required Map options, Function callback}) {
-    if (initDone) {
+    if (Janus.initDone) {
       Janus.log("Library alreaday Initialised");
       if (callback is Function) callback();
     } else {
+      if (options['debug'] != null) debugLevel = options['debug'];
       logger = Logger();
       Janus.log("Initializing library");
       initDone = true;
@@ -142,9 +154,9 @@ class Janus {
         'video': true,
       };
       navigator.getUserMedia(config).then((MediaStream stream) {
-        navigator.getSources().then((List sources) {
-          Janus.debug(sources.toString());
-          callback(sources);
+        navigator.getSources().then((devices) {
+          Janus.debug(devices.toString());
+          callback(devices);
           // Get rid of the now useless stream
           try {
             List<MediaStreamTrack> audioTracks = stream.getAudioTracks();

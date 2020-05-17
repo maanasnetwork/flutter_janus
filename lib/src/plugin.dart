@@ -1,11 +1,6 @@
-import 'dart:convert';
-import 'dart:async';
 import 'dart:core';
-
-import 'callbacks.dart';
-import 'janus.dart';
-import 'session.dart';
 import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutterjanus/flutterjanus.dart';
 
 class Plugin {
   Map<String, dynamic> webrtcStuff = {

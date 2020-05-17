@@ -2,11 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:flutter_webrtc/webrtc.dart';
-
-import 'callbacks.dart';
-import 'websocket.dart';
-import 'janus.dart';
-import 'plugin.dart';
+import 'package:flutterjanus/flutterjanus.dart';
 
 class Session {
   bool websockets = false;
@@ -146,7 +142,7 @@ class Session {
     GatewayCallbacks httpCallbacks = GatewayCallbacks();
     httpCallbacks.success = handleEvent;
     httpCallbacks.error = (textStatus, errorThrown) {
-      Janus.error(textStatus + ":" + errorThrown);
+      Janus.error(textStatus + ":", errorThrown);
       retries++;
       if (retries > 3) {
         // Did we just lose the server? :-(
@@ -183,7 +179,7 @@ class Session {
       Janus.debug(json);
       var transaction = json["transaction"];
       if (transaction) {
-        var reportSuccess = this.transactions[transaction];
+        Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
         this.transactions.remove(transaction);
       }
@@ -192,11 +188,9 @@ class Session {
       // Success!
       Janus.debug("Got a success on session " + sessionId);
       Janus.debug(json);
-      // TODO Map transaction
       var transaction = json["transaction"];
       if (transaction) {
-        // TODO Function reportSuccess
-        var reportSuccess = this.transactions[transaction];
+        Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
         this.transactions.remove(transaction);
       }
@@ -213,13 +207,13 @@ class Session {
         Janus.debug("This handle is not attached to this session");
         return;
       }
-      // TODO  RTCIceCandidate candidate
+
       var candidate = json["candidate"];
       Janus.debug("Got a trickled candidate on session " + this.sessionId);
       Janus.debug(candidate);
       var config = pluginHandle.webrtcStuff;
-      // TODO RTCPeerConnection config['pc']
-      if (config['pc'] && config['remoteSdp']) {
+      // RTCPeerConnection config['pc']
+      if (config['pc'] != null && config['remoteSdp'] != null) {
         // Add candidate right now
         Janus.debug("Adding remote candidate:" + candidate);
         if (candidate == null) {
@@ -323,7 +317,7 @@ class Session {
       Janus.debug(json);
       var transaction = json["transaction"];
       if (transaction != null) {
-        var reportSuccess = this.transactions[transaction];
+        Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
         this.transactions.remove(transaction);
       }
@@ -410,7 +404,7 @@ class Session {
       request["janus"] = "claim";
       request["session_id"] = this.sessionId;
       // If we were using websockets, ignore the old connection
-      if (this.websockets) {
+      if (this.ws != null) {
         this.ws.onopen = null;
         this.ws.onerror = null;
         this.ws.onclose = null;
@@ -480,20 +474,21 @@ class Session {
                   json["error"].code +
                   " " +
                   json["error"].reason); // FIXME
-              callbacks.error(json["error"].reason);
+              callbacks.error(json["error"]["reason"]);
               return;
             }
             this.wsKeepaliveTimeoutId = Timer(
                 Duration(microseconds: this.keepAlivePeriod), this.keepAlive);
             this.connected = true;
-            transaction =
-                json["session_id"] ? json["session_id"] : json.data["id"];
+            this.sessionId = (json["session_id"] != null)
+                ? json["session_id"]
+                : json["data"]["id"];
             if (reconnect) {
               Janus.log("Claimed session: " + this.sessionId);
             } else {
               Janus.log("Created session: " + this.sessionId);
             }
-            // Janus.sessions[this.sessionId] = that;
+            Janus.sessions[this.sessionId] = this;
             callbacks.success();
           };
           this.ws.send(jsonEncode(request));
@@ -523,10 +518,10 @@ class Session {
       Janus.debug(json.toString());
       if (json["janus"] != "success") {
         Janus.error("Ooops: " +
-            json["error"].code +
+            json["error"]["code"] +
             " " +
-            json["error"].reason); // FIXME
-        callbacks.error(json["error"].reason);
+            json["error"]["reason"]); // FIXME
+        callbacks.error(json["error"]["reason"]);
         return;
       }
       this.connected = true;
@@ -545,7 +540,7 @@ class Session {
           .success(this.sessionId); // return session to the success callback
     };
     httpCallbacks.error = (textStatus, errorThrown) {
-      Janus.error(textStatus + ":" + errorThrown); // FIXME
+      Janus.error(textStatus + ":", errorThrown); // FIXME
       if (Janus.isArray(this.servers) && !reconnect) {
         this.serversIndex++;
         if (this.serversIndex == servers.length) {
@@ -593,7 +588,7 @@ class Session {
       return;
     }
     if (cleanupHandles) {
-      this.pluginHandles.forEach((handleId, handle) {
+      this.pluginHandles.forEach((handleId, Plugin handle) {
         handle.detach({'noRequest': true}); // FIXME
       });
     }
@@ -619,6 +614,15 @@ class Session {
         this.ws = null;
       } else {
         // navigator.sendBeacon(this.server + "/" + this.sessionId, jsonEncode(request));
+        GatewayCallbacks httpCallbacks = GatewayCallbacks();
+        Janus.httpAPICall(
+            this.server + "/" + this.sessionId,
+            {
+              'verb': 'POST',
+              'withCredentials': this.withCredentials,
+              'body': request
+            },
+            httpCallbacks);
       }
       Janus.log("Destroyed session:");
       this.sessionId = null;
@@ -671,6 +675,7 @@ class Session {
       this.ws.send(jsonEncode(request));
       return;
     }
+
     GatewayCallbacks httpCallbacks = GatewayCallbacks();
     httpCallbacks.success = (json) {
       Janus.log("Destroyed session:");
@@ -703,7 +708,7 @@ class Session {
           'withCredentials': this.withCredentials,
           'body': request
         },
-        callbacks);
+        httpCallbacks);
   }
 
   createHandle({Callbacks callbacks}) {
@@ -2028,16 +2033,14 @@ class Session {
               });
 
           // Check whether a missing device is really a problem
-          var audioSend = isAudioSendEnabled(media);
-          var videoSend = isVideoSendEnabled(media);
-          var needAudioDevice = isAudioSendRequired(media);
-          var needVideoDevice = isVideoSendRequired(media);
+          bool audioSend = isAudioSendEnabled(media);
+          bool videoSend = isVideoSendEnabled(media);
+          bool needAudioDevice = isAudioSendRequired(media);
+          bool needVideoDevice = isVideoSendRequired(media);
           if (audioSend || videoSend || needAudioDevice || needVideoDevice) {
             // We need to send either audio or video
             var haveAudioDevice = audioSend ? audioExist : false;
             var haveVideoDevice = videoSend ? videoExist : false;
-            Janus.log(haveAudioDevice);
-            Janus.log(haveVideoDevice);
             if (!haveAudioDevice && !haveVideoDevice) {
               // FIXME Should we really give up, or just assume recvonly for both?
               pluginHandle.consentDialog(false);
@@ -2066,9 +2069,11 @@ class Session {
             streamsDone(handleId, jsep, media, callbacks, callbacks.stream);
           } else {
             navigator.getUserMedia(gumConstraints).then((stream) {
+              Janus.log(stream);
               pluginHandle.consentDialog(false);
               streamsDone(handleId, jsep, media, callbacks, stream);
             }).catchError((error) {
+              Janus.log(error);
               pluginHandle.consentDialog(false);
               callbacks.error({
                 'code': error.code,
@@ -3003,21 +3008,23 @@ class Session {
   }
 
   isScreenSendEnabled(Map<String, dynamic> media) {
-    Janus.debug("isScreenSendEnabled:", media.toString());
+    Janus.debug("isScreenSendEnabled:", media);
     if (media == null) return false;
-    if (media['video'] == null ||
-        media['video']['mandatory']['runtimeType'] != Object) return false;
-    var constraints = media['video']['mandatory'];
-    if (constraints['chromeMediaSource'])
-      return constraints['chromeMediaSource'] == 'desktop' ||
-          constraints['chromeMediaSource'] == 'screen';
-    else if (constraints.mozMediaSource)
-      return constraints['mozMediaSource'] == 'window' ||
-          constraints['mozMediaSource'] == 'screen';
-    else if (constraints.mediaSource)
-      return constraints['mediaSource'] == 'window' ||
-          constraints['mediaSource'] == 'screen';
-    return false;
+    if (media['video'] is bool)
+      return false;
+    else {
+      var constraints = media['video']['mandatory'];
+      if (constraints['chromeMediaSource'])
+        return constraints['chromeMediaSource'] == 'desktop' ||
+            constraints['chromeMediaSource'] == 'screen';
+      else if (constraints.mozMediaSource)
+        return constraints['mozMediaSource'] == 'window' ||
+            constraints['mozMediaSource'] == 'screen';
+      else if (constraints.mediaSource)
+        return constraints['mediaSource'] == 'window' ||
+            constraints['mediaSource'] == 'screen';
+      return false;
+    }
   }
 
   isDataEnabled(Map<String, dynamic> media) {

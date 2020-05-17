@@ -46,21 +46,31 @@ class _JanusEchoState extends State<JanusEcho> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    Janus.init(options: {"debug": "vdebug"}, callback: null);
+    Janus.init(options: {"debug": "all"}, callback: null);
+    initRenderers();
+    _connect();
+  }
+
+  initRenderers() async {
+    await _localRenderer.initialize();
+    await _remoteRenderer.initialize();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    _localRenderer.dispose();
+    _remoteRenderer.dispose();
+  }
+
+  void _connect() async {
     GatewayCallbacks gatewayCallbacks = GatewayCallbacks();
     gatewayCallbacks.server = this.server;
     gatewayCallbacks.success = _attach;
     gatewayCallbacks.error = (error) => Janus.log(error.toString());
     gatewayCallbacks.destroyed = () => deactivate();
     Session(gatewayCallbacks); // async httpd call
-  }
-
-  @override
-  void deactivate() {
-    // TODO: implement deactivate
-    super.deactivate();
   }
 
   void _attach(String sessionId) {
@@ -151,10 +161,12 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _onlocalstream(MediaStream stream) {
     Janus.log('Local Stream available');
+    _localRenderer.srcObject = stream;
   }
 
   _onremotestream(MediaStream stream) {
     Janus.log('Remote Stream available');
+    _remoteRenderer.srcObject = stream;
   }
 
   _ondataopen(data) {
@@ -179,7 +191,30 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _muteMic() {}
 
-  _buildRow(context, peer) {}
+  _buildRow(context, peer) {
+    var self = (peer['id'] == _selfId);
+    return ListBody(children: <Widget>[
+      ListTile(
+        title: Text(self
+            ? peer['name'] + '[Your self]'
+            : peer['name'] + '[' + peer['user_agent'] + ']'),
+        onTap: null,
+        trailing: new SizedBox(
+            width: 100.0,
+            child: new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.videocam),
+                    onPressed: () => {},
+                    tooltip: 'Echo Test',
+                  ),
+                ])),
+        subtitle: Text('id: ' + peer['id']),
+      ),
+      Divider()
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {

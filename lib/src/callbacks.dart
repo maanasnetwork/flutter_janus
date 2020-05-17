@@ -7,11 +7,11 @@ class GatewayCallbacks {
   ];
   var iceTransportPolicy;
   var bundlePolicy;
+  String token;
+  String apiSecret;
   bool ipv6Support = false;
   bool withCredentials = false;
   int maxPollEvents = 10;
-  String token;
-  String apiSecret;
   bool destroyOnUnload = true;
   int keepAlivePeriod = 25000;
   int longPollTimeout = 60000;
@@ -26,17 +26,19 @@ class Callbacks {
   String opaqueId;
   String token;
   String transaction;
-  Map<String, String> request;
 
+  Map<String, String> request;
   Map<String, dynamic> message;
   dynamic jsep;
   dynamic text;
   Map<String, dynamic> media = {"audio": true, "video": true};
+
   dynamic data;
   dynamic label;
   dynamic dtmf;
   dynamic noRequest;
   dynamic rtcConstraints;
+
   bool simulcast;
   bool simulcast2;
   bool trickle = true;
