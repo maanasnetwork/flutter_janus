@@ -149,21 +149,33 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _onmessage(msg, jsep) {}
 
-  _onlocalstream(MediaStream stream) {}
+  _onlocalstream(MediaStream stream) {
+    Janus.log('Local Stream available');
+  }
 
-  _onremotestream(MediaStream stream) {}
+  _onremotestream(MediaStream stream) {
+    Janus.log('Remote Stream available');
+  }
 
-  _ondataopen(data) {}
+  _ondataopen(data) {
+    Janus.log('Data Channel opened');
+  }
 
-  _ondata(data) {}
+  _ondata(data) {
+    Janus.log('Data received');
+  }
 
   _oncleanup() {
     Janus.log(" ::: Got a cleanup notification :::");
   }
 
-  _hangUp() {}
+  _hangUp() {
+    Janus.log('Hangup called');
+  }
 
-  _switchCamera() {}
+  _switchCamera() {
+    Janus.log('Switching camera');
+  }
 
   _muteMic() {}
 

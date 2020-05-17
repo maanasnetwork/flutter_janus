@@ -2017,13 +2017,14 @@ class Session {
       // If we got here, we're not screensharing
       if (media == null || media['video'] != 'screen') {
         // Check whether all media sources are actually available or not
-        navigator.getSources().then((sources) {
-          var audioExist = sources.any((source) {
-            return source.getAudioTracks().length > 0 ? true : false;
+        navigator.getSources().then((devices) {
+          Janus.log(devices.toString());
+          var audioExist = devices.any((device) {
+            return device['kind'] == 'audioinput';
           });
           var videoExist = isScreenSendEnabled(media) ||
-              sources.any((source) {
-                return source.getVideoTracks().length > 0 ? true : false;
+              devices.any((device) {
+                return device['kind'] == 'videoinput';
               });
 
           // Check whether a missing device is really a problem
@@ -2035,6 +2036,8 @@ class Session {
             // We need to send either audio or video
             var haveAudioDevice = audioSend ? audioExist : false;
             var haveVideoDevice = videoSend ? videoExist : false;
+            Janus.log(haveAudioDevice);
+            Janus.log(haveVideoDevice);
             if (!haveAudioDevice && !haveVideoDevice) {
               // FIXME Should we really give up, or just assume recvonly for both?
               pluginHandle.consentDialog(false);
