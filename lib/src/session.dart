@@ -14,7 +14,7 @@ class Session {
   var server;
   List<String> protocols = ['janus-protocol'];
   List iceServers = [
-    {"urls": "stun:stun.l.google.com:19302"}
+    {"url": "stun:stun.l.google.com:19302"}
   ];
 
   var iceTransportPolicy;
@@ -1342,8 +1342,9 @@ class Session {
                 : "unified-plan";
       }
       Map<String, dynamic> pc_constraints = {
+        "mandatory": {},
         "optional": [
-          {"DtlsSrtpKeyAgreement": true}
+          {"DtlsSrtpKeyAgreement": false}
         ]
       };
       if (this.ipv6Support) {
@@ -1363,8 +1364,10 @@ class Session {
       }
       Janus.log("Creating PeerConnection");
       Janus.debug(pc_constraints.toString());
+      Janus.debug(pc_config.toString());
       createPeerConnection(pc_config, pc_constraints)
           .then((RTCPeerConnection pc) {
+        Janus.debug(pc);
         config['pc'] = pc;
       }).catchError((error) {
         Janus.error(error.toString());
