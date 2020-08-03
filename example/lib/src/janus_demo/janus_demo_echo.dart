@@ -18,7 +18,8 @@ class JanusEcho extends StatefulWidget {
 }
 
 class _JanusEchoState extends State<JanusEcho> {
-  String server = "https://fusion.minelytics.in:8089/janus";
+  // String server = "wss://janutter.tzty.net:7007";
+  String server = "https://janutter.tzty.net:8008/janus";
   var janus;
   var echotest;
   String opaqueId = "echotest-" + Janus.randomString(12);
@@ -98,7 +99,7 @@ class _JanusEchoState extends State<JanusEcho> {
   _success(Plugin pluginHandle) {
     Plugin echotest = pluginHandle;
 
-    Map<String, dynamic> body = {"audio": true, "video": true};
+    Map<String, dynamic> body = {"audio": true, "video": false};
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
@@ -108,7 +109,8 @@ class _JanusEchoState extends State<JanusEcho> {
     echotest.send(callbacks);
     // No media provided: by default, it's sendrecv for audio and video
     // Let's negotiate data channels as well
-    callbacks.media["data"] = true;
+    callbacks.media["video"] = false;
+    callbacks.media["data"] = false;
     callbacks.simulcast = doSimulcast;
     callbacks.simulcast2 = doSimulcast2;
     callbacks.success = (jsep) {

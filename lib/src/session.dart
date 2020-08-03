@@ -1571,9 +1571,9 @@ class Session {
       media['update'] = true;
       // Check if there's anything to add/remove/replace, or if we
       // can go directly to preparing the new SDP offer or answer
-      if (callbacks['stream'] != null) {
+      if (callbacks.stream != null) {
         // External stream: is this the same as the one we were using before?
-        if (callbacks['stream'] != config['myStream']) {
+        if (callbacks.stream != config['myStream']) {
           Janus.log("Renegotiation involves a new external stream");
         }
       } else {
