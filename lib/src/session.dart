@@ -1238,7 +1238,6 @@ class Session {
     }
     // We're now capturing the new stream: check if we're updating or if it's a new thing
     bool addTracks = false;
-    // TODO Map media
     if (config['myStream'] == null ||
         !media['update'] ||
         config['streamExternal']) {
@@ -1368,28 +1367,35 @@ class Session {
       // From webrtc
       createPeerConnection(pc_config, pc_constraints)
           .then((RTCPeerConnection pc) {
-        Janus.debug(' here');
-        Janus.debug(pc);
         config['pc'] = pc;
         Janus.debug(config['pc'].toString());
-        if (config['pc'].getStats() != null) {
-          // FIXME
-          config['volume'] = {};
-          config['bitrate']['value'] = "0 kbits/sec";
-        }
+        // FIXME
+        config['pc'].getStats().then((List<StatsReport> stats) {
+          if (stats != null) {
+            Janus.log(
+                "PC Stats: " + stats[1].type + stats[1].values.toString());
+            config['volume'] = {};
+            config['bitrate']['value'] = "0 kbits/sec";
+          }
+        }).catchError((error) {
+          Janus.error(error.toString());
+        });
+
         Janus.log("Preparing local SDP and gathering candidates (trickle=" +
-            config['trickle'] +
+            config['trickle'].toString() +
             ")");
-        config['pc'].oniceconnectionstatechange = (e) {
-          if (config['pc'] != null)
-            pluginHandle.iceState(config['pc'].iceConnectionState);
+
+        // TODO assign type to iceConnectionState
+        config['pc'].onIceConnectionState = (iceConnectionState) {
+          if (config['pc'] != null) pluginHandle.iceState(iceConnectionState);
         };
-        config['pc'].onIceCandidate = (event) {
-          if (event.candidate == null ||
+        config['pc'].onIceCandidate = (RTCIceCandidate iceCandidate) {
+          if (iceCandidate == null ||
               (Janus.webRTCAdapter['browserDetails']['browser'] == 'edge' &&
-                  event.candidate.candidate.indexOf('endOfCandidates') > 0)) {
+                  iceCandidate.candidate.indexOf('endOfCandidates') > 0)) {
             Janus.log("End of candidates.");
             config['iceDone'] = true;
+            Janus.log(config['trickle']);
             if (config['trickle'] == true) {
               // Notify end of candidates
               sendTrickleCandidate(handleId, {"completed": true});
@@ -1400,17 +1406,17 @@ class Session {
           } else {
             // JSON.stringify doesn't work on some WebRTC objects anymore
             // See https://code.google.com/p/chromium/issues/detail?id=467366
-            var candidate = {
-              "candidate": event.candidate.candidate,
-              "sdpMid": event.candidate.sdpMid,
-              "sdpMLineIndex": event.candidate.sdpMLineIndex
-            };
+            RTCIceCandidate candidate = RTCIceCandidate(iceCandidate.candidate,
+                iceCandidate.sdpMid, iceCandidate.sdpMlineIndex);
             if (config['trickle'] == true) {
               // Send candidate
-              sendTrickleCandidate(handleId, {});
+              sendTrickleCandidate(handleId, candidate);
+              Janus.log(candidate.toMap().toString());
             }
           }
         };
+
+        Janus.log("Reaching till here");
         config['pc'].onAddTrack = (event) {
           Janus.log("Handling Remote Track");
           Janus.debug(event);
@@ -1528,7 +1534,6 @@ class Session {
           }, callbacks.error);
         }
       }).catchError((error) {
-        Janus.debug('no i m here');
         Janus.error(error.toString());
       });
     }
@@ -2042,6 +2047,7 @@ class Session {
           var audioExist = devices.any((device) {
             return device['kind'] == 'audioinput';
           });
+
           var videoExist = isScreenSendEnabled(media) ||
               devices.any((device) {
                 return device['kind'] == 'videoinput';
@@ -2052,6 +2058,7 @@ class Session {
           bool videoSend = isVideoSendEnabled(media);
           bool needAudioDevice = isAudioSendRequired(media);
           bool needVideoDevice = isVideoSendRequired(media);
+
           if (audioSend || videoSend || needAudioDevice || needVideoDevice) {
             // We need to send either audio or video
             var haveAudioDevice = audioSend ? audioExist : false;
@@ -2078,7 +2085,7 @@ class Session {
             'audio': (audioExist && !media['keepAudio']) ? audioSupport : false,
             'video': (videoExist && !media['keepVideo']) ? videoSupport : false
           };
-          Janus.debug("getUserMedia constraints", gumConstraints);
+          Janus.debug("getUserMedia constraints", gumConstraints.toString());
           if (!gumConstraints['audio'] && !gumConstraints['video']) {
             // pluginHandle.consentDialog(false);
             streamsDone(handleId, jsep, media, callbacks, callbacks.stream);
