@@ -27,7 +27,7 @@ class Janus {
   static Map useOldDependencies = {};
 
   static String dataChanDefaultLabel = "JanusDataChannel";
-  static String
+  static RTCIceCandidate
       endOfCandidates; // https://github.com/meetecho/janus-gateway/issues/1670
 
   static String debugLevel;
