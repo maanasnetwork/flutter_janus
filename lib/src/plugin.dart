@@ -59,7 +59,7 @@ class Plugin {
   dtmf(callbacks) => this.session.sendDtmf(this.handleId, callbacks);
 
   consentDialog(bool state) => callbacks.consentDialog(state);
-  iceState(bool state) => callbacks.iceState(state);
+  iceState(RTCIceConnectionState state) => callbacks.iceState(state);
   mediaState(mediaType, mediaReciving) =>
       callbacks.mediaState(mediaType, mediaReciving);
   webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);
