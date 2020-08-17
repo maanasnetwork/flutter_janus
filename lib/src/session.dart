@@ -1229,7 +1229,8 @@ class Session {
   }
 
   // WebRTC stuff
-  streamsDone(String handleId, jsep, Map media, callbacks, MediaStream stream) {
+  streamsDone(String handleId, RTCSessionDescription jsep, Map media, callbacks,
+      MediaStream stream) {
     Plugin pluginHandle = this.pluginHandles[handleId];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
@@ -1473,7 +1474,7 @@ class Session {
           var simulcast2 = (callbacks.simulcast2 == true);
           // FIX ME: janus.js  find out all the track from the stream and then add to the PC
           // There is no equivalnet call in flutter_webrtc. We will add the stream to PC
-          pc.addStream(stream).then(() {
+          pc.addStream(stream).then((void v) {
             Janus.log("Stream added to PC");
             Janus.log(pc.getLocalStreams().length);
           }).catchError((error, StackTrace stackTrace) {
@@ -1543,10 +1544,10 @@ class Session {
         }
 
         // Create offer/answer now
-        if (!jsep) {
+        if (jsep == null) {
           createOffer(handleId, media, callbacks, null);
         } else {
-          pc.setRemoteDescription(jsep).then(() {
+          pc.setRemoteDescription(jsep).then((void v) {
             Janus.log("Remote description accepted!");
             config['remoteSdp'] = jsep.sdp;
             // Any trickle candidate we cached?
@@ -1567,7 +1568,9 @@ class Session {
             }
             // Create the answer now
             createAnswer(handleId, media, callbacks, null);
-          }, callbacks.error);
+          }).catchError((error, StackTrace stackTrade) {
+            callbacks.error(error);
+          });
         }
       }).catchError((error, StackTrace stackTrace) {
         Janus.error(error.toString());
@@ -2186,7 +2189,7 @@ class Session {
             "No PeerConnection: if this is an answer, use createAnswer and not handleRemoteJsep");
         return;
       }
-      pc.setRemoteDescription(jsep).then(() {
+      pc.setRemoteDescription(jsep).then((void v) {
         Janus.log("Remote description accepted!");
         config['remoteSdp'] = jsep['sdp'];
         // Any trickle candidate we cached?
@@ -2206,7 +2209,9 @@ class Session {
         }
         // Done
         callbacks.success();
-      }, callbacks.error);
+      }).catchError((error, StackTrace stackTrace) {
+        callbacks.error(error);
+      });
     } else {
       callbacks.error("Invalid JSEP");
     }
@@ -2739,15 +2744,17 @@ class Session {
       Janus.warn("Local SDP instance is invalid, not sending anything...");
       return;
     }
-    pc.getLocalDescription().then((RTCSessionDescription rtcSessionDescription) {
+    pc
+        .getLocalDescription()
+        .then((RTCSessionDescription rtcSessionDescription) {
       config['mySdp'] = {
-      "type": rtcSessionDescription.type,
-      "sdp": rtcSessionDescription.sdp,
-    };
-    }).catchError((error, StackTrace stackTrace){
-        Janus.log(error);
+        "type": rtcSessionDescription.type,
+        "sdp": rtcSessionDescription.sdp,
+      };
+    }).catchError((error, StackTrace stackTrace) {
+      Janus.log(error);
     });
-    
+
     if (config['trickle'] == false) config['mySdp']["trickle"] = false;
     Janus.debug(callbacks);
     config['sdpSent'] = true;
