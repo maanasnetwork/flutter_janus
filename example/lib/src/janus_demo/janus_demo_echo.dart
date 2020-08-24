@@ -99,7 +99,7 @@ class _JanusEchoState extends State<JanusEcho> {
   _success(Plugin pluginHandle) {
     Plugin echotest = pluginHandle;
 
-    Map<String, dynamic> body = {"audio": true, "video": false};
+    Map<String, dynamic> body = {"audio": true, "video": true};
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
     Janus.debug("Sending message (" + jsonEncode(body) + ")");

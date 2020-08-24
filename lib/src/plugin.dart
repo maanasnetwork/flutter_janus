@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/rtc_peerconnection.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class Plugin {
@@ -10,14 +11,13 @@ class Plugin {
     'remoteStream': null,
     'mySdp': null,
     'mediaConstraints': null,
-    'pc': null,
     'dataChannel': {},
     'dtmfSender': null,
     'trickle': true,
     'iceDone': false,
     'volume': {'value': null, 'timer': null},
     'bitrate': {
-      'value': null,
+      'value': '',
       'bsnow': null,
       'bsbefore': null,
       'tsnow': null,
@@ -26,6 +26,7 @@ class Plugin {
     }
   };
 
+  RTCPeerConnection pc;
   bool detached;
 
   final Session session;
@@ -58,7 +59,7 @@ class Plugin {
   dtmf(callbacks) => this.session.sendDtmf(this.handleId, callbacks);
 
   consentDialog(bool state) => callbacks.consentDialog(state);
-  iceState(bool state) => callbacks.iceState(state);
+  iceState(RTCIceConnectionState state) => callbacks.iceState(state);
   mediaState(mediaType, mediaReciving) =>
       callbacks.mediaState(mediaType, mediaReciving);
   webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);

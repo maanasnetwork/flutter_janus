@@ -58,7 +58,7 @@ class _DataChannelSampleState extends State<DataChannelSample> {
       ]
     };
 
-    final Map<String, dynamic> offer_sdp_constraints = {
+    final Map<String, dynamic> offerSdpConstraints = {
       "mandatory": {
         "OfferToReceiveAudio": false,
         "OfferToReceiveVideo": false,
@@ -66,7 +66,7 @@ class _DataChannelSampleState extends State<DataChannelSample> {
       "optional": [],
     };
 
-    final Map<String, dynamic> loopback_constraints = {
+    final Map<String, dynamic> loopbackConstraints = {
       "mandatory": {},
       "optional": [
         {"DtlsSrtpKeyAgreement": true},
@@ -77,7 +77,7 @@ class _DataChannelSampleState extends State<DataChannelSample> {
 
     try {
       _peerConnection =
-          await createPeerConnection(configuration, loopback_constraints);
+          await createPeerConnection(configuration, loopbackConstraints);
 
       _peerConnection.onSignalingState = _onSignalingState;
       _peerConnection.onIceGatheringState = _onIceGatheringState;
@@ -98,7 +98,7 @@ class _DataChannelSampleState extends State<DataChannelSample> {
       _peerConnection.onDataChannel = _onDataChannel;
 
       RTCSessionDescription description =
-          await _peerConnection.createOffer(offer_sdp_constraints);
+          await _peerConnection.createOffer(offerSdpConstraints);
       print(description.sdp);
       _peerConnection.setLocalDescription(description);
 
