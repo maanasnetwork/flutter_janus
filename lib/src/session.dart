@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -995,7 +996,7 @@ class Session {
   }
 
   // Private method to create a data channel
-  createDataChannel(String handleId, dclabel, incoming, pendingData) {
+  createDataChannel(String handleId, label, incoming, pendingData) {
     Plugin pluginHandle = this.pluginHandles[handleId];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
@@ -1003,33 +1004,35 @@ class Session {
     }
     Map<String, dynamic> config = pluginHandle.webrtcStuff;
     RTCPeerConnection pc = pluginHandle.pc;
+    Map<String, RTCDataChannel> dataChannels = pluginHandle.dataChannels;
+
     var onDataChannelMessage = (event) {
       Janus.log('Received message on data channel:' + event.toString());
       var label = event.target.label;
       pluginHandle.ondata(event.data, label);
     };
-    var onDataChannelStateChange = (event) {
-      Janus.log('Received state change on data channel:' + event.toString());
-      var label = event.target.label;
-      var dcState = config['dataChannel'][label]
-          ? config['dataChannel'][label].readyState
-          : "null";
+    var onDataChannelStateChange = (state) {
+      Janus.log('Received state change on data channel:' + state.toString());
+      var label = state.label;
+      var dcState =
+          (dataChannels[label] != null) ? dataChannels[label].state : "null";
       Janus.log('State change on <' + label + '> data channel: ' + dcState);
       if (dcState == 'open') {
+        // FIX ME no params pending in RTCDataChannel to store pending message in flutter_webrtc
         // Any pending messages to send?
-        if (config['dataChannel'][label].pending &&
-            config['dataChannel'][label]['pending'].length > 0) {
-          Janus.log("Sending pending messages on <" +
-              label +
-              ">:" +
-              config['dataChannel'][label]['pending'].length.toString());
-          for (var data in config['dataChannel'][label]['pending']) {
-            Janus.log("Sending data on data channel <" + label + ">");
-            Janus.debug(data);
-            config['dataChannel'][label].send(data);
-          }
-          config['dataChannel'][label]['pending'] = [];
-        }
+        // if (dataChannels[label].pending &&
+        //     config['dataChannel'][label]['pending'].length > 0) {
+        //   Janus.log("Sending pending messages on <" +
+        //       label +
+        //       ">:" +
+        //       config['dataChannel'][label]['pending'].length.toString());
+        //   for (var data in config['dataChannel'][label]['pending']) {
+        //     Janus.log("Sending data on data channel <" + label + ">");
+        //     Janus.debug(data);
+        //     config['dataChannel'][label].send(data);
+        //   }
+        //   config['dataChannel'][label]['pending'] = [];
+        // }
         // Notify the open data channel
         pluginHandle.ondataopen(label);
       }
@@ -1038,22 +1041,29 @@ class Session {
           Janus.error('Got error on data channel:' + error)
           // TODO
         };
-    if (!incoming) {
+    if (incoming == null) {
+      Janus.log("Creating a data channel with label" + label);
       // Add options (ordered, maxRetransmits, etc.)
       RTCDataChannelInit rtcDataChannel = RTCDataChannelInit();
-      config['dataChannel'][dclabel] =
-          pc.createDataChannel(dclabel, rtcDataChannel);
+      pc
+          .createDataChannel(label, rtcDataChannel)
+          .then((RTCDataChannel channel) {
+        dataChannels[label] = channel;
+      }).catchError((error, StackTrace trace) {
+        Janus.error(error.toString());
+      });
     } else {
       // The channel was created by Janus
-      config['dataChannel'][dclabel] = incoming;
+      dataChannels[label] = incoming;
     }
-    config['dataChannel'][dclabel].onmessage = onDataChannelMessage;
-    config['dataChannel'][dclabel].onopen = onDataChannelStateChange;
-    config['dataChannel'][dclabel].onclose = onDataChannelStateChange;
-    config['dataChannel'][dclabel].onerror = onDataChannelError;
-    config['dataChannel'][dclabel].pending = [];
-    if (pendingData != null)
-      config['dataChannel'][dclabel]['pending'].add(pendingData);
+    dataChannels[label].onMessage = onDataChannelMessage;
+    dataChannels[label].onDataChannelState = onDataChannelStateChange;
+    // FIX me these calls do not exists, need to implement these in onDataChannelStateChange
+    // dataChannels[label].onclose = onDataChannelStateChange;
+    // dataChannels[label].onerror = onDataChannelError;
+    // dataChannels[label].pending = [];
+    // if (pendingData != null)
+    //   config['dataChannel'][label]['pending'].add(pendingData);
   }
 
   // Private method to send a data channel message
@@ -1074,7 +1084,7 @@ class Session {
     var label = callbacks.label ? callbacks.label : Janus.dataChanDefaultLabel;
     if (!config['dataChannel'][label]) {
       // Create new data channel and wait for it to open
-      createDataChannel(handleId, label, false, data);
+      createDataChannel(handleId, label, null, data);
       callbacks.success();
       return;
     }
@@ -1385,8 +1395,10 @@ class Session {
       Janus.debug(pcConfig.toString());
       // From webrtc
       createPeerConnection(pcConfig, pcConstraints)
-          .then((RTCPeerConnection pc) {
-        pc = pc;
+          .then((RTCPeerConnection newPc) {
+        pc = newPc;
+        pluginHandle.pc = newPc;
+        Janus.log("Peer Connection is ready");
         Janus.debug(pc.toString());
         // FIXME
 
@@ -1470,7 +1482,6 @@ class Session {
 
         // TODO connect addTrack
         if (addTracks != null && stream != null) {
-          Janus.log('Adding local stream');
           // var simulcast2 = (callbacks.simulcast2 == true);
           // FIX ME: janus.js  find out all the track from the stream and then add to the PC
           // There is no equivalnet call in flutter_webrtc. We will add the stream to PC
@@ -1481,7 +1492,6 @@ class Session {
             Janus.log(stackTrace);
             Janus.error(error.toString());
           });
-          Janus.log("After addStream");
           // // Get a list of audio and video tracks
           // List<MediaStreamTrack> tracks =
           //     stream.getAudioTracks() + stream.getVideoTracks();
@@ -1526,20 +1536,21 @@ class Session {
           // });
         }
 
-        Janus.log('reaching here');
         // Any data channel to create?
         if (isDataEnabled(media) &&
             config['dataChannel'][Janus.dataChanDefaultLabel] == null) {
           Janus.log("Creating data channel");
-          createDataChannel(handleId, Janus.dataChanDefaultLabel, false, null);
+          createDataChannel(handleId, Janus.dataChanDefaultLabel, null, null);
+          Janus.log('failing here');
           pc.onDataChannel = (RTCDataChannel channel) {
             Janus.log("Data channel created by Janus:" +
                 channel.toString()); // FIX ME
-            // createDataChannel(handleId, event.channel.label, event.channel, null);
+            createDataChannel(handleId, "label", channel, null);
           };
         }
+
         // If there's a new local stream, let's notify the application
-        if (config['myStream']) {
+        if (config['myStream'] != null) {
           pluginHandle.onlocalstream(config['myStream']);
         }
 
@@ -2238,7 +2249,7 @@ class Session {
           ")");
     }
     // https://code.google.com/p/webrtc/issues/detail?id=3508
-    Map mediaConstraints = {};
+    Map<String, dynamic> mediaConstraints = {};
     if (Janus.unifiedPlan) {
       // We can use Transceivers
       var audioTransceiver;
@@ -2424,12 +2435,14 @@ class Session {
       //   sender.setParameters(parameters);
       // }
     }
+
     pc.createOffer(mediaConstraints).then((RTCSessionDescription offer) {
       Janus.debug(offer);
       // JSON.stringify doesn't work on some WebRTC objects anymore
       // See https://code.google.com/p/chromium/issues/detail?id=467366
       RTCSessionDescription jsep = RTCSessionDescription(offer.sdp, offer.type);
-      callbacks.customizeSdp(jsep);
+      // FIX ME
+      // callbacks.customizeSdp(jsep);
       offer.sdp = jsep.sdp;
       Janus.log("Setting local description");
       if (sendVideo && simulcast) {
@@ -2451,7 +2464,7 @@ class Session {
         callbacks.error(error);
       });
       config['mediaConstraints'] = mediaConstraints;
-      if (!config['iceDone'] && !config['trickle']) {
+      if (config['iceDone'] == false && config['trickle'] == false) {
         // Don't do anything until we have all candidates
         Janus.log("Waiting for all candidates...");
         return;

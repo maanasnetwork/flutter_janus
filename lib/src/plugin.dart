@@ -11,7 +11,6 @@ class Plugin {
     'remoteStream': null,
     'mySdp': null,
     'mediaConstraints': null,
-    'dataChannel': {},
     'dtmfSender': null,
     'trickle': true,
     'iceDone': false,
@@ -23,9 +22,11 @@ class Plugin {
       'tsnow': null,
       'tsbefore': null,
       'timer': null
-    }
+    },
+    'pendingData': null,
   };
 
+  Map<String, RTCDataChannel> dataChannels;
   RTCPeerConnection pc;
   bool detached;
 

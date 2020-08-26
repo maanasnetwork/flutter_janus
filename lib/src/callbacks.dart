@@ -42,6 +42,7 @@ class Callbacks {
   bool simulcast;
   bool simulcast2;
   bool trickle = true;
+  bool iceRestart = false;
   MediaStream stream;
 
   Function success = () => {};
