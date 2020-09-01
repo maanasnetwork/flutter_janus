@@ -106,7 +106,7 @@ class Janus {
       // 'headers': 'Accept': 'application/json, text/plain, */*',
       'cache': 'no-cache'
     };
-    Janus.log(options.toString());
+    Janus.debug(options.toString());
     if (options['withCredentials']) {
       if ((options['withCredentials']).length > 0) {
         fetchOptions['credentials'] = 'include';

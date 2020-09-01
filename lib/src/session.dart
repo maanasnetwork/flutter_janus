@@ -1398,7 +1398,7 @@ class Session {
           .then((RTCPeerConnection newPc) {
         pc = newPc;
         pluginHandle.pc = newPc;
-        Janus.log("Peer Connection is ready");
+        Janus.debug("Peer Connection is ready");
         Janus.debug(pc.toString());
         // FIXME
 
@@ -2096,7 +2096,7 @@ class Session {
       if (media == null || media['video'] != 'screen') {
         // Check whether all media sources are actually available or not
         navigator.getSources().then((devices) {
-          Janus.log(devices.toString());
+          Janus.debug(devices.toString());
           var audioExist = devices.any((device) {
             return device['kind'] == 'audioinput';
           });

@@ -98,7 +98,11 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _success(Plugin pluginHandle) {
     Plugin echotest = pluginHandle;
-
+    Janus.log("Plugin attached! (" +
+        echotest.getPlugin() +
+        ", id=" +
+        echotest.getId() +
+        ")");
     Map<String, dynamic> body = {"audio": true, "video": true};
     if (this.acodec != null) body['audiocodec'] = this.acodec;
     if (this.vcodec != null) body['videocodec'] = this.vcodec;
@@ -112,11 +116,11 @@ class _JanusEchoState extends State<JanusEcho> {
     callbacks.media["data"] = false;
     callbacks.simulcast = doSimulcast;
     callbacks.simulcast2 = doSimulcast2;
-    callbacks.success = (jsep) {
+    callbacks.success = (RTCSessionDescription jsep) {
       Janus.debug("Got SDP!");
       Janus.debug(jsep);
       callbacks.message = body;
-      callbacks.jsep = jsep;
+      callbacks.jsep = jsep.toMap();
       echotest.send(callbacks);
     };
     callbacks.error = (error) {
