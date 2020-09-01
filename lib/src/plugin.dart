@@ -65,19 +65,19 @@ class Plugin {
       callbacks.mediaState(mediaType, mediaReciving);
   webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);
   slowLink(uplink, lost) => callbacks.slowLink(uplink, lost);
-  onmessage(data, jsep) => callbacks.onmessage(data, jsep);
+  onmessage(data, jsep) => callbacks.onMessage(data, jsep);
   createOffer({Callbacks callbacks}) =>
       this.session.prepareWebrtc(this.handleId, true, callbacks);
   createAnswer(callbacks) =>
       this.session.prepareWebrtc(this.handleId, false, callbacks);
   handleRemoteJsep(callbacks) =>
       this.session.prepareWebrtcPeer(this.handleId, callbacks);
-  onlocalstream(MediaStream stream) => callbacks.onlocalstream(stream);
-  onremotestream(MediaStream stream) => callbacks.onremotestream(stream);
-  ondata(event, data) => callbacks.ondata(event, data);
-  ondataopen(label) => callbacks.ondataopen(label);
-  oncleanup() => callbacks.oncleanup();
-  ondetached() => callbacks.ondetached();
+  onLocalStream(MediaStream stream) => callbacks.onLocalStream(stream);
+  onRemoteStream(MediaStream stream) => callbacks.onRemoteStream(stream);
+  onData(event, data) => callbacks.onData(event, data);
+  onDataOpen(label) => callbacks.onDataOpen(label);
+  onCleanup() => callbacks.onCleanup();
+  onDetached() => callbacks.onDetached();
   hangup(sendRequest) =>
       this.session.cleanupWebrtc(this.handleId, sendRequest == true);
   detach(callbacks) => this.session.destroyHandle(this.handleId, callbacks);

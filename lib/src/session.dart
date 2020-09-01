@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -280,7 +279,7 @@ class Session {
         return;
       }
       pluginHandle.detached = true;
-      pluginHandle.ondetached();
+      pluginHandle.onDetached();
       pluginHandle.detach(null);
     } else if (json["janus"] == "media") {
       // Media started/stopped flowing
@@ -1009,7 +1008,7 @@ class Session {
     var onDataChannelMessage = (event) {
       Janus.log('Received message on data channel:' + event.toString());
       var label = event.target.label;
-      pluginHandle.ondata(event.data, label);
+      pluginHandle.onData(event.data, label);
     };
     var onDataChannelStateChange = (state) {
       Janus.log('Received state change on data channel:' + state.toString());
@@ -1034,7 +1033,7 @@ class Session {
         //   config['dataChannel'][label]['pending'] = [];
         // }
         // Notify the open data channel
-        pluginHandle.ondataopen(label);
+        pluginHandle.onDataOpen(label);
       }
     };
     var onDataChannelError = (error) => {
@@ -1453,7 +1452,7 @@ class Session {
           Janus.debug(stream);
           if (stream == null) return;
           config['remoteStream'] = stream;
-          pluginHandle.onremotestream(config['remoteStream']);
+          pluginHandle.onRemoteStream(config['remoteStream']);
 
           // FIX ME no equivalent call exists in flutter_webrtc
           // if (event.track.onended) return;
@@ -1551,7 +1550,7 @@ class Session {
 
         // If there's a new local stream, let's notify the application
         if (config['myStream'] != null) {
-          pluginHandle.onlocalstream(config['myStream']);
+          pluginHandle.onLocalStream(config['myStream']);
         }
 
         // Create offer/answer now
@@ -3074,7 +3073,7 @@ class Session {
       config['dataChannel'] = {};
       config['dtmfSender'] = null;
     }
-    pluginHandle.oncleanup();
+    pluginHandle.onCleanup();
   }
 
   // Helper method to munge an SDP to enable simulcasting (Chrome only)

@@ -52,11 +52,11 @@ class Callbacks {
   Function mediaState = () => {};
   Function webrtcState = () => {};
   Function slowLink = () => {};
-  Function onmessage = () => {};
-  Function onlocalstream = () => {};
-  Function onremotestream = () => {};
-  Function ondata = () => {};
-  Function ondataopen = () => {};
-  Function oncleanup = () => {};
-  Function ondetached = () => {};
+  Function onMessage = () => {};
+  Function onLocalStream = () => {};
+  Function onRemoteStream = () => {};
+  Function onData = () => {};
+  Function onDataOpen = () => {};
+  Function onCleanup = () => {};
+  Function onDetached = () => {};
 }

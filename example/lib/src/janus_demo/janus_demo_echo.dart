@@ -87,12 +87,12 @@ class _JanusEchoState extends State<JanusEcho> {
     callbacks.mediaState = _mediaState;
     callbacks.webrtcState = _webrtcState;
     callbacks.slowLink = _slowLink;
-    callbacks.onmessage = _onmessage;
-    callbacks.onlocalstream = _onlocalstream;
-    callbacks.onremotestream = _onremotestream;
-    callbacks.ondataopen = _ondataopen;
-    callbacks.ondata = _ondata;
-    callbacks.oncleanup = _oncleanup;
+    callbacks.onMessage = _onMessage;
+    callbacks.onLocalStream = _onLocalStream;
+    callbacks.onRemoteStream = _onRemoteStream;
+    callbacks.onDataOpen = _onDataOpen;
+    callbacks.onData = _onData;
+    callbacks.onCleanup = _onCleanup;
     this._session.attach(callbacks: callbacks);
   }
 
@@ -162,27 +162,27 @@ class _JanusEchoState extends State<JanusEcho> {
         " lost packets)");
   }
 
-  _onmessage(msg, jsep) {}
+  _onMessage(msg, jsep) {}
 
-  _onlocalstream(MediaStream stream) {
+  _onLocalStream(MediaStream stream) {
     Janus.log('Local Stream available');
     _localRenderer.srcObject = stream;
   }
 
-  _onremotestream(MediaStream stream) {
+  _onRemoteStream(MediaStream stream) {
     Janus.log('Remote Stream available');
     _remoteRenderer.srcObject = stream;
   }
 
-  _ondataopen(data) {
+  _onDataOpen(data) {
     Janus.log('Data Channel opened');
   }
 
-  _ondata(data) {
+  _onData(data) {
     Janus.log('Data received');
   }
 
-  _oncleanup() {
+  _onCleanup() {
     Janus.log(" ::: Got a cleanup notification :::");
   }
 
