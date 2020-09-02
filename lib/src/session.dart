@@ -6,7 +6,7 @@ import 'package:flutterjanus/flutterjanus.dart';
 
 class Session {
   bool websockets = false;
-  var ws;
+  SimpleWebSocket ws;
   var wsHandlers;
   Timer wsKeepaliveTimeoutId;
   List servers;
@@ -366,7 +366,7 @@ class Session {
       Janus.error("Timeout on session " + this.sessionId);
       Janus.debug(json);
       if (this.websockets) {
-        this.ws.close(3504, "Gateway timeout");
+        this.ws.close();
       }
       return;
     } else {
@@ -406,9 +406,9 @@ class Session {
       request["session_id"] = this.sessionId;
       // If we were using websockets, ignore the old connection
       if (this.ws != null) {
-        this.ws.onopen = null;
-        this.ws.onerror = null;
-        this.ws.onclose = null;
+        this.ws.onOpen = null;
+        this.ws.onError = null;
+        this.ws.onClose = null;
         if (this.wsKeepaliveTimeoutId != null) {
           this.wsKeepaliveTimeoutId.cancel();
           this.wsKeepaliveTimeoutId = null;
@@ -445,72 +445,68 @@ class Session {
         Janus.error(e.toString());
       }
 
-      this.wsHandlers = {
-        'error': () {
-          Janus.error(
-              "Error connecting to the Janus WebSockets server... " + server);
-          if (Janus.isArray(this.servers) && !reconnect) {
-            this.serversIndex++;
-            if (this.serversIndex == this.servers.length) {
-              // We tried all the servers the user gave us and they all failed
-              callbacks.error(
-                  "Error connecting to any of the provided Janus servers: Is the server down?");
-              return;
-            }
-            // Let's try the next server
-            this.server = null;
-            Timer(Duration(microseconds: 200),
-                createSession(callbacks: callbacks));
+      // Attach websocket handlers
+      this.ws.onError = (int code, String reason) {
+        Janus.error(
+            "Error connecting to the Janus WebSockets server... " + server);
+        Janus.error(reason.toString());
+        if (Janus.isArray(this.servers) && !reconnect) {
+          this.serversIndex++;
+          if (this.serversIndex == this.servers.length) {
+            // We tried all the servers the user gave us and they all failed
+            callbacks.error(
+                "Error connecting to any of the provided Janus servers: Is the server down?");
             return;
           }
-          callbacks.error(
-              "Error connecting to the Janus WebSockets server: Is the server down?");
-        },
-        'open': () {
-          // We need to be notified about the success
-          this.transactions[transaction] = (json) {
-            Janus.debug(json);
-            if (json["janus"] != "success") {
-              Janus.error("Ooops: " +
-                  json["error"].code +
-                  " " +
-                  json["error"].reason); // FIXME
-              callbacks.error(json["error"]["reason"]);
-              return;
-            }
-            this.wsKeepaliveTimeoutId = Timer(
-                Duration(microseconds: this.keepAlivePeriod), this.keepAlive);
-            this.connected = true;
-            this.sessionId = (json["session_id"] != null)
-                ? json["session_id"]
-                : json["data"]["id"];
-            if (reconnect) {
-              Janus.log("Claimed session: " + this.sessionId);
-            } else {
-              Janus.log("Created session: " + this.sessionId);
-            }
-            Janus.sessions[this.sessionId] = this;
-            callbacks.success();
-          };
-          this.ws.send(jsonEncode(request));
-        },
-        'message': (event) => handleEvent(jsonDecode(event["data"])),
-        'close': () {
-          if (this.server == null || !this.connected) {
-          } else {
-            this.connected = false;
-            // FIXME What if this is called when the page is closed?
-            gatewayCallbacks
-                .error("Lost connection to the server (is it down?)");
-          }
+          // Let's try the next server
+          this.server = null;
+          Timer(
+              Duration(microseconds: 200), createSession(callbacks: callbacks));
+          return;
         }
+        callbacks.error(
+            "Error connecting to the Janus WebSockets server: Is the server down?");
       };
 
-      // Attach websocket handlers
-      this.ws.onerror = this.wsHandlers['error'];
-      this.ws.onopen = this.wsHandlers['open'];
-      this.ws.onmessage = this.wsHandlers['message'];
-      this.ws.onclose = this.wsHandlers['close'];
+      this.ws.onOpen = () {
+        // We need to be notified about the success
+        this.transactions[transaction] = (json) {
+          Janus.debug(json);
+          if (json["janus"] != "success") {
+            Janus.error("Ooops: " +
+                json["error"].code +
+                " " +
+                json["error"].reason); // FIXME
+            callbacks.error(json["error"]["reason"]);
+            return;
+          }
+          this.wsKeepaliveTimeoutId = Timer(
+              Duration(microseconds: this.keepAlivePeriod), this.keepAlive);
+          this.connected = true;
+          this.sessionId = (json["session_id"] != null)
+              ? json["session_id"]
+              : json["data"]["id"];
+          if (reconnect) {
+            Janus.log("Claimed session: " + this.sessionId);
+          } else {
+            Janus.log("Created session: " + this.sessionId);
+          }
+          Janus.sessions[this.sessionId] = this;
+          callbacks.success();
+        };
+        this.ws.send(jsonEncode(request));
+      };
+
+      this.ws.onMessage = (message) => handleEvent(jsonDecode(message));
+
+      this.ws.onClose = (int code, String reason) {
+        if (this.server == null || !this.connected) {
+        } else {
+          this.connected = false;
+          // FIXME What if this is called when the page is closed?
+          gatewayCallbacks.error("Lost connection to the server (is it down?)");
+        }
+      };
       return;
     }
 
@@ -610,7 +606,7 @@ class Session {
       // We're unloading the page: use sendBeacon for HTTP instead,
       // or just close the WebSocket connection if we're using that
       if (this.websockets) {
-        this.ws.onclose = null;
+        this.ws.onClose = null;
         this.ws.close();
         this.ws = null;
       } else {
@@ -639,10 +635,10 @@ class Session {
       var onUnbindError;
       var unbindWebSocket = () {
         // Detach websocket handlers
-        this.ws.onerror = null;
-        this.ws.onopen = null;
-        this.ws.onmessage = null;
-        this.ws.onclose = null;
+        this.ws.onError = null;
+        this.ws.onOpen = null;
+        this.ws.onMessage = null;
+        this.ws.onClose = null;
 
         // TODO connect these calls
         // ws.removeEventListener('message', onUnbindMessage);
@@ -670,8 +666,8 @@ class Session {
         if (notifyDestroyed) gatewayCallbacks.destroyed();
       };
 
-      this.ws.onmessage = onUnbindMessage;
-      this.ws.onerror = onUnbindError;
+      this.ws.onMessage = onUnbindMessage;
+      this.ws.onError = onUnbindError;
 
       this.ws.send(jsonEncode(request));
       return;
@@ -1591,11 +1587,12 @@ class Session {
   prepareWebrtc(handleId, offer, callbacks) {
     var jsep = callbacks.jsep;
 
-    if (offer && jsep != null) {
+    if (offer != null && jsep != null) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");
       return;
-    } else if (!offer && (!jsep || !jsep.type || !jsep.sdp)) {
+    } else if (offer == null &&
+        (jsep == null || jsep.type == null || jsep.sdp == null)) {
       Janus.error("A valid JSEP is required for createAnswer");
       callbacks.error("A valid JSEP is required for createAnswer");
       return;
@@ -2469,7 +2466,7 @@ class Session {
         return;
       }
       Janus.log("Offer ready");
-      Janus.debug(callbacks);
+      Janus.debug(callbacks.toString());
       callbacks.success(offer);
     }).catchError((error, StackTrace stackTrace) {
       callbacks.error(error);

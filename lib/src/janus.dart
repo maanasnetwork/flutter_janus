@@ -144,7 +144,10 @@ class Janus {
         callbacks.error(
             'API call failed ', response.statusCode.toString() + response.body);
       }
-    }).catchError((error) => {Janus.error('Internal Error', error)});
+    }).catchError((error, StackTrace stackTrace) {
+      Janus.error('Internal Error', error);
+      Janus.debug(options);
+    });
   }
 
   static listDevices(Function callback, Map config) {

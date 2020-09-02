@@ -18,8 +18,8 @@ class JanusEcho extends StatefulWidget {
 }
 
 class _JanusEchoState extends State<JanusEcho> {
-  // String server = "wss://janutter.tzty.net:7007";
-  String server = "https://janutter.tzty.net:8008/janus";
+  String server = "wss://janutter.tzty.net:7007";
+  // String server = "https://janutter.tzty.net:8008/janus";
   var janus;
   var echotest;
   String opaqueId = "echotest-" + Janus.randomString(12);
@@ -109,16 +109,19 @@ class _JanusEchoState extends State<JanusEcho> {
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
     // Create am empty callback for the message
     Callbacks callbacks = Callbacks();
+    callbacks.success = null;
     callbacks.message = body;
+    Janus.log(callbacks.success.runtimeType);
     echotest.send(callbacks);
     // No media provided: by default, it's sendrecv for audio and video
+
     // Let's negotiate data channels as well
     callbacks.media["data"] = false;
     callbacks.simulcast = doSimulcast;
     callbacks.simulcast2 = doSimulcast2;
     callbacks.success = (RTCSessionDescription jsep) {
       Janus.debug("Got SDP!");
-      Janus.debug(jsep);
+      Janus.debug(jsep.toMap());
       callbacks.message = body;
       callbacks.jsep = jsep.toMap();
       echotest.send(callbacks);
@@ -128,6 +131,7 @@ class _JanusEchoState extends State<JanusEcho> {
       Janus.log("WebRTC error... " + jsonEncode(error));
     };
     Janus.debug("Trying a createOffer too (audio/video sendrecv)");
+
     echotest.createOffer(callbacks: callbacks);
   }
 

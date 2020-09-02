@@ -1,4 +1,5 @@
 import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutterjanus/flutterjanus.dart';
 
 class GatewayCallbacks {
   var server;
@@ -45,8 +46,8 @@ class Callbacks {
   bool iceRestart = false;
   MediaStream stream;
 
-  Function success = () => {};
-  Function error = () => {};
+  Function success = (response) => {Janus.debug(response.toString())};
+  Function error = (error) => {Janus.debug(error)};
   Function consentDialog = () => {};
   Function iceState = () => {};
   Function mediaState = () => {};
