@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   # The following adds the flutter_webrtx package to the application
   flutter_webrtc: ^0.2.8
+  # The following adds the web_socket_channel to the application
+  web_socket_channel: ^1.1.0
   # The following install the http package to the application
   http: ^0.12.0+4
   # The following install the random string package to the application

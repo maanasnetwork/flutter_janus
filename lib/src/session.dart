@@ -404,16 +404,13 @@ class Session {
       connected = false;
       request["janus"] = "claim";
       request["session_id"] = this.sessionId;
+      // FIX ME
       // If we were using websockets, ignore the old connection
-      if (this.ws != null) {
-        this.ws.onOpen = null;
-        this.ws.onError = null;
-        this.ws.onClose = null;
-        if (this.wsKeepaliveTimeoutId != null) {
-          this.wsKeepaliveTimeoutId.cancel();
-          this.wsKeepaliveTimeoutId = null;
-        }
-      }
+      // if (this.ws != null) {
+      //   this.ws.onOpen = null;
+      //   this.ws.onError = null;
+      //   this.ws.onClose = null;
+      // }
     }
 
     if (this.token != null) request["token"] = token;
@@ -440,7 +437,9 @@ class Session {
     }
     if (this.websockets) {
       try {
-        this.ws = SimpleWebSocket(this.server, this.protocols);
+        this.ws =
+            SimpleWebSocket(this.server, this.protocols, this.keepAlivePeriod);
+        this.ws.connect();
       } catch (e) {
         Janus.error(e.toString());
       }

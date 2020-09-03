@@ -1,7 +1,6 @@
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:io';
-import 'dart:math';
-import 'dart:convert';
-import 'dart:async';
 
 typedef void OnMessageCallback(dynamic msg);
 typedef void OnErrorCallback(int code, String reason);
@@ -9,72 +8,40 @@ typedef void OnCloseCallback(int code, String reason);
 typedef void OnOpenCallback();
 
 class SimpleWebSocket {
-  String _url;
-  Iterable _protocols;
-  var _socket;
+  String url;
+  List<String> protocols;
+  int keepAlivePeriod;
+  WebSocketChannel webSocketChannel;
+
+  // Webscoket Callbacks
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnErrorCallback onError;
   OnCloseCallback onClose;
-  SimpleWebSocket(this._url, this._protocols);
 
-  connect() async {
-    try {
-      _socket = await WebSocket.connect(_url, protocols: _protocols);
-      // _socket = await _connectForSelfSignedCert(_url);
-      this?.onOpen();
-      _socket.listen((data) {
-        this?.onMessage(data);
-      }, onDone: () {
-        this?.onClose(_socket.closeCode, _socket.closeReason);
-      });
-    } catch (e) {
-      this.onError(500, e.toString());
-    }
+  // Constructor
+  SimpleWebSocket(this.url, this.protocols, this.keepAlivePeriod);
+
+  connect() {
+    Duration pingInterval = Duration(seconds: (keepAlivePeriod ~/ 1000));
+    webSocketChannel = IOWebSocketChannel.connect(url,
+        protocols: protocols, pingInterval: pingInterval);
+
+    // this?.onOpen();
+    // webSocketChannel.listen((data) {
+    //   this?.onMessage(data);
+    // }, onDone: () {
+    //   this?.onClose(webSocketChannel.closeCode, webSocketChannel.closeReason);
+    // });
   }
 
   send(data) {
-    if (_socket != null) {
-      _socket.add(data);
-      print('send: $data');
+    if (webSocketChannel != null) {
+      webSocketChannel.sink.add(data);
     }
   }
 
   close() {
-    if (_socket != null) _socket.close();
-  }
-
-  Future<WebSocket> _connectForSelfSignedCert(url) async {
-    try {
-      Random r = new Random();
-      String key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
-      HttpClient client = HttpClient(context: SecurityContext());
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) {
-        print(
-            'SimpleWebSocket: Allow self-signed certificate => $host:$port. ');
-        return true;
-      };
-
-      HttpClientRequest request =
-          await client.getUrl(Uri.parse(url)); // form the correct url here
-      request.headers.add('Connection', 'Upgrade');
-      request.headers.add('Upgrade', 'websocket');
-      request.headers.add(
-          'Sec-WebSocket-Version', '13'); // insert the correct version here
-      request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
-
-      HttpClientResponse response = await request.close();
-      Socket socket = await response.detachSocket();
-      var webSocket = WebSocket.fromUpgradedSocket(
-        socket,
-        protocol: 'janus-protocol',
-        serverSide: false,
-      );
-
-      return webSocket;
-    } catch (e) {
-      throw e;
-    }
+    if (webSocketChannel != null) webSocketChannel.sink.close();
   }
 }
