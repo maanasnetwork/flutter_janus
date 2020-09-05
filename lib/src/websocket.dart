@@ -7,7 +7,7 @@ typedef void OnErrorCallback(int code, String reason);
 typedef void OnCloseCallback(int code, String reason);
 typedef void OnOpenCallback();
 
-class SimpleWebSocket {
+class WebSocketWrapper {
   String url;
   List<String> protocols;
   int keepAlivePeriod;
@@ -20,19 +20,21 @@ class SimpleWebSocket {
   OnCloseCallback onClose;
 
   // Constructor
-  SimpleWebSocket(this.url, this.protocols, this.keepAlivePeriod);
+  WebSocketWrapper(this.url, this.protocols, this.keepAlivePeriod);
 
-  connect() {
+  void connect() {
     Duration pingInterval = Duration(seconds: (keepAlivePeriod ~/ 1000));
     webSocketChannel = IOWebSocketChannel.connect(url,
         protocols: protocols, pingInterval: pingInterval);
 
-    // this?.onOpen();
-    // webSocketChannel.listen((data) {
-    //   this?.onMessage(data);
-    // }, onDone: () {
-    //   this?.onClose(webSocketChannel.closeCode, webSocketChannel.closeReason);
-    // });
+    this?.onOpen();
+    webSocketChannel.stream.listen((message) {
+      this?.onMessage(message);
+    }, onError: (error) {
+      this?.onError(100, error);
+    }, onDone: () {
+      this?.onClose(0, "Websocket closed.");
+    });
   }
 
   send(data) {

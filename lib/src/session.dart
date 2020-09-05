@@ -6,7 +6,7 @@ import 'package:flutterjanus/flutterjanus.dart';
 
 class Session {
   bool websockets = false;
-  SimpleWebSocket ws;
+  WebSocketWrapper ws;
   var wsHandlers;
   Timer wsKeepaliveTimeoutId;
   List servers;
@@ -436,13 +436,8 @@ class Session {
       }
     }
     if (this.websockets) {
-      try {
-        this.ws =
-            SimpleWebSocket(this.server, this.protocols, this.keepAlivePeriod);
-        this.ws.connect();
-      } catch (e) {
-        Janus.error(e.toString());
-      }
+      this.ws =
+          WebSocketWrapper(this.server, this.protocols, this.keepAlivePeriod);
 
       // Attach websocket handlers
       this.ws.onError = (int code, String reason) {
@@ -493,6 +488,7 @@ class Session {
           Janus.sessions[this.sessionId] = this;
           callbacks.success();
         };
+        Janus.debug(request.toString());
         this.ws.send(jsonEncode(request));
       };
 
@@ -506,6 +502,14 @@ class Session {
           gatewayCallbacks.error("Lost connection to the server (is it down?)");
         }
       };
+
+      // All set, now try to connect websocket
+      try {
+        this.ws.connect();
+      } catch (error) {
+        Janus.error(error.toString());
+      }
+
       return;
     }
 
