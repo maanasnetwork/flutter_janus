@@ -33,7 +33,7 @@ class Session {
   String sessionId;
   Map<String, Plugin> pluginHandles = {};
   int retries = 0;
-  Map<String, dynamic> transactions;
+  Map<String, dynamic> transactions = {};
 
   final GatewayCallbacks gatewayCallbacks;
 
@@ -382,16 +382,17 @@ class Session {
   // Private helper to send keep-alive messages on WebSockets
   keepAlive() {
     if (this.server == null || !this.websockets || !this.connected) return;
-    this.wsKeepaliveTimeoutId =
-        Timer(Duration(microseconds: this.keepAlivePeriod), this.keepAlive);
-    Map<String, String> request = {
-      "janus": "keepalive",
-      "session_id": this.sessionId,
-      "transaction": Janus.randomString(12)
-    };
-    if (this.token != null) request["token"] = token;
-    if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
-    this.ws.send(jsonEncode(request));
+    Timer.periodic(Duration(microseconds: this.keepAlivePeriod), (Timer t) {
+      this.wsKeepaliveTimeoutId = t;
+      Map<String, String> request = {
+        "janus": "keepalive",
+        "session_id": this.sessionId,
+        "transaction": Janus.randomString(12)
+      };
+      if (this.token != null) request["token"] = token;
+      if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
+      this.ws.send(jsonEncode(request));
+    });
   }
 
   createSession({GatewayCallbacks callbacks, bool reconnect = false}) {
@@ -479,7 +480,8 @@ class Session {
       // All set, now try to connect websocket
       try {
         this.ws.connect();
-        Function success = (json) {
+        this.transactions[transaction] = (json) {
+          Janus.log('inside');
           Janus.debug(json);
           if (json["janus"] != "success") {
             Janus.error("Ooops: " +
@@ -489,8 +491,6 @@ class Session {
             callbacks.error(json["error"]["reason"]);
             return;
           }
-          this.wsKeepaliveTimeoutId = Timer(
-              Duration(microseconds: this.keepAlivePeriod), this.keepAlive);
           this.connected = true;
           this.sessionId = (json["session_id"] != null)
               ? json["session_id"]
@@ -501,12 +501,9 @@ class Session {
             Janus.log("Created session: " + this.sessionId);
           }
           Janus.sessions[this.sessionId] = this;
-          callbacks.success();
+          keepAlive();
+          callbacks.success(this.sessionId);
         };
-        Janus.log('here');
-        this.transactions[transaction] = "__init__";
-        Janus.log('not here');
-        this.transactions.update(transaction, success);
 
         Janus.debug(request.toString());
         this.ws.send(jsonEncode(request));
