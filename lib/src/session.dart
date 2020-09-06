@@ -186,10 +186,11 @@ class Session {
       return;
     } else if (json["janus"] == "success") {
       // Success!
-      Janus.debug("Got a success on session " + sessionId);
+      if (sessionId != null)
+        Janus.debug("Got a success on session " + sessionId);
       Janus.debug(json);
       var transaction = json["transaction"];
-      if (transaction) {
+      if (transaction != null) {
         Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
         this.transactions.remove(transaction);
@@ -462,9 +463,23 @@ class Session {
             "Error connecting to the Janus WebSockets server: Is the server down?");
       };
 
-      this.ws.onOpen = () {
-        // We need to be notified about the success
-        this.transactions[transaction] = (json) {
+      this.ws.onMessage = (message) {
+        handleEvent(jsonDecode(message));
+      };
+
+      this.ws.onClose = (int code, String reason) {
+        if (this.server == null || !this.connected) {
+        } else {
+          this.connected = false;
+          // FIXME What if this is called when the page is closed?
+          gatewayCallbacks.error("Lost connection to the server (is it down?)");
+        }
+      };
+
+      // All set, now try to connect websocket
+      try {
+        this.ws.connect();
+        Function success = (json) {
           Janus.debug(json);
           if (json["janus"] != "success") {
             Janus.error("Ooops: " +
@@ -488,24 +503,13 @@ class Session {
           Janus.sessions[this.sessionId] = this;
           callbacks.success();
         };
+        Janus.log('here');
+        this.transactions[transaction] = "__init__";
+        Janus.log('not here');
+        this.transactions.update(transaction, success);
+
         Janus.debug(request.toString());
         this.ws.send(jsonEncode(request));
-      };
-
-      this.ws.onMessage = (message) => handleEvent(jsonDecode(message));
-
-      this.ws.onClose = (int code, String reason) {
-        if (this.server == null || !this.connected) {
-        } else {
-          this.connected = false;
-          // FIXME What if this is called when the page is closed?
-          gatewayCallbacks.error("Lost connection to the server (is it down?)");
-        }
-      };
-
-      // All set, now try to connect websocket
-      try {
-        this.ws.connect();
       } catch (error) {
         Janus.error(error.toString());
       }

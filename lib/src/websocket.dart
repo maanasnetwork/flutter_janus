@@ -1,23 +1,18 @@
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'dart:io';
-
-typedef void OnMessageCallback(dynamic msg);
-typedef void OnErrorCallback(int code, String reason);
-typedef void OnCloseCallback(int code, String reason);
-typedef void OnOpenCallback();
+import 'package:flutterjanus/flutterjanus.dart';
 
 class WebSocketWrapper {
   String url;
   List<String> protocols;
   int keepAlivePeriod;
-  WebSocketChannel webSocketChannel;
 
-  // Webscoket Callbacks
-  OnOpenCallback onOpen;
-  OnMessageCallback onMessage;
-  OnErrorCallback onError;
-  OnCloseCallback onClose;
+  Function() onOpen;
+  Function(dynamic) onMessage;
+  Function(int, String) onError;
+  Function(int, String) onClose;
+
+  WebSocketChannel webSocketChannel;
 
   // Constructor
   WebSocketWrapper(this.url, this.protocols, this.keepAlivePeriod);
@@ -27,13 +22,13 @@ class WebSocketWrapper {
     webSocketChannel = IOWebSocketChannel.connect(url,
         protocols: protocols, pingInterval: pingInterval);
 
-    this?.onOpen();
+    // this?.onOpen();
     webSocketChannel.stream.listen((message) {
-      this?.onMessage(message);
+      this.onMessage(message);
     }, onError: (error) {
-      this?.onError(100, error);
+      this.onError(100, error);
     }, onDone: () {
-      this?.onClose(0, "Websocket closed.");
+      this.onClose(0, "Websocket closed.");
     });
   }
 
