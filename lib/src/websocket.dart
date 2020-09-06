@@ -18,10 +18,7 @@ class WebSocketWrapper {
   WebSocketWrapper(this.url, this.protocols, this.keepAlivePeriod);
 
   void connect() {
-    Duration pingInterval = Duration(seconds: (keepAlivePeriod ~/ 1000));
-    webSocketChannel = IOWebSocketChannel.connect(url,
-        protocols: protocols, pingInterval: pingInterval);
-
+    webSocketChannel = IOWebSocketChannel.connect(url, protocols: protocols);
     // this?.onOpen();
     webSocketChannel.stream.listen((message) {
       this.onMessage(message);

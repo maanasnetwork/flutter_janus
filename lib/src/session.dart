@@ -381,7 +381,6 @@ class Session {
 
   // Private helper to send keep-alive messages on WebSockets
   keepAlive() {
-    Janus.log(this.keepAlivePeriod);
     if (this.server == null || !this.websockets || !this.connected) return;
     Timer.periodic(Duration(milliseconds: this.keepAlivePeriod), (Timer t) {
       this.wsKeepaliveTimeoutId = t;
