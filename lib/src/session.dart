@@ -381,8 +381,9 @@ class Session {
 
   // Private helper to send keep-alive messages on WebSockets
   keepAlive() {
+    Janus.log(this.keepAlivePeriod);
     if (this.server == null || !this.websockets || !this.connected) return;
-    Timer.periodic(Duration(microseconds: this.keepAlivePeriod), (Timer t) {
+    Timer.periodic(Duration(milliseconds: this.keepAlivePeriod), (Timer t) {
       this.wsKeepaliveTimeoutId = t;
       Map<String, String> request = {
         "janus": "keepalive",
@@ -391,6 +392,7 @@ class Session {
       };
       if (this.token != null) request["token"] = token;
       if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
+      Janus.log(request.toString());
       this.ws.send(jsonEncode(request));
     });
   }
@@ -406,13 +408,12 @@ class Session {
       connected = false;
       request["janus"] = "claim";
       request["session_id"] = this.sessionId;
-      // FIX ME
       // If we were using websockets, ignore the old connection
-      // if (this.ws != null) {
-      //   this.ws.onOpen = null;
-      //   this.ws.onError = null;
-      //   this.ws.onClose = null;
-      // }
+      if (this.ws != null) {
+        this.ws.onMessage = null;
+        this.ws.onError = null;
+        this.ws.onClose = null;
+      }
     }
 
     if (this.token != null) request["token"] = token;
@@ -481,7 +482,6 @@ class Session {
       try {
         this.ws.connect();
         this.transactions[transaction] = (json) {
-          Janus.log('inside');
           Janus.debug(json);
           if (json["janus"] != "success") {
             Janus.error("Ooops: " +
@@ -492,9 +492,11 @@ class Session {
             return;
           }
           this.connected = true;
-          this.sessionId = (json["session_id"] != null)
-              ? json["session_id"]
-              : json["data"]["id"];
+          if (json["session_id"] != null) {
+            this.sessionId = json["session_id"];
+          } else {
+            this.sessionId = json["data"]["id"].toString();
+          }
           if (reconnect) {
             Janus.log("Claimed session: " + this.sessionId);
           } else {
@@ -736,6 +738,7 @@ class Session {
       "opaque_id": opaqueId,
       "transaction": transaction
     };
+    Janus.log(request.toString());
     if (handleToken != null) request["token"] = handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
 
