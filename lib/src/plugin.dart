@@ -43,8 +43,8 @@ class Plugin {
       this.handleToken,
       this.callbacks});
 
-  getId() => handleId;
-  getPlugin() => plugin;
+  getId() => this.handleId;
+  getPlugin() => this.plugin;
   getVolume() => this.session.getVolume(this.handleId, true);
   getRemoteVolume() => this.session.getVolume(this.handleId, true);
   getLocalVolume() => this.session.getVolume(this.handleId, false);

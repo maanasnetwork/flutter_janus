@@ -101,7 +101,7 @@ class _JanusEchoState extends State<JanusEcho> {
     Janus.log("Plugin attached! (" +
         echotest.getPlugin() +
         ", id=" +
-        echotest.getId() +
+        echotest.getId().toString() +
         ")");
     Map<String, dynamic> body = {"audio": true, "video": true};
     if (this.acodec != null) body['audiocodec'] = this.acodec;
