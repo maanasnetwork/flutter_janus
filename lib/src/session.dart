@@ -759,8 +759,8 @@ class Session {
               "Ooops: " + json["error"].code + " " + json["error"].reason);
           return;
         }
-        String handleId = json["data"]["id"].toString();
-        Janus.log("Created handle: " + handleId);
+        int handleId = json["data"]["id"];
+        Janus.log("Created handle: " + handleId.toString());
         // Initialise plugin
         Plugin pluginHandle = Plugin(
             session: this,
@@ -769,7 +769,7 @@ class Session {
             handleToken: handleToken,
             callbacks: callbacks);
 
-        this.pluginHandles[handleId] = pluginHandle;
+        this.pluginHandles[handleId.toString()] = pluginHandle;
         callbacks.success(pluginHandle);
       };
 
@@ -789,8 +789,8 @@ class Session {
             .error("Ooops: " + json["error"].code + " " + json["error"].reason);
         return;
       }
-      String handleId = json["data"]["id"].toString();
-      Janus.log("Created handle: " + handleId);
+      int handleId = json["data"]["id"];
+      Janus.log("Created handle: " + handleId.toString());
 
       // Initialise plugin
       Plugin pluginHandle = Plugin(
@@ -800,7 +800,7 @@ class Session {
           handleToken: handleToken,
           callbacks: callbacks);
 
-      this.pluginHandles[handleId] = pluginHandle;
+      this.pluginHandles[handleId.toString()] = pluginHandle;
       callbacks.success(pluginHandle);
     };
 
@@ -823,13 +823,13 @@ class Session {
   }
 
   // Private method to send a message
-  sendMessage(String handleId, Callbacks callbacks) {
+  sendMessage(int handleId, Callbacks callbacks) {
     if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       callbacks.error("Is the server down? (connected=false)");
       return;
     }
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -848,7 +848,8 @@ class Session {
       request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
     if (jsep != null) request["jsep"] = jsep;
-    Janus.debug("Sending message to plugin (handle=" + handleId + "):");
+    Janus.debug(
+        "Sending message to plugin (handle=" + handleId.toString() + "):");
     Janus.debug(request);
     if (this.websockets) {
       request["session_id"] = this.sessionId;
@@ -936,7 +937,7 @@ class Session {
     };
 
     Janus.httpAPICall(
-        this.server + "/" + this.sessionId + "/" + handleId,
+        this.server + "/" + this.sessionId + "/" + handleId.toString(),
         {
           'verb': 'POST',
           'withCredentials': this.withCredentials,
@@ -946,12 +947,12 @@ class Session {
   }
 
   // Private method to send a trickle candidate
-  sendTrickleCandidate(String handleId, var candidate) {
+  sendTrickleCandidate(int handleId, var candidate) {
     if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       return;
     }
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return;
@@ -965,7 +966,8 @@ class Session {
     if (pluginHandle.handleToken != null)
       request["token"] = pluginHandle.handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
-    Janus.vdebug("Sending trickle candidate (handle=" + handleId + "):");
+    Janus.vdebug(
+        "Sending trickle candidate (handle=" + handleId.toString() + "):");
     Janus.vdebug(request);
     if (this.websockets) {
       request["session_id"] = this.sessionId;
@@ -992,7 +994,7 @@ class Session {
     };
 
     Janus.httpAPICall(
-        this.server + "/" + this.sessionId + "/" + handleId,
+        this.server + "/" + this.sessionId + "/" + handleId.toString(),
         {
           'verb': 'POST',
           'withCredentials': this.withCredentials,
@@ -1002,8 +1004,8 @@ class Session {
   }
 
   // Private method to create a data channel
-  createDataChannel(String handleId, label, incoming, pendingData) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  createDataChannel(int handleId, label, incoming, pendingData) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return;
@@ -1073,8 +1075,8 @@ class Session {
   }
 
   // Private method to send a data channel message
-  sendData(String handleId, Callbacks callbacks) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  sendData(int handleId, Callbacks callbacks) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -1107,8 +1109,8 @@ class Session {
   }
 
   // Private method to send a DTMF tone
-  sendDtmf(String handleId, Callbacks callbacks) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  sendDtmf(int handleId, Callbacks callbacks) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -1173,24 +1175,24 @@ class Session {
   }
 
   // Private method to destroy a plugin handle
-  destroyHandle(String handleId, Callbacks callbacks) {
+  destroyHandle(int handleId, Callbacks callbacks) {
     var noRequest = (callbacks.noRequest == true);
     Janus.log("Destroying handle " +
-        handleId +
+        handleId.toString() +
         " (only-locally=" +
         noRequest.toString() +
         ")");
     cleanupWebrtc(handleId, false);
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       // Plugin was already detached by Janus, calling detach again will return a handle not found error, so just exit here
-      this.pluginHandles.remove(handleId);
+      this.pluginHandles.remove(handleId.toString());
       callbacks.success();
       return;
     }
     if (noRequest) {
       // We're only removing the handle locally
-      this.pluginHandles.remove(handleId);
+      this.pluginHandles.remove(handleId.toString());
       callbacks.success();
       return;
     }
@@ -1210,7 +1212,7 @@ class Session {
       request["session_id"] = this.sessionId;
       request["handle_id"] = handleId;
       this.ws.send(jsonEncode(request)); // FIX ME
-      this.pluginHandles.remove(handleId);
+      this.pluginHandles.remove(handleId.toString());
       callbacks.success();
       return;
     }
@@ -1225,17 +1227,17 @@ class Session {
             " " +
             json["error"].reason.toString()); // FIXME
       }
-      this.pluginHandles.remove(handleId);
+      this.pluginHandles.remove(handleId.toString());
       callbacks.success();
     };
     httpCallbacks.error = (textStatus, errorThrown) {
       Janus.error(textStatus + ":" + errorThrown); // FIXME
       // We cleanup anyway
-      this.pluginHandles.remove(handleId);
+      this.pluginHandles.remove(handleId.toString());
       callbacks.success();
     };
     Janus.httpAPICall(
-        this.server + "/" + this.sessionId + "/" + handleId,
+        this.server + "/" + this.sessionId + "/" + handleId.toString(),
         {
           'verb': 'POST',
           'withCredentials': this.withCredentials,
@@ -1245,9 +1247,9 @@ class Session {
   }
 
   // WebRTC stuff
-  streamsDone(String handleId, RTCSessionDescription jsep, Map media, callbacks,
+  streamsDone(int handleId, RTCSessionDescription jsep, Map media, callbacks,
       MediaStream stream) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -1595,7 +1597,7 @@ class Session {
     }
   }
 
-  prepareWebrtc(handleId, offer, callbacks) {
+  prepareWebrtc(int handleId, offer, callbacks) {
     var jsep = callbacks.jsep;
 
     if (offer != null && jsep != null) {
@@ -1614,7 +1616,7 @@ class Session {
         ? callbacks.media
         : {'audio': true, 'video': true};
     Map<String, dynamic> media = callbacks.media;
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -2189,9 +2191,9 @@ class Session {
     }
   }
 
-  prepareWebrtcPeer(handleId, callbacks) {
+  prepareWebrtcPeer(int handleId, callbacks) {
     var jsep = callbacks.jsep;
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -2235,8 +2237,8 @@ class Session {
     }
   }
 
-  createOffer(handleId, media, callbacks, customizeSdp) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  createOffer(int handleId, media, callbacks, customizeSdp) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -2484,8 +2486,8 @@ class Session {
     });
   }
 
-  createAnswer(handleId, media, callbacks, customizedSdp) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  createAnswer(int handleId, media, callbacks, customizedSdp) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
@@ -2766,8 +2768,8 @@ class Session {
     });
   }
 
-  sendSDP(handleId, callbacks) {
-    var pluginHandle = this.pluginHandles[handleId];
+  sendSDP(int handleId, callbacks) {
+    var pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle, not sending anything");
       return;
@@ -2797,8 +2799,8 @@ class Session {
     callbacks.success(config['mySdp']);
   }
 
-  getVolume(handleId, remote) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  getVolume(int handleId, remote) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return 0;
@@ -2845,8 +2847,8 @@ class Session {
     }
   }
 
-  isMuted(handleId, video) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  isMuted(int handleId, video) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return true;
@@ -2881,8 +2883,8 @@ class Session {
     }
   }
 
-  mute(handleId, video, mute) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  mute(int handleId, video, mute) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return false;
@@ -2919,8 +2921,8 @@ class Session {
     }
   }
 
-  getBitrate(handleId) {
-    Plugin pluginHandle = this.pluginHandles[handleId];
+  getBitrate(int handleId) {
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
       return "Invalid handle";
@@ -2996,9 +2998,9 @@ class Session {
     Janus.error("WebRTC error:", error);
   }
 
-  cleanupWebrtc(handleId, hangupRequest) {
+  cleanupWebrtc(int handleId, hangupRequest) {
     Janus.log("Cleaning WebRTC stuff");
-    Plugin pluginHandle = this.pluginHandles[handleId];
+    Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null) {
       // Nothing to clean
       return;
@@ -3016,7 +3018,8 @@ class Session {
         if (pluginHandle.handleToken != null)
           request["token"] = pluginHandle.handleToken;
         if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
-        Janus.debug("Sending hangup request (handle=" + handleId + "):");
+        Janus.debug(
+            "Sending hangup request (handle=" + handleId.toString() + "):");
         Janus.debug(request);
         if (this.websockets) {
           request["session_id"] = this.sessionId;
@@ -3025,7 +3028,7 @@ class Session {
         } else {
           GatewayCallbacks httpCallbacks = GatewayCallbacks();
           Janus.httpAPICall(
-              this.server + "/" + this.sessionId + "/" + handleId,
+              this.server + "/" + this.sessionId + "/" + handleId.toString(),
               {
                 'verb': 'POST',
                 'withCredentials': this.withCredentials,

@@ -33,7 +33,7 @@ class Plugin {
   final Session session;
   final Callbacks callbacks;
   final String plugin;
-  final String handleId;
+  final int handleId;
   final String handleToken;
 
   Plugin(
