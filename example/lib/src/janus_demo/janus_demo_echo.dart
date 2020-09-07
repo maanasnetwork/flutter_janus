@@ -75,7 +75,7 @@ class _JanusEchoState extends State<JanusEcho> {
   }
 
   void _attach(String sessionId) {
-    this._session = Janus.sessions[sessionId];
+    this._session = Janus.sessions[sessionId.toString()];
 
     Callbacks callbacks = Callbacks();
     callbacks.plugin = "janus.plugin.echotest";

@@ -12,7 +12,7 @@ class Janus {
   // between janus.js and the flutter_janus
 
   // List of sessions
-  static Map<int, dynamic> sessions = {};
+  static Map<String, Session> sessions = {};
 
   // Extension
   static bool isExtensionEnable() => true;

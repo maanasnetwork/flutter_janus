@@ -505,7 +505,7 @@ class Session {
           } else {
             Janus.log("Created session: " + this.sessionId.toString());
           }
-          Janus.sessions[this.sessionId] = this;
+          Janus.sessions[this.sessionId.toString()] = this;
           keepAlive();
           callbacks.success(this.sessionId);
         };
@@ -542,7 +542,7 @@ class Session {
       } else {
         Janus.log("Created session: " + this.sessionId.toString());
       }
-      Janus.sessions[this.sessionId] = this;
+      Janus.sessions[this.sessionId.toString()] = this;
       eventHandler();
       callbacks
           .success(this.sessionId); // return session to the success callback
