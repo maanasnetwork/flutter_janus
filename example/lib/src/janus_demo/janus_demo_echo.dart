@@ -74,7 +74,7 @@ class _JanusEchoState extends State<JanusEcho> {
     Session(gatewayCallbacks); // async httpd call
   }
 
-  void _attach(String sessionId) {
+  void _attach(int sessionId) {
     this._session = Janus.sessions[sessionId.toString()];
 
     Callbacks callbacks = Callbacks();

@@ -773,7 +773,6 @@ class Session {
         callbacks.success(pluginHandle);
       };
 
-      Janus.log(request);
       this.ws.send(jsonEncode(request));
       return;
     }
