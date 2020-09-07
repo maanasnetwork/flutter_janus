@@ -30,7 +30,7 @@ class Session {
   int longPollTimeout = 60000;
 
   bool connected = false;
-  String sessionId;
+  int sessionId;
   Map<String, Plugin> pluginHandles = {};
   int retries = 0;
   Map<String, dynamic> transactions = {};
@@ -171,11 +171,11 @@ class Session {
     }
     if (json["janus"] == "keepalive") {
       // Nothing happened
-      Janus.vdebug("Got a keepalive on session " + this.sessionId);
+      Janus.vdebug("Got a keepalive on session " + this.sessionId.toString());
       return;
     } else if (json["janus"] == "ack") {
       // Just an ack, we can probably ignore
-      Janus.debug("Got an ack on session " + sessionId);
+      Janus.debug("Got an ack on session " + sessionId.toString());
       Janus.debug(json);
       var transaction = json["transaction"];
       if (transaction) {
@@ -187,7 +187,7 @@ class Session {
     } else if (json["janus"] == "success") {
       // Success!
       if (sessionId != null)
-        Janus.debug("Got a success on session " + sessionId);
+        Janus.debug("Got a success on session " + sessionId.toString());
       Janus.debug(json);
       var transaction = json["transaction"];
       if (transaction != null) {
@@ -210,7 +210,8 @@ class Session {
       }
 
       RTCIceCandidate candidate = json["candidate"];
-      Janus.debug("Got a trickled candidate on session " + this.sessionId);
+      Janus.debug(
+          "Got a trickled candidate on session " + this.sessionId.toString());
       Janus.debug(candidate);
       var config = pluginHandle.webrtcStuff;
       // RTCPeerConnection pc => pc
@@ -235,7 +236,8 @@ class Session {
       }
     } else if (json["janus"] == "webrtcup") {
       // The PeerConnection with the server is up! Notify this
-      Janus.debug("Got a webrtcup event on session " + this.sessionId);
+      Janus.debug(
+          "Got a webrtcup event on session " + this.sessionId.toString());
       Janus.debug(json);
       String sender = json["sender"].toString();
       if (sender == null) {
@@ -251,7 +253,7 @@ class Session {
       return;
     } else if (json["janus"] == "hangup") {
       // A plugin asked the core to hangup a PeerConnection on one of our handles
-      Janus.debug("Got a hangup event on session " + this.sessionId);
+      Janus.debug("Got a hangup event on session " + this.sessionId.toString());
       Janus.debug(json);
       String sender = json["sender"].toString();
       if (sender == null) {
@@ -267,7 +269,8 @@ class Session {
       pluginHandle.hangup({});
     } else if (json["janus"] == "detached") {
       // A plugin asked the core to detach one of our handles
-      Janus.debug("Got a detached event on session " + this.sessionId);
+      Janus.debug(
+          "Got a detached event on session " + this.sessionId.toString());
       Janus.debug(json);
       String sender = json["sender"].toString();
       if (sender == null) {
@@ -284,7 +287,7 @@ class Session {
       pluginHandle.detach(null);
     } else if (json["janus"] == "media") {
       // Media started/stopped flowing
-      Janus.debug("Got a media event on session " + this.sessionId);
+      Janus.debug("Got a media event on session " + this.sessionId.toString());
       Janus.debug(json);
       String sender = json["sender"].toString();
       if (sender == null) {
@@ -298,7 +301,8 @@ class Session {
       }
       pluginHandle.mediaState(json["type"], json["receiving"]);
     } else if (json["janus"] == "slowlink") {
-      Janus.debug("Got a slowlink event on session " + this.sessionId);
+      Janus.debug(
+          "Got a slowlink event on session " + this.sessionId.toString());
       Janus.debug(json);
       // Trouble uplink or downlink
       String sender = json["sender"].toString();
@@ -325,7 +329,7 @@ class Session {
       }
       return;
     } else if (json["janus"] == "event") {
-      Janus.debug("Got a plugin event on session " + this.sessionId);
+      Janus.debug("Got a plugin event on session " + this.sessionId.toString());
       Janus.debug(json);
       String sender = json["sender"].toString();
       if (sender == null) {
@@ -364,7 +368,7 @@ class Session {
         Janus.debug("No provided notification callback");
       }
     } else if (json["janus"] == "timeout") {
-      Janus.error("Timeout on session " + this.sessionId);
+      Janus.error("Timeout on session " + this.sessionId.toString());
       Janus.debug(json);
       if (this.websockets) {
         this.ws.close();
@@ -374,7 +378,7 @@ class Session {
       Janus.warn("Unknown message/event  '" +
           json["janus"] +
           "' on session " +
-          this.sessionId);
+          this.sessionId.toString());
       Janus.debug(json);
     }
   }
@@ -384,7 +388,7 @@ class Session {
     if (this.server == null || !this.websockets || !this.connected) return;
     Timer.periodic(Duration(milliseconds: this.keepAlivePeriod), (Timer t) {
       this.wsKeepaliveTimeoutId = t;
-      Map<String, String> request = {
+      Map<String, dynamic> request = {
         "janus": "keepalive",
         "session_id": this.sessionId,
         "transaction": Janus.randomString(12)
@@ -398,7 +402,7 @@ class Session {
 
   createSession({GatewayCallbacks callbacks, bool reconnect = false}) {
     String transaction = Janus.randomString(12);
-    Map<String, String> request = {
+    Map<String, dynamic> request = {
       "janus": "create",
       "transaction": transaction
     };
@@ -494,12 +498,12 @@ class Session {
           if (json["session_id"] != null) {
             this.sessionId = json["session_id"];
           } else {
-            this.sessionId = json["data"]["id"].toString();
+            this.sessionId = json["data"]["id"];
           }
           if (reconnect) {
-            Janus.log("Claimed session: " + this.sessionId);
+            Janus.log("Claimed session: " + this.sessionId.toString());
           } else {
-            Janus.log("Created session: " + this.sessionId);
+            Janus.log("Created session: " + this.sessionId.toString());
           }
           Janus.sessions[this.sessionId] = this;
           keepAlive();
@@ -527,14 +531,16 @@ class Session {
         return;
       }
       this.connected = true;
-      this.sessionId = json["session_id"] != null
-          ? json["session_id"].toString()
-          : json['data']["id"].toString();
+      if (json["session_id"] != null) {
+        this.sessionId = json["session_id"];
+      } else {
+        this.sessionId = json["data"]["id"];
+      }
 
       if (reconnect) {
-        Janus.log("Claimed session: " + this.sessionId);
+        Janus.log("Claimed session: " + this.sessionId.toString());
       } else {
-        Janus.log("Created session: " + this.sessionId);
+        Janus.log("Created session: " + this.sessionId.toString());
       }
       Janus.sessions[this.sessionId] = this;
       eventHandler();
@@ -578,7 +584,7 @@ class Session {
       bool cleanupHandles = true}) {
     // FIXME This method triggers a success even when we fail
     Janus.log("Destroying session " +
-        sessionId +
+        sessionId.toString() +
         " (unload=" +
         unload.toString() +
         ")");
@@ -601,7 +607,7 @@ class Session {
       return;
     }
     // No need to destroy all handles first, Janus will do that itself
-    Map<String, String> request = {
+    Map<String, dynamic> request = {
       "janus": "destroy",
       "transaction": Janus.randomString(12)
     };
@@ -731,13 +737,13 @@ class Session {
     String handleToken =
         callbacks.token != null ? callbacks.token : this.token; // FIXME
     String transaction = Janus.randomString(12);
-    Map<String, String> request = {
+    Map<String, dynamic> request = {
       "janus": "attach",
       "plugin": plugin,
+      "session_id": this.sessionId,
       "opaque_id": opaqueId,
       "transaction": transaction
     };
-    Janus.log(request.toString());
     if (handleToken != null) request["token"] = handleToken;
     if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
 
@@ -753,7 +759,7 @@ class Session {
               "Ooops: " + json["error"].code + " " + json["error"].reason);
           return;
         }
-        String handleId = json["data"]["id"];
+        String handleId = json["data"]["id"].toString();
         Janus.log("Created handle: " + handleId);
         // Initialise plugin
         Plugin pluginHandle = Plugin(
@@ -767,7 +773,7 @@ class Session {
         callbacks.success(pluginHandle);
       };
 
-      request["session_id"] = this.sessionId;
+      Janus.log(request);
       this.ws.send(jsonEncode(request));
       return;
     }
@@ -1194,7 +1200,7 @@ class Session {
       callbacks.error("Is the server down? (connected=false)");
       return;
     }
-    Map<String, String> request = {
+    Map<String, dynamic> request = {
       "janus": "detach",
       "transaction": Janus.randomString(12)
     };
