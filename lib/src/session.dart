@@ -947,7 +947,7 @@ class Session {
   }
 
   // Private method to send a trickle candidate
-  sendTrickleCandidate(int handleId, var candidate) {
+  sendTrickleCandidate(int handleId, RTCIceCandidate candidate) {
     if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       return;
@@ -957,10 +957,9 @@ class Session {
       Janus.warn("Invalid handle");
       return;
     }
-
     Map<String, dynamic> request = {
       "janus": "trickle",
-      "candidate": candidate,
+      "candidate": candidate.toMap(),
       "transaction": Janus.randomString(12)
     };
     if (pluginHandle.handleToken != null)
@@ -1438,7 +1437,7 @@ class Session {
             Janus.log(config['trickle']);
             if (config['trickle'] == true) {
               // Notify end of candidates
-              sendTrickleCandidate(handleId, {"completed": true});
+              sendTrickleCandidate(handleId, Janus.endOfCandidates);
             } else {
               // No trickle, time to send the complete SDP (including all candidates)
               sendSDP(handleId, callbacks);
@@ -1451,7 +1450,7 @@ class Session {
             if (config['trickle'] == true) {
               // Send candidate
               sendTrickleCandidate(handleId, candidate);
-              Janus.log(candidate.toMap().toString());
+              Janus.debug(candidate.toMap());
             }
           }
         };

@@ -26,13 +26,13 @@ class _JanusEchoState extends State<JanusEcho> {
   var bitrateTimer;
   var spinner;
 
-  bool audioenabled = false;
-  bool videoenabled = false;
+  bool audioEnabled = false;
+  bool videoEnabled = false;
 
   bool doSimulcast = false;
   bool doSimulcast2 = false;
-  String acodec;
-  String vcodec;
+  String aCodec;
+  String vCodec;
   bool simulcastStarted = false;
 
   Session _session;
@@ -45,12 +45,13 @@ class _JanusEchoState extends State<JanusEcho> {
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   bool _inCalling = false;
 
+  _JanusEchoState({Key key});
+
   @override
   void initState() {
     super.initState();
     Janus.init(options: {"debug": "all"}, callback: null);
     initRenderers();
-    _connect();
   }
 
   initRenderers() async {
@@ -61,6 +62,7 @@ class _JanusEchoState extends State<JanusEcho> {
   @override
   void deactivate() {
     super.deactivate();
+    if (_session != null) _session.destroy();
     _localRenderer.dispose();
     _remoteRenderer.dispose();
   }
@@ -72,6 +74,9 @@ class _JanusEchoState extends State<JanusEcho> {
     gatewayCallbacks.error = (error) => Janus.log(error.toString());
     gatewayCallbacks.destroyed = () => deactivate();
     Session(gatewayCallbacks); // async httpd call
+    setState(() {
+      _inCalling = true;
+    });
   }
 
   void _attach(int sessionId) {
@@ -104,8 +109,8 @@ class _JanusEchoState extends State<JanusEcho> {
         echotest.getId().toString() +
         ")");
     Map<String, dynamic> body = {"audio": true, "video": true};
-    if (this.acodec != null) body['audiocodec'] = this.acodec;
-    if (this.vcodec != null) body['videocodec'] = this.vcodec;
+    if (this.aCodec != null) body['audiocodec'] = this.aCodec;
+    if (this.vCodec != null) body['videocodec'] = this.vCodec;
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
     // Create am empty callback for the message
     Callbacks callbacks = Callbacks();
@@ -192,6 +197,9 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _hangUp() {
     Janus.log('Hangup called');
+    setState(() {
+      _inCalling = false;
+    });
   }
 
   _switchCamera() {
@@ -200,104 +208,54 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _muteMic() {}
 
-  _buildRow(context, peer) {
-    var self = (peer['id'] == _selfId);
-    return ListBody(children: <Widget>[
-      ListTile(
-        title: Text(self
-            ? peer['name'] + '[Your self]'
-            : peer['name'] + '[' + peer['user_agent'] + ']'),
-        onTap: null,
-        trailing: new SizedBox(
-            width: 100.0,
-            child: new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.videocam),
-                    onPressed: () => {},
-                    tooltip: 'Echo Test',
-                  ),
-                ])),
-        subtitle: Text('id: ' + peer['id']),
-      ),
-      Divider()
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Janus Echo Test'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: null,
-            tooltip: 'setup',
-          ),
-        ],
+        title: new Text('Janus Echotest'),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _inCalling
-          ? new SizedBox(
-              width: 200.0,
-              child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    FloatingActionButton(
-                      child: const Icon(Icons.switch_camera),
-                      onPressed: _switchCamera,
-                    ),
-                    FloatingActionButton(
-                      onPressed: _hangUp,
-                      tooltip: 'Hangup',
-                      child: new Icon(Icons.call_end),
-                      backgroundColor: Colors.pink,
-                    ),
-                    FloatingActionButton(
-                      child: const Icon(Icons.mic_off),
-                      onPressed: _muteMic,
-                    )
-                  ]))
-          : null,
-      body: _inCalling
-          ? OrientationBuilder(builder: (context, orientation) {
-              return new Container(
-                child: new Stack(children: <Widget>[
-                  new Positioned(
-                      left: 0.0,
-                      right: 0.0,
-                      top: 0.0,
-                      bottom: 0.0,
-                      child: new Container(
-                        margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: new RTCVideoView(_remoteRenderer),
-                        decoration: new BoxDecoration(color: Colors.black54),
-                      )),
-                  new Positioned(
-                    left: 20.0,
-                    top: 20.0,
+      body: new OrientationBuilder(
+        builder: (context, orientation) {
+          return new Center(
+            child: new Container(
+              decoration: new BoxDecoration(color: Colors.white),
+              child: new Stack(
+                children: <Widget>[
+                  new Align(
+                    alignment: orientation == Orientation.portrait
+                        ? const FractionalOffset(0.5, 0.1)
+                        : const FractionalOffset(0.0, 0.5),
                     child: new Container(
-                      width: orientation == Orientation.portrait ? 90.0 : 120.0,
-                      height:
-                          orientation == Orientation.portrait ? 120.0 : 90.0,
+                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      width: 320.0,
+                      height: 240.0,
                       child: new RTCVideoView(_localRenderer),
                       decoration: new BoxDecoration(color: Colors.black54),
                     ),
                   ),
-                ]),
-              );
-            })
-          : new ListView.builder(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(0.0),
-              itemCount: (_peers != null ? _peers.length : 0),
-              itemBuilder: (context, i) {
-                return _buildRow(context, _peers[i]);
-              }),
+                  new Align(
+                    alignment: orientation == Orientation.portrait
+                        ? const FractionalOffset(0.5, 0.9)
+                        : const FractionalOffset(1.0, 0.5),
+                    child: new Container(
+                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      width: 320.0,
+                      height: 240.0,
+                      child: new RTCVideoView(_remoteRenderer),
+                      decoration: new BoxDecoration(color: Colors.black54),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: _inCalling ? _hangUp : _connect,
+        tooltip: _inCalling ? 'Hangup' : 'Call',
+        child: new Icon(_inCalling ? Icons.call_end : Icons.phone),
+      ),
     );
   }
 }
