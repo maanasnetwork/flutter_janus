@@ -114,9 +114,7 @@ class _JanusEchoState extends State<JanusEcho> {
     Janus.debug("Sending message (" + jsonEncode(body) + ")");
     // Create am empty callback for the message
     Callbacks callbacks = Callbacks();
-    callbacks.success = null;
     callbacks.message = body;
-
     echotest.send(callbacks);
     // No media provided: by default, it's sendrecv for audio and video
 

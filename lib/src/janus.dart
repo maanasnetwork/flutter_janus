@@ -31,7 +31,7 @@ class Janus {
       endOfCandidates; // https://github.com/meetecho/janus-gateway/issues/1670
 
   static String debugLevel;
-  static var logger;
+  static Logger logger;
   static int methodCount = 0;
   static int errorMethodCount = 0;
 

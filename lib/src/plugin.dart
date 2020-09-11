@@ -65,7 +65,7 @@ class Plugin {
       callbacks.mediaState(mediaType, mediaReciving);
   webrtcState(bool state, [reason]) => callbacks.webrtcState(state, [reason]);
   slowLink(uplink, lost) => callbacks.slowLink(uplink, lost);
-  onmessage(data, jsep) => callbacks.onMessage(data, jsep);
+  onMessage(data, jsep) => callbacks.onMessage(data, jsep);
   createOffer({Callbacks callbacks}) =>
       this.session.prepareWebrtc(this.handleId, true, callbacks);
   createAnswer(callbacks) =>

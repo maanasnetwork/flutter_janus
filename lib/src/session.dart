@@ -110,13 +110,14 @@ class Session {
   isConnected() => this.connected;
 
   reconnect(GatewayCallbacks callbacks) =>
-      createSession(callbacks: gatewayCallbacks, reconnect: true);
+      this.createSession(callbacks: gatewayCallbacks, reconnect: true);
 
   getSessionId() => this.sessionId;
 
-  destroy({GatewayCallbacks callbacks}) => destroySession(callbacks: callbacks);
+  destroy({GatewayCallbacks callbacks}) =>
+      this.destroySession(callbacks: callbacks);
 
-  attach({Callbacks callbacks}) => createHandle(callbacks: callbacks);
+  attach({Callbacks callbacks}) => this.createHandle(callbacks: callbacks);
 
   eventHandler() {
     if (this.sessionId == null) {
@@ -158,7 +159,6 @@ class Session {
 
   // Private event handler: this will trigger plugin callbacks, if set
   handleEvent(json, [skipTimeout]) {
-    Janus.debug(json);
     retries = 0;
     if (!this.websockets && this.sessionId != null && skipTimeout != true)
       eventHandler();
@@ -171,14 +171,14 @@ class Session {
     }
     if (json["janus"] == "keepalive") {
       // Nothing happened
-      Janus.vdebug("Got a keepalive on session " + this.sessionId.toString());
+      Janus.debug("Got a keepalive on session " + this.sessionId.toString());
       return;
     } else if (json["janus"] == "ack") {
       // Just an ack, we can probably ignore
-      Janus.debug("Got an ack on session " + sessionId.toString());
+      Janus.debug("Got an ack on session " + this.sessionId.toString());
       Janus.debug(json);
-      var transaction = json["transaction"];
-      if (transaction) {
+      String transaction = json["transaction"];
+      if (transaction != null) {
         Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
         this.transactions.remove(transaction);
@@ -186,10 +186,10 @@ class Session {
       return;
     } else if (json["janus"] == "success") {
       // Success!
-      if (sessionId != null)
-        Janus.debug("Got a success on session " + sessionId.toString());
+      if (this.sessionId != null)
+        Janus.debug("Got a success on session " + this.sessionId.toString());
       Janus.debug(json);
-      var transaction = json["transaction"];
+      String transaction = json["transaction"];
       if (transaction != null) {
         Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
@@ -203,7 +203,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -244,7 +244,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -260,7 +260,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -277,7 +277,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         // Don't warn here because destroyHandle causes this situation.
         return;
@@ -294,7 +294,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -310,7 +310,7 @@ class Session {
         Janus.warn("Missing sender...");
         return;
       }
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.debug("This handle is not attached to this session");
         return;
@@ -321,7 +321,7 @@ class Session {
       Janus.error(
           "Ooops: " + json["error"].code + " " + json["error"].reason); // FIXME
       Janus.debug(json);
-      var transaction = json["transaction"];
+      String transaction = json["transaction"];
       if (transaction != null) {
         Function reportSuccess = this.transactions[transaction];
         if (reportSuccess is Function) reportSuccess(json);
@@ -342,23 +342,24 @@ class Session {
         return;
       }
       Janus.debug("  -- Event is coming from " +
-          sender +
+          sender.toString() +
           " (" +
           plugindata["plugin"] +
           ")");
       var data = plugindata["data"];
       Janus.debug(data);
-      Plugin pluginHandle = this.pluginHandles[sender];
+      Plugin pluginHandle = this.pluginHandles[sender.toString()];
       if (pluginHandle == null) {
         Janus.warn("This handle is not attached to this session");
         return;
       }
+
       var jsep = json["jsep"];
-      if (jsep) {
+      if (jsep != null) {
         Janus.debug("Handling SDP as well...");
         Janus.debug(jsep);
       }
-      var callback = pluginHandle.onmessage;
+      var callback = pluginHandle.onMessage;
       if (callback is Function) {
         Janus.debug("Notifying application...");
         // Send to callback specified when attaching plugin handle
@@ -838,7 +839,7 @@ class Session {
 
     Map<String, dynamic> message = callbacks.message;
     var jsep = callbacks.jsep;
-    var transaction = Janus.randomString(12);
+    String transaction = Janus.randomString(12);
     Map<String, dynamic> request = {
       "janus": "message",
       "body": message,
@@ -870,7 +871,7 @@ class Session {
               ")");
           var data = plugindata["data"];
           Janus.debug(data);
-          callbacks.success(data);
+          if (callbacks.success != null) callbacks.success(data);
           return;
         } else if (json["janus"] != "ack") {
           // Not a success and not an ack, must be an error
@@ -1379,7 +1380,7 @@ class Session {
       Map<String, dynamic> pcConstraints = {
         "mandatory": {},
         "optional": [
-          {"DtlsSrtpKeyAgreement": false}
+          {"DtlsSrtpKeyAgreement": true}
         ]
       };
       if (this.ipv6Support) {
@@ -1596,14 +1597,14 @@ class Session {
     }
   }
 
-  prepareWebrtc(int handleId, offer, callbacks) {
+  prepareWebrtc(int handleId, bool offer, Callbacks callbacks) {
     var jsep = callbacks.jsep;
 
-    if (offer != null && jsep != null) {
+    if (offer && jsep != null) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");
       return;
-    } else if (offer == null &&
+    } else if (!offer &&
         (jsep == null || jsep.type == null || jsep.sdp == null)) {
       Janus.error("A valid JSEP is required for createAnswer");
       callbacks.error("A valid JSEP is required for createAnswer");
@@ -1874,7 +1875,12 @@ class Session {
         callbacks.error("getUserMedia not available");
         return;
       }
-      Map<String, dynamic> constraints = {'mandatory': {}, 'optional': []};
+      Map<String, dynamic> constraints = {
+        'mandatory': {},
+        'optional': [
+          {'DtlsSrtpKeyAgreement': true},
+        ]
+      };
       // pluginHandle.consentDialog(true);
       bool audioSupport = isAudioSendEnabled(media);
       if (audioSupport && media != null && media['audio'] is bool)
@@ -1965,8 +1971,8 @@ class Session {
               //pluginHandle.consentDialog(false);
               if (isAudioSendEnabled(media) && !media['keepAudio']) {
                 navigator.getUserMedia({'audio': true, 'video': false}).then(
-                    (audioStream) {
-                  stream.addTrack(audioStream.getAudioTracks()[0]);
+                    (MediaStream stream) {
+                  // stream.addTrack(stream.getAudioTracks()[0]);
                   streamsDone(handleId, jsep, media, callbacks, stream);
                 });
               } else {
@@ -2105,11 +2111,11 @@ class Session {
         // Check whether all media sources are actually available or not
         navigator.getSources().then((devices) {
           Janus.debug(devices.toString());
-          var audioExist = devices.any((device) {
+          bool audioExist = devices.any((device) {
             return device['kind'] == 'audioinput';
           });
 
-          var videoExist = isScreenSendEnabled(media) ||
+          bool videoExist = isScreenSendEnabled(media) ||
               devices.any((device) {
                 return device['kind'] == 'videoinput';
               });
@@ -2165,7 +2171,7 @@ class Session {
               };
             }
             Janus.debug(gumConstraints);
-            navigator.getUserMedia(gumConstraints).then((stream) {
+            navigator.getUserMedia(gumConstraints).then((MediaStream stream) {
               // pluginHandle.consentDialog(false);
               streamsDone(handleId, jsep, media, callbacks, stream);
             }).catchError((error, StackTrace stackTrace) {
@@ -2895,7 +2901,7 @@ class Session {
       Janus.warn("Invalid PeerConnection");
       return false;
     }
-    if (config['myStream']) {
+    if (config['myStream'] != null) {
       Janus.warn("Invalid local MediaStream");
       return false;
     }
