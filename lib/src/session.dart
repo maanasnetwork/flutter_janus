@@ -1365,11 +1365,11 @@ class Session {
     }
     // If we still need to create a PeerConnection, let's do that
     if (pc == null) {
-      Map<String, dynamic> pcConfig = {
-        "iceServers": this.iceServers,
-        "iceTransportPolicy": this.iceTransportPolicy,
-        "bundlePolicy": this.bundlePolicy
-      };
+      Map<String, dynamic> pcConfig = {"iceServers": this.iceServers};
+      if (this.iceTransportPolicy != null)
+        pcConfig["iceTransportPolicy"] = this.iceTransportPolicy;
+      if (this.bundlePolicy != null)
+        pcConfig["bundlePolicy"] = this.bundlePolicy;
       if (Janus.webRTCAdapter['browserDetails']['browser'] == "chrome") {
         // For Chrome versions before 72, we force a plan-b semantic, and unified-plan otherwise
         pcConfig["sdpSemantics"] =
@@ -1410,29 +1410,29 @@ class Session {
         Janus.debug(pc.toString());
         // FIXME
 
-        pc.getStats().then((List<StatsReport> stats) {
-          if (stats != null) {
-            Janus.log(
-                "PC Stats: " + stats[1].type + stats[1].values.toString());
-            config['volume'] = {};
-            config['bitrate']['value'] = "0 kbits/sec";
-          }
-        }).catchError((error, StackTrace stackTrace) {
-          Janus.error(error.toString());
-        });
+        // pc.getStats().then((List<StatsReport> stats) {
+        //   if (stats != null) {
+        //     Janus.log(
+        //         "PC Stats: " + stats[1].type + stats[1].values.toString());
+        //     config['volume'] = {};
+        //     config['bitrate']['value'] = "0 kbits/sec";
+        //   }
+        // }).catchError((error, StackTrace stackTrace) {
+        //   Janus.error(error.toString());
+        // });
 
         Janus.log("Preparing local SDP and gathering candidates (trickle=" +
             config['trickle'].toString() +
             ")");
 
-        // TODO assign type to iceConnectionState
-        pc.onIceConnectionState = (iceConnectionState) {
-          if (pc != null) pluginHandle.iceState(iceConnectionState);
+        pc.onIceConnectionState = (RTCIceConnectionState state) {
+          if (pc != null) pluginHandle.iceState(state);
         };
-        pc.onIceCandidate = (RTCIceCandidate iceCandidate) {
-          if (iceCandidate == null ||
+
+        pc.onIceCandidate = (RTCIceCandidate candidate) {
+          if (candidate == null ||
               (Janus.webRTCAdapter['browserDetails']['browser'] == 'edge' &&
-                  iceCandidate.candidate.indexOf('endOfCandidates') > 0)) {
+                  candidate.candidate.indexOf('endOfCandidates') > 0)) {
             Janus.log("End of candidates.");
             config['iceDone'] = true;
             Janus.log(config['trickle']);
@@ -1446,8 +1446,8 @@ class Session {
           } else {
             // JSON.stringify doesn't work on some WebRTC objects anymore
             // See https://code.google.com/p/chromium/issues/detail?id=467366
-            RTCIceCandidate candidate = RTCIceCandidate(iceCandidate.candidate,
-                iceCandidate.sdpMid, iceCandidate.sdpMlineIndex);
+            // RTCIceCandidate candidate = RTCIceCandidate(iceCandidate.candidate,
+            //     iceCandidate.sdpMid, iceCandidate.sdpMlineIndex);
             if (config['trickle'] == true) {
               // Send candidate
               sendTrickleCandidate(handleId, candidate);
@@ -1456,12 +1456,22 @@ class Session {
           }
         };
 
+        pc.onAddStream = (MediaStream stream) {
+          Janus.log('onAddStream event call');
+          Janus.log(stream.toString());
+        };
+
+        pc.onRemoveStream = (MediaStream stream) {
+          Janus.log('onRemoveStream event call');
+          Janus.log(stream.toString());
+        };
+
         pc.onAddTrack = (MediaStream stream, MediaStreamTrack track) {
           Janus.log("Handling Remote Track");
           Janus.debug(stream);
           if (stream == null) return;
           config['remoteStream'] = stream;
-          pluginHandle.onRemoteStream(config['remoteStream']);
+          pluginHandle.onRemoteStream(stream);
 
           // FIX ME no equivalent call exists in flutter_webrtc
           // if (event.track.onended) return;
@@ -1489,7 +1499,7 @@ class Session {
         };
 
         // TODO connect addTrack
-        if (addTracks != null && stream != null) {
+        if (addTracks && stream != null) {
           // var simulcast2 = (callbacks.simulcast2 == true);
           // FIX ME: janus.js  find out all the track from the stream and then add to the PC
           // There is no equivalnet call in flutter_webrtc. We will add the stream to PC
@@ -1564,7 +1574,7 @@ class Session {
 
         // Create offer/answer now
         if (jsep == null) {
-          createOffer(handleId, media, callbacks, null);
+          createOffer(handleId, media, callbacks);
         } else {
           pc.setRemoteDescription(jsep).then((void v) {
             Janus.log("Remote description accepted!");
@@ -2242,7 +2252,7 @@ class Session {
     }
   }
 
-  createOffer(int handleId, media, callbacks, customizeSdp) {
+  createOffer(int handleId, Map<String, dynamic> media, Callbacks callbacks) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
       Janus.warn("Invalid handle");
@@ -2451,13 +2461,13 @@ class Session {
     }
 
     pc.createOffer(mediaConstraints).then((RTCSessionDescription offer) {
-      Janus.debug(offer);
+      Janus.debug(offer.toString());
       // JSON.stringify doesn't work on some WebRTC objects anymore
       // See https://code.google.com/p/chromium/issues/detail?id=467366
-      RTCSessionDescription jsep = RTCSessionDescription(offer.sdp, offer.type);
+      // RTCSessionDescription jsep = RTCSessionDescription(offer.sdp, offer.type);
       // FIX ME
       // callbacks.customizeSdp(jsep);
-      offer.sdp = jsep.sdp;
+      // offer.sdp = offer.sdp;
       Janus.log("Setting local description");
       if (sendVideo && simulcast) {
         // This SDP munging only works with Chrome (Safari STP may support it too)
@@ -2472,11 +2482,7 @@ class Session {
         }
       }
       config['mySdp'] = offer.sdp;
-      pc.setLocalDescription(offer).then((void v) {
-        Janus.log("Set local description: " + offer.toString());
-      }).catchError((error, StackTrace stackTrace) {
-        callbacks.error(error);
-      });
+      pc.setLocalDescription(offer);
       config['mediaConstraints'] = mediaConstraints;
       if (config['iceDone'] == false && config['trickle'] == false) {
         // Don't do anything until we have all candidates
