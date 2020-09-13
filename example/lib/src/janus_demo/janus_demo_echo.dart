@@ -18,8 +18,8 @@ class JanusEcho extends StatefulWidget {
 }
 
 class _JanusEchoState extends State<JanusEcho> {
-  String server = "wss://janutter.tzty.net:7007";
-  // String server = "https://janutter.tzty.net:8008/janus";
+  // String server = "wss://janutter.tzty.net:7007";
+  String server = "https://janutter.tzty.net:8008/janus";
   var janus;
   var echotest;
   String opaqueId = "echotest-" + Janus.randomString(12);
@@ -146,8 +146,8 @@ class _JanusEchoState extends State<JanusEcho> {
     Janus.debug("Consent dialog should be " + (on ? "on" : "off") + " now");
   }
 
-  _iceState(String state) {
-    Janus.log("ICE state changed to " + state);
+  _iceState(RTCIceConnectionState state) {
+    Janus.log("ICE state changed to " + state.toString());
   }
 
   _mediaState(String medium, bool on) {
@@ -169,7 +169,10 @@ class _JanusEchoState extends State<JanusEcho> {
         " lost packets)");
   }
 
-  _onMessage(msg, jsep) {}
+  _onMessage(msg, jsep) {
+    Janus.log(msg);
+    Janus.log(jsep);
+  }
 
   _onLocalStream(MediaStream stream) {
     Janus.log('Local Stream available');
