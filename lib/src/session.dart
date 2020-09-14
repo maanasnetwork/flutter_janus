@@ -14,7 +14,7 @@ class Session {
   var server;
   List<String> protocols = ['janus-protocol'];
   List iceServers = [
-    {"url": "stun:stun.l.google.com:19302"}
+    {"url": "stun:stun.l.google.com:19302"},
   ];
 
   var iceTransportPolicy;

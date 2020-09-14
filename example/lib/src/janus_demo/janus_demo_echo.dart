@@ -18,8 +18,8 @@ class JanusEcho extends StatefulWidget {
 }
 
 class _JanusEchoState extends State<JanusEcho> {
-  // String server = "wss://janutter.tzty.net:7007";
-  String server = "https://janutter.tzty.net:8008/janus";
+  String server = "wss://janutter.tzty.net:7007";
+  // String server = "https://janutter.tzty.net:8008/janus";
   var janus;
   var echotest;
   String opaqueId = "echotest-" + Janus.randomString(12);
