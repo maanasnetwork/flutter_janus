@@ -4,31 +4,31 @@ import 'package:flutter_webrtc/rtc_peerconnection.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class Plugin {
-  Map<String, dynamic> webrtcStuff = {
-    'started': false,
-    'myStream': null,
-    'streamExternal': false,
-    'remoteStream': null,
-    'mySdp': null,
-    'mediaConstraints': null,
-    'dtmfSender': null,
-    'trickle': true,
-    'iceDone': false,
-    'volume': {'value': null, 'timer': null},
-    'bitrate': {
-      'value': '',
-      'bsnow': null,
-      'bsbefore': null,
-      'tsnow': null,
-      'tsbefore': null,
-      'timer': null
-    },
-    'pendingData': null,
-  };
-
-  Map<String, RTCDataChannel> dataChannels;
-  RTCPeerConnection pc;
   bool detached;
+  bool started = false;
+  MediaStream myStream;
+  bool streamExternal;
+  MediaStream remoteStream;
+  var mySdp;
+  var remoteSdp;
+  bool sdpSent;
+  Map<String, dynamic> mediaConstraints;
+  RTCPeerConnection pc;
+  Map<String, dynamic> dataChannels;
+  var dtmfSender;
+  bool trickle = true;
+  bool iceDone = false;
+  Map<String, dynamic> volume = {'value': null, 'timer': null};
+  Map<String, dynamic> bitrate = {
+    'value': '',
+    'bsnow': null,
+    'bsbefore': null,
+    'tsnow': null,
+    'tsbefore': null,
+    'timer': null
+  };
+  List<RTCIceCandidate> candidates;
+  var pendingData;
 
   final Session session;
   final Callbacks callbacks;

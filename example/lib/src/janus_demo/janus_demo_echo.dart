@@ -1,12 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutterjanus/src/callbacks.dart';
 import 'dart:core';
 import 'package:flutter_webrtc/webrtc.dart';
-import 'package:flutterjanus/src/janus.dart';
-import 'package:flutterjanus/src/session.dart';
-import 'package:flutterjanus/src/plugin.dart';
+import 'package:flutterjanus/flutterjanus.dart';
 
 class JanusEcho extends StatefulWidget {
   static String tag = 'janus_demo_echo';
@@ -102,6 +99,7 @@ class _JanusEchoState extends State<JanusEcho> {
   }
 
   _success(Plugin pluginHandle) {
+    this._plugin = pluginHandle;
     Plugin echotest = pluginHandle;
     Janus.log("Plugin attached! (" +
         echotest.getPlugin() +

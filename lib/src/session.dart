@@ -210,31 +210,29 @@ class Session {
       }
 
       Map<String, dynamic> candidateMap = json["candidate"];
+      Janus.debug(candidateMap.toString());
       RTCIceCandidate candidate = RTCIceCandidate(candidateMap['candidate'],
           candidateMap['sdpMid'], candidateMap['sdpMlineIndex']);
       Janus.debug(
           "Got a trickled candidate on session " + this.sessionId.toString());
       Janus.debug(candidate.toMap());
-      var config = pluginHandle.webrtcStuff;
-      // RTCPeerConnection pc => pc
-      RTCPeerConnection pc = pluginHandle.pc;
-      if (pc != null && config['remoteSdp'] != null) {
+      if (pluginHandle.pc != null && pluginHandle.remoteSdp != null) {
         // Add candidate right now
         Janus.debug("Adding remote candidate:" + candidate.toString());
-        if (candidate == null) {
+        if (candidate == null ||
+            candidateMap['candidate']['completed'] == true) {
           // end-of-candidates
-          pc.addCandidate(Janus.endOfCandidates);
+          pluginHandle.pc.addCandidate(Janus.endOfCandidates);
         } else {
           // New candidate
-          pc.addCandidate(candidate);
+          pluginHandle.pc.addCandidate(candidate);
         }
       } else {
         // We didn't do setRemoteDescription (trickle got here before the offer?)
         Janus.debug(
             "We didn't do setRemoteDescription (trickle got here before the offer?), caching candidate");
-        if (config['candidates'] == null) config['candidates'] = [];
-        config['candidates'].add(candidate.toMap());
-        Janus.debug(config['candidates']);
+        pluginHandle.candidates.add(candidate);
+        Janus.debug(pluginHandle.candidates.toString());
       }
     } else if (json["janus"] == "webrtcup") {
       // The PeerConnection with the server is up! Notify this
@@ -738,13 +736,11 @@ class Session {
     }
 
     String opaqueId = callbacks.opaqueId;
-    String handleToken =
-        callbacks.token != null ? callbacks.token : this.token; // FIXME
+    String handleToken = callbacks.token != null ? callbacks.token : this.token;
     String transaction = Janus.randomString(12);
     Map<String, dynamic> request = {
       "janus": "attach",
       "plugin": plugin,
-      "session_id": this.sessionId,
       "opaque_id": opaqueId,
       "transaction": transaction
     };
@@ -777,6 +773,7 @@ class Session {
         callbacks.success(pluginHandle);
       };
 
+      request["session_id"] = this.sessionId;
       this.ws.send(jsonEncode(request));
       return;
     }
@@ -834,7 +831,7 @@ class Session {
       return;
     }
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
@@ -961,7 +958,7 @@ class Session {
       return;
     }
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return;
     }
@@ -1017,12 +1014,10 @@ class Session {
   // Private method to create a data channel
   createDataChannel(int handleId, label, incoming, pendingData) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
     Map<String, RTCDataChannel> dataChannels = pluginHandle.dataChannels;
 
     var onDataChannelMessage = (event) {
@@ -1040,17 +1035,17 @@ class Session {
         // FIX ME no params pending in RTCDataChannel to store pending message in flutter_webrtc
         // Any pending messages to send?
         // if (dataChannels[label].pending &&
-        //     config['dataChannel'][label]['pending'].length > 0) {
+        //     pluginHandle.dataChannels[label]['pending'].length > 0) {
         //   Janus.log("Sending pending messages on <" +
         //       label +
         //       ">:" +
-        //       config['dataChannel'][label]['pending'].length.toString());
-        //   for (var data in config['dataChannel'][label]['pending']) {
+        //       pluginHandle.dataChannels[label]['pending'].length.toString());
+        //   for (var data in pluginHandle.dataChannels[label]['pending']) {
         //     Janus.log("Sending data on data channel <" + label + ">");
         //     Janus.debug(data);
-        //     config['dataChannel'][label].send(data);
+        //     pluginHandle.dataChannels[label].send(data);
         //   }
-        //   config['dataChannel'][label]['pending'] = [];
+        //   pluginHandle.dataChannels[label]['pending'] = [];
         // }
         // Notify the open data channel
         pluginHandle.onDataOpen(label);
@@ -1064,7 +1059,7 @@ class Session {
       Janus.log("Creating a data channel with label" + label);
       // Add options (ordered, maxRetransmits, etc.)
       RTCDataChannelInit rtcDataChannel = RTCDataChannelInit();
-      pc
+      pluginHandle.pc
           .createDataChannel(label, rtcDataChannel)
           .then((RTCDataChannel channel) {
         dataChannels[label] = channel;
@@ -1082,18 +1077,17 @@ class Session {
     // dataChannels[label].onerror = onDataChannelError;
     // dataChannels[label].pending = [];
     // if (pendingData != null)
-    //   config['dataChannel'][label]['pending'].add(pendingData);
+    //   pluginHandle.dataChannels[label]['pending'].add(pendingData);
   }
 
   // Private method to send a data channel message
   sendData(int handleId, Callbacks callbacks) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
     var data = callbacks.text || callbacks.data;
     if (!data) {
       Janus.warn("Invalid data");
@@ -1101,37 +1095,35 @@ class Session {
       return;
     }
     var label = callbacks.label ? callbacks.label : Janus.dataChanDefaultLabel;
-    if (!config['dataChannel'][label]) {
+    if (pluginHandle.dataChannels[label] == null) {
       // Create new data channel and wait for it to open
       createDataChannel(handleId, label, null, data);
       callbacks.success();
       return;
     }
-    if (config['dataChannel'][label]['readyState'] != "open") {
-      config['dataChannel'][label]['pending'].add(data);
+    if (pluginHandle.dataChannels[label]['readyState'] != "open") {
+      pluginHandle.dataChannels[label]['pending'].add(data);
       callbacks.success();
       return;
     }
     Janus.log("Sending data on data channel <" + label + ">");
     Janus.debug(data);
     // TODO attach send
-    config['dataChannel'][label].send(data);
+    pluginHandle.dataChannels[label].send(data);
     callbacks.success();
   }
 
   // Private method to send a DTMF tone
   sendDtmf(int handleId, Callbacks callbacks) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
-    if (config['dtmfSender'] == null) {
+    if (pluginHandle.dtmfSender == null) {
       // Create the DTMF sender the proper way, if possible
-      if (pc != null) {
+      if (pluginHandle.pc != null) {
         // FIX ME
         // var senders = pc.getSenders();
         // var audioSender = senders.find((sender) {
@@ -1143,14 +1135,14 @@ class Session {
           callbacks.error("Invalid DTMF configuration (no audio track)");
           return;
         }
-        config['dtmfSender'] = audioSender['dtmf'];
-        if (config['dtmfSender']) {
+        pluginHandle.dtmfSender = audioSender['dtmf'];
+        if (pluginHandle.dtmfSender != null) {
           Janus.log("Created DTMF Sender");
-          config['dtmfSender']['ontonechange'] = (tone) =>
+          pluginHandle.dtmfSender['ontonechange'] = (tone) =>
               Janus.debug("Sent DTMF tone: " + tone['tone'].toString());
         }
       }
-      if (config['dtmfSender'] == null) {
+      if (pluginHandle.dtmfSender == null) {
         Janus.warn("Invalid DTMF configuration");
         callbacks.error("Invalid DTMF configuration");
         return;
@@ -1181,7 +1173,7 @@ class Session {
         "ms, gap " +
         gap.toString() +
         "ms)");
-    config['dtmfSender'].insertDTMF(tones, duration, gap);
+    pluginHandle.dtmfSender.insertDTMF(tones, duration, gap);
     callbacks.success();
   }
 
@@ -1195,7 +1187,7 @@ class Session {
         ")");
     cleanupWebrtc(handleId, false);
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       // Plugin was already detached by Janus, calling detach again will return a handle not found error, so just exit here
       this.pluginHandles.remove(handleId.toString());
       callbacks.success();
@@ -1265,13 +1257,11 @@ class Session {
   streamsDone(int handleId, RTCSessionDescription jsep, Map media, callbacks,
       MediaStream stream) async {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
     Janus.debug("streamsDone:" + stream.toString());
     if (stream != null) {
       Janus.debug("  -- Audio tracks:" + stream.getAudioTracks().toString());
@@ -1279,10 +1269,10 @@ class Session {
     }
     // We're now capturing the new stream: check if we're updating or if it's a new thing
     bool addTracks = false;
-    if (config['myStream'] == null ||
+    if (pluginHandle.myStream == null ||
         !media['update'] ||
-        config['streamExternal']) {
-      config['myStream'] = stream;
+        pluginHandle.streamExternal) {
+      pluginHandle.myStream = stream;
       addTracks = true;
     } else {
       // We only need to update the existing stream
@@ -1291,13 +1281,13 @@ class Session {
                   (media['addAudio'] || media['replaceAudio']))) &&
           stream.getAudioTracks() != null &&
           stream.getAudioTracks().length > 0) {
-        config['myStream'].addTrack(stream.getAudioTracks()[0]);
+        pluginHandle.myStream.addTrack(stream.getAudioTracks()[0]);
         if (Janus.unifiedPlan) {
           // Use Transceivers
           Janus.log((media['replaceAudio'] ? "Replacing" : "Adding") +
               " audio track:" +
               stream.getAudioTracks()[0].toString());
-          Map audioTransceiver;
+          Map<String, dynamic> audioTransceiver;
           // FIX ME
           // List transceivers = pc.getTransceivers();
           List transceivers = [];
@@ -1321,7 +1311,7 @@ class Session {
           } else {
             // FIX ME
             // pc.addTrack(stream.getAudioTracks()[0], stream);
-            pc.addStream(stream);
+            pluginHandle.pc.addStream(stream);
           }
         } else {
           Janus.log((media['replaceAudio'] ? "Replacing" : "Adding") +
@@ -1329,7 +1319,7 @@ class Session {
               stream.getAudioTracks()[0].toString());
           // FIX ME
           // pc.addTrack(stream.getAudioTracks()[0], stream);
-          pc.addStream(stream);
+          pluginHandle.pc.addStream(stream);
         }
       }
       if (((!media['update'] && isVideoSendEnabled(media)) ||
@@ -1337,13 +1327,13 @@ class Session {
                   (media['addVideo'] || media['replaceVideo']))) &&
           stream.getVideoTracks() != null &&
           stream.getVideoTracks().length > 0) {
-        config['myStream'].addTrack(stream.getVideoTracks()[0]);
+        pluginHandle.myStream.addTrack(stream.getVideoTracks()[0]);
         if (Janus.unifiedPlan) {
           // Use Transceivers
           Janus.log((media['replaceVideo'] ? "Replacing" : "Adding") +
               " video track:" +
               stream.getVideoTracks()[0].toString());
-          Map videoTransceiver;
+          Map<String, dynamic> videoTransceiver;
           // List transceivers = pc.getTransceivers();
           List transceivers = [];
           if (transceivers != null && transceivers.length > 0) {
@@ -1366,7 +1356,7 @@ class Session {
           } else {
             // FIX ME
             // pc.addTrack(stream.getVideoTracks()[0], stream);
-            pc.addStream(stream);
+            pluginHandle.pc.addStream(stream);
           }
         } else {
           Janus.log((media['replaceVideo'] ? "Replacing" : "Adding") +
@@ -1374,12 +1364,12 @@ class Session {
               stream.getVideoTracks()[0].toString());
           // FIX ME
           // pc.addTrack(stream.getVideoTracks()[0], stream);
-          pc.addStream(stream);
+          pluginHandle.pc.addStream(stream);
         }
       }
     }
     // If we still need to create a PeerConnection, let's do that
-    if (pc == null) {
+    if (pluginHandle.pc == null) {
       Map<String, dynamic> pcConfig = {"iceServers": this.iceServers};
       if (this.iceTransportPolicy != null)
         pcConfig["iceTransportPolicy"] = this.iceTransportPolicy;
@@ -1417,40 +1407,38 @@ class Session {
       Janus.debug(pcConstraints.toString());
       Janus.debug(pcConfig.toString());
       // From webrtc
-      RTCPeerConnection pc =
-          await createPeerConnection(pcConfig, pcConstraints);
-      pluginHandle.pc = pc;
+      pluginHandle.pc = await createPeerConnection(pcConfig, pcConstraints);
       Janus.debug("Peer Connection is ready");
-      Janus.debug(pc.toString());
+      Janus.debug(pluginHandle.pc.toString());
       // FIXME
 
-      // pc.getStats().then((List<StatsReport> stats) {
+      // pluginHandle.pc.getStats().then((List<StatsReport> stats) {
       //   if (stats != null) {
       //     Janus.log(
       //         "PC Stats: " + stats[1].type + stats[1].values.toString());
-      //     config['volume'] = {};
-      //     config['bitrate']['value'] = "0 kbits/sec";
+      //     pluginHandle.volume = {};
+      //     pluginHandle.bitrate['value'] = "0 kbits/sec";
       //   }
       // }).catchError((error, StackTrace stackTrace) {
       //   Janus.error(error.toString());
       // });
 
       Janus.log("Preparing local SDP and gathering candidates (trickle=" +
-          config['trickle'].toString() +
+          pluginHandle.trickle.toString() +
           ")");
 
-      pc.onIceConnectionState = (RTCIceConnectionState state) {
-        if (pc != null) pluginHandle.iceState(state);
+      pluginHandle.pc.onIceConnectionState = (RTCIceConnectionState state) {
+        if (pluginHandle.pc != null) pluginHandle.iceState(state);
       };
 
-      pc.onIceCandidate = (RTCIceCandidate candidate) {
+      pluginHandle.pc.onIceCandidate = (RTCIceCandidate candidate) {
         if (candidate == null ||
             (Janus.webRTCAdapter['browserDetails']['browser'] == 'edge' &&
                 candidate.candidate.indexOf('endOfCandidates') > 0)) {
           Janus.log("End of candidates.");
-          config['iceDone'] = true;
-          Janus.log(config['trickle']);
-          if (config['trickle'] == true) {
+          pluginHandle.iceDone = true;
+          Janus.log(pluginHandle.trickle);
+          if (pluginHandle.trickle == true) {
             // Notify end of candidates
             sendTrickleCandidate(handleId, {"completed": true});
           } else {
@@ -1462,7 +1450,7 @@ class Session {
           // See https://code.google.com/p/chromium/issues/detail?id=467366
           // RTCIceCandidate candidate = RTCIceCandidate(iceCandidate.candidate,
           //     iceCandidate.sdpMid, iceCandidate.sdpMlineIndex);
-          if (config['trickle'] == true) {
+          if (pluginHandle.trickle == true) {
             // Send candidate
             sendTrickleCandidate(handleId, candidate.toMap());
             Janus.debug(candidate.toMap());
@@ -1470,21 +1458,22 @@ class Session {
         }
       };
 
-      pc.onAddStream = (MediaStream stream) {
+      pluginHandle.pc.onAddStream = (MediaStream stream) {
         Janus.log('onAddStream event call');
         Janus.log(stream.toString());
       };
 
-      pc.onRemoveStream = (MediaStream stream) {
+      pluginHandle.pc.onRemoveStream = (MediaStream stream) {
         Janus.log('onRemoveStream event call');
         Janus.log(stream.toString());
       };
 
-      pc.onAddTrack = (MediaStream stream, MediaStreamTrack track) {
+      pluginHandle.pc.onAddTrack =
+          (MediaStream stream, MediaStreamTrack track) {
         Janus.log("Handling Remote Track");
         Janus.debug(stream);
         if (stream == null) return;
-        config['remoteStream'] = stream;
+        pluginHandle.remoteStream = stream;
         pluginHandle.onRemoteStream(stream);
 
         // FIX ME no equivalent call exists in flutter_webrtc
@@ -1492,9 +1481,9 @@ class Session {
         // Janus.log("Adding onended callback to track:" + event.track);
         // event.track.onended = (ev) {
         //   Janus.log("Remote track muted/removed:" + ev);
-        //   if (config['remoteStream']) {
-        //     config['remoteStream'].removeTrack(ev.target);
-        //     pluginHandle.onremotestream(config['remoteStream']);
+        //   if (pluginHandle.remoteStream) {
+        //     pluginHandle.remoteStream.removeTrack(ev.target);
+        //     pluginHandle.onremotestream(pluginHandle.remoteStream);
         //   }
         // };
 
@@ -1503,8 +1492,8 @@ class Session {
         // event.track.onunmute = (ev) {
         //   Janus.log("Remote track flowing again:" + ev);
         //   try {
-        //     config['remoteStream'].addTrack(ev.target);
-        //     pluginHandle.onremotestream(config['remoteStream']);
+        //     pluginHandle.remoteStream.addTrack(ev.target);
+        //     pluginHandle.onremotestream(pluginHandle.remoteStream);
         //   } catch (e) {
         //     Janus.error(e);
         //   }
@@ -1517,9 +1506,9 @@ class Session {
         // var simulcast2 = (callbacks.simulcast2 == true);
         // FIX ME: janus.js  find out all the track from the stream and then add to the PC
         // There is no equivalnet call in flutter_webrtc. We will add the stream to PC
-        pc.addStream(stream).then((void v) {
+        pluginHandle.pc.addStream(stream).then((void v) {
           Janus.log("Stream added to PC");
-          Janus.log(pc.getLocalStreams().length);
+          Janus.log(pluginHandle.pc.getLocalStreams().length);
         }).catchError((error, StackTrace stackTrace) {
           Janus.log(stackTrace);
           Janus.error(error.toString());
@@ -1531,10 +1520,10 @@ class Session {
         //   Janus.log('Adding local track:' + track.toString());
         //   if (!simulcast2) {
         //     Janus.log('here i am');
-        //     pc.addTrack(track, stream);
+        //     pluginHandle.pc.addTrack(track, stream);
         //   } else {
         //     if (track.kind == "audio") {
-        //       pc.addTrack(track, stream);
+        //       pluginHandle.pc.addTrack(track, stream);
         //     } else {
         //       Janus.log(
         //           'Enabling rid-based simulcasting:' + track.toString());
@@ -1570,11 +1559,11 @@ class Session {
 
       // Any data channel to create?
       if (isDataEnabled(media) &&
-          config['dataChannel'][Janus.dataChanDefaultLabel] == null) {
+          pluginHandle.dataChannels[Janus.dataChanDefaultLabel] == null) {
         Janus.log("Creating data channel");
         createDataChannel(handleId, Janus.dataChanDefaultLabel, null, null);
         Janus.log('failing here');
-        pc.onDataChannel = (RTCDataChannel channel) {
+        pluginHandle.pc.onDataChannel = (var channel) {
           Janus.log(
               "Data channel created by Janus:" + channel.toString()); // FIX ME
           createDataChannel(handleId, "label", channel, null);
@@ -1582,31 +1571,32 @@ class Session {
       }
 
       // If there's a new local stream, let's notify the application
-      if (config['myStream'] != null) {
-        pluginHandle.onLocalStream(config['myStream']);
+      if (pluginHandle.myStream != null) {
+        pluginHandle.onLocalStream(pluginHandle.myStream);
       }
 
       // Create offer/answer now
       if (jsep == null) {
         createOffer(handleId, media, callbacks);
       } else {
-        pc.setRemoteDescription(jsep).then((void v) {
+        pluginHandle.pc.setRemoteDescription(jsep).then((void v) {
           Janus.log("Remote description accepted!");
-          config['remoteSdp'] = jsep.sdp;
+          pluginHandle.remoteSdp = jsep.sdp;
           // Any trickle candidate we cached?
-          if (config['candidates'] != null && config['candidates'].length > 0) {
-            for (var i = 0; i < config['candidates'].length; i++) {
-              RTCIceCandidate candidate = config['candidates'][i];
+          if (pluginHandle.candidates != null &&
+              pluginHandle.candidates.length > 0) {
+            for (var i = 0; i < pluginHandle.candidates.length; i++) {
+              RTCIceCandidate candidate = pluginHandle.candidates[i];
               Janus.debug("Adding remote candidate:" + candidate.toString());
               if (candidate == null) {
                 // end-of-candidates
-                pc.addCandidate(Janus.endOfCandidates);
+                pluginHandle.pc.addCandidate(Janus.endOfCandidates);
               } else {
                 // New candidate
-                pc.addCandidate(candidate);
+                pluginHandle.pc.addCandidate(candidate);
               }
             }
-            config['candidates'] = [];
+            pluginHandle.candidates = [];
           }
           // Create the answer now
           createAnswer(handleId, media, callbacks, null);
@@ -1637,16 +1627,14 @@ class Session {
         : {'audio': true, 'video': true};
     Map<String, dynamic> media = callbacks.media;
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
-    config['trickle'] = isTrickleEnabled(callbacks.trickle);
+    pluginHandle.trickle = isTrickleEnabled(callbacks.trickle);
     // Are we updating a session?
-    if (pc == null) {
+    if (pluginHandle.pc == null) {
       // Nope, new PeerConnection
       media['update'] = false;
       media['keepAudio'] = false;
@@ -1658,7 +1646,7 @@ class Session {
       // can go directly to preparing the new SDP offer or answer
       if (callbacks.stream != null) {
         // External stream: is this the same as the one we were using before?
-        if (callbacks.stream != config['myStream']) {
+        if (callbacks.stream != pluginHandle.myStream) {
           Janus.log("Renegotiation involves a new external stream");
         }
       } else {
@@ -1668,9 +1656,9 @@ class Session {
           media['replaceAudio'] = false;
           media['removeAudio'] = false;
           media['audioSend'] = true;
-          if (config['myStream'] != null &&
-              config['myStream'].getAudioTracks() &&
-              config['myStream'].getAudioTracks().length) {
+          if (pluginHandle.myStream != null &&
+              pluginHandle.myStream.getAudioTracks() != null &&
+              pluginHandle.myStream.getAudioTracks().length > 0) {
             Janus.error("Can't add audio stream, there already is one");
             callbacks.error("Can't add audio stream, there already is one");
             return;
@@ -1687,7 +1675,7 @@ class Session {
           media['audioSend'] = true;
         }
 
-        if (!config['myStream']) {
+        if (pluginHandle.myStream == null) {
           // No media stream: if we were asked to replace, it's actually an "add"
           if (media['replaceAudio']) {
             media['keepAudio'] = false;
@@ -1700,8 +1688,8 @@ class Session {
             media['addAudio'] = true;
           }
         } else {
-          if (config['myStream'].getAudioTracks() == null ||
-              config['myStream'].getAudioTracks().length == 0) {
+          if (pluginHandle.myStream.getAudioTracks() == null ||
+              pluginHandle.myStream.getAudioTracks().length == 0) {
             // No audio track: if we were asked to replace, it's actually an "add"
             if (media['replaceAudio']) {
               media['keepAudio'] = false;
@@ -1728,9 +1716,9 @@ class Session {
           media['replaceVideo'] = false;
           media['removeVideo'] = false;
           media['videoSend'] = true;
-          if (config['myStream'] != null &&
-              config['myStream'].getVideoTracks() != null &&
-              config['myStream'].getVideoTracks().length) {
+          if (pluginHandle.myStream != null &&
+              pluginHandle.myStream.getVideoTracks() != null &&
+              pluginHandle.myStream.getVideoTracks().length > 0) {
             Janus.error("Can't add video stream, there already is one");
             callbacks.error("Can't add video stream, there already is one");
             return;
@@ -1746,7 +1734,7 @@ class Session {
           media['removeVideo'] = false;
           media['videoSend'] = true;
         }
-        if (config['myStream'] == null) {
+        if (pluginHandle.myStream == null) {
           // No media stream: if we were asked to replace, it's actually an "add"
           if (media['replaceVideo']) {
             media['keepVideo'] = false;
@@ -1759,8 +1747,8 @@ class Session {
             media['addVideo'] = true;
           }
         } else {
-          if (config['myStream'].getVideoTracks() == null ||
-              config['myStream'].getVideoTracks().length == 0) {
+          if (pluginHandle.myStream.getVideoTracks() == null ||
+              pluginHandle.myStream.getVideoTracks().length == 0) {
             // No video track: if we were asked to replace, it's actually an "add"
             if (media['replaceVideo']) {
               media['keepVideo'] = false;
@@ -1790,56 +1778,56 @@ class Session {
       if ((isAudioSendEnabled(media) && media['keepAudio']) &&
           (isVideoSendEnabled(media) && media['keepVideo'])) {
         // pluginHandle.consentDialog(false);
-        streamsDone(handleId, jsep, media, callbacks, config['myStream']);
+        streamsDone(handleId, jsep, media, callbacks, pluginHandle.myStream);
         return;
       }
     }
 
     // If we're updating, check if we need to remove/replace one of the tracks
-    if (media['update'] && config['streamExternal'] == null) {
+    if (media['update'] && pluginHandle.streamExternal) {
       if (media['removeAudio'] || media['replaceAudio']) {
-        if (config['myStream'] != null &&
-            config['myStream'].getAudioTracks() != null &&
-            config['myStream'].getAudioTracks().length) {
-          var at = config['myStream'].getAudioTracks()[0];
+        if (pluginHandle.myStream != null &&
+            pluginHandle.myStream.getAudioTracks() != null &&
+            pluginHandle.myStream.getAudioTracks().length > 0) {
+          var at = pluginHandle.myStream.getAudioTracks()[0];
           Janus.log("Removing audio track:" + at.toString());
-          config['myStream'].removeTrack(at);
+          pluginHandle.myStream.removeTrack(at);
           try {
-            at.stop();
+            // at.stop();
           } catch (e) {}
         }
         // FIX ME
-        // if (pc.getSenders() && pc.getSenders().length) {
+        // if (pluginHandle.pc.getSenders() && pluginHandle.pc.getSenders().length) {
         //   var ra = true;
         //   if (media['replaceAudio'] && Janus.unifiedPlan) {
         //     // We can use replaceTrack
         //     ra = false;
         //   }
         //   if (ra) {
-        //     for (var asnd in pc.getSenders()) {
+        //     for (var asnd in pluginHandle.pc.getSenders()) {
         //       if (asnd != null &&
         //           asnd.track != null &&
         //           asnd.track.kind == "audio") {
         //         Janus.log("Removing audio sender:" + asnd.toString());
-        //         pc.removeTrack(asnd);
+        //         pluginHandle.pc.removeTrack(asnd);
         //       }
         //     }
         //   }
         // }
       }
       if (media['removeVideo'] || media['replaceVideo']) {
-        if (config['myStream'] != null &&
-            config['myStream'].getVideoTracks() != null &&
-            config['myStream'].getVideoTracks().length) {
-          var vt = config['myStream'].getVideoTracks()[0];
+        if (pluginHandle.myStream != null &&
+            pluginHandle.myStream.getVideoTracks() != null &&
+            pluginHandle.myStream.getVideoTracks().length > 0) {
+          var vt = pluginHandle.myStream.getVideoTracks()[0];
           Janus.log("Removing video track:", vt);
-          config['myStream'].removeTrack(vt);
+          pluginHandle.myStream.removeTrack(vt);
           try {
-            vt.stop();
+            // vt.stop();
           } catch (e) {}
         }
         // FIX ME
-        // if (pc.getSenders() && pc.getSenders().length) {
+        // if (pluginHandle.pc.getSenders() && pluginHandle.pc.getSenders().length) {
         //   var rv = true;
         //   if (media['replaceVideo'] && Janus.unifiedPlan) {
         //     // We can use replaceTrack
@@ -1851,7 +1839,7 @@ class Session {
         //           vsnd.track != null &&
         //           vsnd.track.kind == "video") {
         //         Janus.log("Removing video sender:", vsnd);
-        //         pc.removeTrack(vsnd);
+        //         pluginHandle.pc.removeTrack(vsnd);
         //       }
         //     }
         //   }
@@ -1866,25 +1854,25 @@ class Session {
       Janus.debug(stream);
       // If this is an update, let's check if we need to release the previous stream
       if (media['update']) {
-        if (config['myStream'] != null &&
-            config['myStream'] != callbacks.stream &&
-            !config['streamExternal']) {
+        if (pluginHandle.myStream != null &&
+            pluginHandle.myStream != callbacks.stream &&
+            pluginHandle.streamExternal) {
           // We're replacing a stream we captured ourselves with an external one
           try {
             // Try a MediaStreamTrack.stop() for each track
-            List tracks = config['myStream'].getTracks();
-            for (MediaStreamTrack mst in tracks) {
-              Janus.log(mst);
-              if (mst != null) mst.dispose();
-            }
+            // List tracks = pluginHandle.myStream.getTracks();
+            // for (MediaStreamTrack mst in tracks) {
+            //   Janus.log(mst);
+            //   if (mst != null) mst.dispose();
+            // }
           } catch (e) {
             // Do nothing if this fails
           }
-          config['myStream'] = null;
+          pluginHandle.myStream = null;
         }
       }
       // Skip the getUserMedia part
-      config['streamExternal'] = true;
+      pluginHandle.streamExternal = true;
       // pluginHandle.consentDialog(false);
       streamsDone(handleId, jsep, media, callbacks, stream);
       return;
@@ -2219,42 +2207,37 @@ class Session {
   prepareWebrtcPeer(int handleId, callbacks) {
     var jsep = callbacks.jsep;
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
     if (jsep != null) {
-      if (pc != null) {
+      if (pluginHandle.pc != null) {
         Janus.warn(
             "Wait, no PeerConnection?? if this is an answer, use createAnswer and not handleRemoteJsep");
         callbacks.error(
             "No PeerConnection: if this is an answer, use createAnswer and not handleRemoteJsep");
         return;
       }
-      pc.setRemoteDescription(jsep).then((void v) {
+      pluginHandle.pc.setRemoteDescription(jsep).then((void v) {
         Janus.log("Remote description accepted!");
-        config['remoteSdp'] = jsep['sdp'];
+        pluginHandle.remoteSdp = jsep['sdp'];
         // Any trickle candidate we cached?
-        if (config['candidates'] != null && config['candidates'].length > 0) {
-          for (var i = 0; i < config['candidates'].length; i++) {
-            Map<String, dynamic> candidateMap = config['candidates'][i];
-            RTCIceCandidate candidate = RTCIceCandidate(
-                candidateMap['candidate'],
-                candidateMap['sdpMid'],
-                candidateMap['sdpMlineIndex']);
+        if (pluginHandle.candidates != null &&
+            pluginHandle.candidates.length > 0) {
+          for (var i = 0; i < pluginHandle.candidates.length; i++) {
+            RTCIceCandidate candidate = pluginHandle.candidates[i];
             Janus.debug("Adding remote candidate:", candidate);
             if (candidate == null) {
               // end-of-candidates
-              pc.addCandidate(Janus.endOfCandidates);
+              pluginHandle.pc.addCandidate(Janus.endOfCandidates);
             } else {
               // New candidate
-              pc.addCandidate(candidate);
+              pluginHandle.pc.addCandidate(candidate);
             }
           }
-          config['candidates'] = [];
+          pluginHandle.candidates = [];
         }
         // Done
         callbacks.success();
@@ -2268,20 +2251,18 @@ class Session {
 
   createOffer(int handleId, Map<String, dynamic> media, Callbacks callbacks) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
     bool simulcast = (callbacks.simulcast == true);
     if (!simulcast) {
       Janus.log(
-          "Creating offer (iceDone=" + config['iceDone'].toString() + ")");
+          "Creating offer (iceDone=" + pluginHandle.iceDone.toString() + ")");
     } else {
       Janus.log("Creating offer (iceDone=" +
-          config['iceDone'].toString() +
+          pluginHandle.iceDone.toString() +
           ", simulcast=" +
           simulcast.toString() +
           ")");
@@ -2474,7 +2455,9 @@ class Session {
       // }
     }
 
-    pc.createOffer(mediaConstraints).then((RTCSessionDescription offer) {
+    pluginHandle.pc
+        .createOffer(mediaConstraints)
+        .then((RTCSessionDescription offer) {
       Janus.debug(offer.toString());
       // JSON.stringify doesn't work on some WebRTC objects anymore
       // See https://code.google.com/p/chromium/issues/detail?id=467366
@@ -2495,10 +2478,10 @@ class Session {
               "simulcast=true, but this is not Chrome nor Firefox, ignoring");
         }
       }
-      config['mySdp'] = offer.sdp;
-      pc.setLocalDescription(offer);
-      config['mediaConstraints'] = mediaConstraints;
-      if (config['iceDone'] == false && config['trickle'] == false) {
+      pluginHandle.mySdp = offer.sdp;
+      pluginHandle.pc.setLocalDescription(offer);
+      pluginHandle.mediaConstraints = mediaConstraints;
+      if (pluginHandle.iceDone == false && pluginHandle.trickle == false) {
         // Don't do anything until we have all candidates
         Janus.log("Waiting for all candidates...");
         return;
@@ -2513,19 +2496,18 @@ class Session {
 
   createAnswer(int handleId, media, callbacks, customizedSdp) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       callbacks.error("Invalid handle");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
     var simulcast = (callbacks['simulcast'] == true);
     if (!simulcast) {
-      Janus.log("Creating answer (iceDone=" + config['iceDone'] + ")");
+      Janus.log(
+          "Creating answer (iceDone=" + pluginHandle.iceDone.toString() + ")");
     } else {
       Janus.log("Creating answer (iceDone=" +
-          config['iceDone'] +
+          pluginHandle.iceDone.toString() +
           ", simulcast=" +
           simulcast.toString() +
           ")");
@@ -2537,7 +2519,7 @@ class Session {
       var audioTransceiver;
       var videoTransceiver;
       // FIX ME no equivalent call
-      // var transceivers = pc.getTransceivers();
+      // var transceivers = pluginHandle.pc.getTransceivers();
       // if (transceivers != null && transceivers.length > 0) {
       //   for (var t in transceivers) {
       //     if ((t['sender'] &&
@@ -2756,7 +2738,9 @@ class Session {
       //   ]
       // });
     }
-    pc.createAnswer(mediaConstraints).then((RTCSessionDescription answer) {
+    pluginHandle.pc
+        .createAnswer(mediaConstraints)
+        .then((RTCSessionDescription answer) {
       Janus.debug(answer.toString());
       // JSON.stringify doesn't work on some WebRTC objects anymore
       // See https://code.google.com/p/chromium/issues/detail?id=467366
@@ -2779,10 +2763,10 @@ class Session {
               "simulcast=true, but this is not Chrome nor Firefox, ignoring");
         }
       }
-      config['mySdp'] = answer.sdp;
-      pc.setLocalDescription(answer).catchError(callbacks.error);
-      config['mediaConstraints'] = mediaConstraints;
-      if (config['iceDone'] == null && config['trickle'] == null) {
+      pluginHandle.mySdp = answer.sdp;
+      pluginHandle.pc.setLocalDescription(answer).catchError(callbacks.error);
+      pluginHandle.mediaConstraints = mediaConstraints;
+      if (pluginHandle.iceDone == null && pluginHandle.trickle == null) {
         // Don't do anything until we have all candidates
         Janus.log("Waiting for all candidates...");
         return;
@@ -2795,22 +2779,20 @@ class Session {
 
   sendSDP(int handleId, callbacks) {
     var pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle, not sending anything");
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
     Janus.log("Sending offer/answer SDP...");
-    if (config['mySdp'] == null) {
+    if (pluginHandle.mySdp == null) {
       Janus.warn("Local SDP instance is invalid, not sending anything...");
       return;
     }
-    pc
+    pluginHandle.pc
         .getLocalDescription()
         .then((RTCSessionDescription rtcSessionDescription) {
-      config['mySdp'] = {
+      pluginHandle.mySdp = {
         "type": rtcSessionDescription.type,
         "sdp": rtcSessionDescription.sdp,
       };
@@ -2818,52 +2800,51 @@ class Session {
       Janus.log(error);
     });
 
-    if (config['trickle'] == false) config['mySdp']["trickle"] = false;
+    if (pluginHandle.trickle == false) pluginHandle.mySdp["trickle"] = false;
     Janus.debug(callbacks);
-    config['sdpSent'] = true;
-    callbacks.success(config['mySdp']);
+    pluginHandle.sdpSent = true;
+    callbacks.success(pluginHandle.mySdp);
   }
 
   getVolume(int handleId, remote) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return 0;
     }
     var stream = remote ? "remote" : "local";
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
-    if (!config['volume'][stream]) config['volume'][stream] = {'value': 0};
+    if (!pluginHandle.volume[stream])
+      pluginHandle.volume[stream] = {'value': 0};
     // Start getting the volume, if audioLevel in getStats is supported (apparently
     // they're only available in Chrome/Safari right now: https://webrtc-stats.callstats.io/)
-    if (pc.getStats() != null &&
+    if (pluginHandle.pc.getStats() != null &&
         (Janus.webRTCAdapter['browserDetails']['browser'] == "chrome" ||
             Janus.webRTCAdapter['browserDetails']['browser'] == "safari")) {
-      if (remote && config['remoteStream'] == null) {
+      if (remote && pluginHandle.remoteStream == null) {
         Janus.warn("Remote stream unavailable");
         return 0;
-      } else if (remote == null && config['myStream'] == null) {
+      } else if (remote == null && pluginHandle.myStream == null) {
         Janus.warn("Local stream unavailable");
         return 0;
       }
-      if (config['volume'][stream]['timer'] == null) {
+      if (pluginHandle.volume[stream]['timer'] == null) {
         Janus.log("Starting " + stream + " volume monitor");
-        config['volume'][stream]['timer'] =
+        pluginHandle.volume[stream]['timer'] =
             Timer(Duration(microseconds: 200), () {
-          pc.getStats().then((List<StatsReport> stats) {
+          pluginHandle.pc.getStats().then((List<StatsReport> stats) {
             stats.forEach((res) {
               if (res == null || res.type != "audio") return;
               if ((remote != null && !res.values['remoteSource']) ||
                   (remote != null && res.type != "media-source")) return;
-              config['volume'][stream]['value'] =
+              pluginHandle.volume[stream]['value'] =
                   (res.values['audioLevel'] ? res.values['audioLevel'] : 0);
             });
           });
         });
         return 0; // We don't have a volume to return yet
       }
-      return config['volume'][stream]['value'];
+      return pluginHandle.volume[stream]['value'];
     } else {
       // audioInputLevel and audioOutputLevel seem only available in Chrome? audioLevel
       // seems to be available on Chrome and Firefox, but they don't seem to work
@@ -2874,94 +2855,88 @@ class Session {
 
   isMuted(int handleId, video) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return true;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
-    if (pc == null) {
+    if (pluginHandle.pc == null) {
       Janus.warn("Invalid PeerConnection");
       return true;
     }
-    if (config['myStream']) {
+    if (pluginHandle.myStream == null) {
       Janus.warn("Invalid local MediaStream");
       return true;
     }
     if (video) {
       // Check video track
-      if (config['myStream'].getVideoTracks() == null ||
-          config['myStream'].getVideoTracks().length == 0) {
+      if (pluginHandle.myStream.getVideoTracks() == null ||
+          pluginHandle.myStream.getVideoTracks().length == 0) {
         Janus.warn("No video track");
         return true;
       }
-      return !config['myStream'].getVideoTracks()[0].enabled;
+      return !pluginHandle.myStream.getVideoTracks()[0].enabled;
     } else {
       // Check audio track
-      if (config['myStream'].getAudioTracks() == null ||
-          config['myStream'].getAudioTracks().length == 0) {
+      if (pluginHandle.myStream.getAudioTracks() == null ||
+          pluginHandle.myStream.getAudioTracks().length == 0) {
         Janus.warn("No audio track");
         return true;
       }
-      return !config['myStream'].getAudioTracks()[0].enabled;
+      return !pluginHandle.myStream.getAudioTracks()[0].enabled;
     }
   }
 
   mute(int handleId, video, mute) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return false;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
-    if (pc == null) {
+    if (pluginHandle.pc == null) {
       Janus.warn("Invalid PeerConnection");
       return false;
     }
-    if (config['myStream'] != null) {
+    if (pluginHandle.myStream != null) {
       Janus.warn("Invalid local MediaStream");
       return false;
     }
     if (video) {
       // Mute/unmute video track
-      if (config['myStream'].getVideoTracks() == null ||
-          config['myStream'].getVideoTracks().length == 0) {
+      if (pluginHandle.myStream.getVideoTracks() == null ||
+          pluginHandle.myStream.getVideoTracks().length == 0) {
         Janus.warn("No video track");
         return false;
       }
-      config['myStream'].getVideoTracks()[0].enabled = !mute;
+      pluginHandle.myStream.getVideoTracks()[0].enabled = !mute;
       return true;
     } else {
       // Mute/unmute audio track
-      if (config['myStream'].getAudioTracks() == null ||
-          config['myStream'].getAudioTracks().length == 0) {
+      if (pluginHandle.myStream.getAudioTracks() == null ||
+          pluginHandle.myStream.getAudioTracks().length == 0) {
         Janus.warn("No audio track");
         return false;
       }
-      config['myStream'].getAudioTracks()[0].enabled = !mute;
+      pluginHandle.myStream.getAudioTracks()[0].enabled = !mute;
       return true;
     }
   }
 
   getBitrate(int handleId) {
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null || pluginHandle.webrtcStuff == null) {
+    if (pluginHandle == null) {
       Janus.warn("Invalid handle");
       return "Invalid handle";
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
-    if (pc == null) return "Invalid PeerConnection";
+    if (pluginHandle.pc == null) return "Invalid PeerConnection";
     // Start getting the bitrate, if getStats is supported
-    if (pc.getStats() != null) {
-      if (config['bitrate']['timer'] != null) {
+    if (pluginHandle.pc.getStats() != null) {
+      if (pluginHandle.bitrate['timer'] != null) {
         Janus.log("Starting bitrate timer (via getStats)");
-        config['bitrate']['timer'] = Timer(Duration(microseconds: 1000), () {
-          pc.getStats().then((List<StatsReport> stats) {
+        pluginHandle.bitrate['timer'] = Timer(Duration(microseconds: 1000), () {
+          pluginHandle.pc.getStats().then((List<StatsReport> stats) {
             stats.forEach((res) {
               if (res == null) return;
               bool inStats = false;
@@ -2978,33 +2953,37 @@ class Session {
               }
               // Parse stats now
               if (inStats) {
-                config['bitrate']['bsnow'] = res.values['bytesReceived'];
-                config['bitrate']['tsnow'] = res.timestamp;
-                if (config['bitrate']['bsbefore'] == null ||
-                    config['bitrate']['tsbefore'] == null) {
+                pluginHandle.bitrate['bsnow'] = res.values['bytesReceived'];
+                pluginHandle.bitrate['tsnow'] = res.timestamp;
+                if (pluginHandle.bitrate['bsbefore'] == null ||
+                    pluginHandle.bitrate['tsbefore'] == null) {
                   // Skip this round
-                  config['bitrate']['bsbefore'] = config['bitrate']['bsnow'];
-                  config['bitrate']['tsbefore'] = config['bitrate']['tsnow'];
+                  pluginHandle.bitrate['bsbefore'] =
+                      pluginHandle.bitrate['bsnow'];
+                  pluginHandle.bitrate['tsbefore'] =
+                      pluginHandle.bitrate['tsnow'];
                 } else {
                   // Calculate bitrate
-                  var timePassed = config['bitrate']['tsnow'] -
-                      config['bitrate']['tsbefore'];
+                  var timePassed = pluginHandle.bitrate['tsnow'] -
+                      pluginHandle.bitrate['tsbefore'];
                   if (Janus.webRTCAdapter['browserDetails']['browser'] ==
                       "safari")
                     timePassed = timePassed /
                         1000; // Apparently the timestamp is in microseconds, in Safari
-                  var bitRate = ((config['bitrate']['bsnow'] -
-                              config['bitrate']['bsbefore']) *
+                  var bitRate = ((pluginHandle.bitrate['bsnow'] -
+                              pluginHandle.bitrate['bsbefore']) *
                           8 /
                           timePassed)
                       .round();
                   if (Janus.webRTCAdapter['browserDetails']['browser'] ==
                       "safari") bitRate = int.parse(bitRate / 1000);
-                  config['bitrate']['value'] = bitRate + ' kbits/sec';
+                  pluginHandle.bitrate['value'] = bitRate + ' kbits/sec';
                   Janus.log(
-                      "Estimated bitrate is " + config['bitrate']['value']);
-                  config['bitrate']['bsbefore'] = config['bitrate']['bsnow'];
-                  config['bitrate']['tsbefore'] = config['bitrate']['tsnow'];
+                      "Estimated bitrate is " + pluginHandle.bitrate['value']);
+                  pluginHandle.bitrate['bsbefore'] =
+                      pluginHandle.bitrate['bsnow'];
+                  pluginHandle.bitrate['tsbefore'] =
+                      pluginHandle.bitrate['tsnow'];
                 }
               }
             });
@@ -3012,7 +2991,7 @@ class Session {
         });
         return "0 kbits/sec"; // We don't have a bitrate value yet
       }
-      return config['bitrate']['value'];
+      return pluginHandle.bitrate['value'];
     } else {
       Janus.warn("Getting the video bitrate unsupported by browser");
       return "Feature unsupported by browser";
@@ -3030,89 +3009,84 @@ class Session {
       // Nothing to clean
       return;
     }
-    Map<String, dynamic> config = pluginHandle.webrtcStuff;
-    RTCPeerConnection pc = pluginHandle.pc;
 
-    if (config != null) {
-      if (hangupRequest == true) {
-        // Send a hangup request (we don't really care about the response)
-        var request = {
-          "janus": "hangup",
-          "transaction": Janus.randomString(12)
-        };
-        if (pluginHandle.handleToken != null)
-          request["token"] = pluginHandle.handleToken;
-        if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
-        Janus.debug(
-            "Sending hangup request (handle=" + handleId.toString() + "):");
-        Janus.debug(request);
-        if (this.websockets) {
-          request["session_id"] = this.sessionId;
-          request["handle_id"] = handleId;
-          this.ws.send(jsonEncode(request));
-        } else {
-          GatewayCallbacks httpCallbacks = GatewayCallbacks();
-          Janus.httpAPICall(
-              this.server +
-                  "/" +
-                  this.sessionId.toString() +
-                  "/" +
-                  handleId.toString(),
-              {
-                'verb': 'POST',
-                'withCredentials': this.withCredentials,
-                'body': request,
-              },
-              httpCallbacks);
-        }
+    if (hangupRequest == true) {
+      // Send a hangup request (we don't really care about the response)
+      var request = {"janus": "hangup", "transaction": Janus.randomString(12)};
+      if (pluginHandle.handleToken != null)
+        request["token"] = pluginHandle.handleToken;
+      if (this.apiSecret != null) request["apisecret"] = this.apiSecret;
+      Janus.debug(
+          "Sending hangup request (handle=" + handleId.toString() + "):");
+      Janus.debug(request);
+      if (this.websockets) {
+        request["session_id"] = this.sessionId;
+        request["handle_id"] = handleId;
+        this.ws.send(jsonEncode(request));
+      } else {
+        GatewayCallbacks httpCallbacks = GatewayCallbacks();
+        Janus.httpAPICall(
+            this.server +
+                "/" +
+                this.sessionId.toString() +
+                "/" +
+                handleId.toString(),
+            {
+              'verb': 'POST',
+              'withCredentials': this.withCredentials,
+              'body': request,
+            },
+            httpCallbacks);
       }
-      // Cleanup stack
-      config['remoteStream'] = null;
-      if (config['volume']) {
-        if (config['volume']['local'] != null &&
-            config['volume']['local']['timer'] != null)
-          config['volume']['local']['timer'].cancel();
-        if (config['volume']['remote'] &&
-            config['volume']['remote']['timer'] != null)
-          config['volume']['remote']['timer'].cancel();
-      }
-      config['volume'] = {};
-      if (config['bitrate']['timer']) config['bitrate']['timer'].cancel();
-      config['bitrate']['timer'] = null;
-      config['bitrate']['bsnow'] = null;
-      config['bitrate']['bsbefore'] = null;
-      config['bitrate']['tsnow'] = null;
-      config['bitrate']['tsbefore'] = null;
-      config['bitrate']['value'] = null;
-      try {
-        // Try a MediaStreamTrack.stop() for each track
-        if (config['streamExternal'] == null && config['myStream'] != null) {
-          Janus.log("Stopping local stream tracks");
-          var tracks = config['myStream'].getTracks();
-          for (var mst in tracks) {
-            Janus.log(mst);
-            if (mst) mst.stop();
-          }
-        }
-      } catch (e) {
-        // Do nothing if this fails
-      }
-      config['streamExternal'] = false;
-      config['myStream'] = null;
-      // Close PeerConnection
-      try {
-        pc.dispose();
-      } catch (e) {
-        // Do nothing
-      }
-      pc = null;
-      config['candidates'] = null;
-      config['mySdp'] = null;
-      config['remoteSdp'] = null;
-      config['iceDone'] = false;
-      config['dataChannel'] = {};
-      config['dtmfSender'] = null;
     }
+    // Cleanup stack
+    pluginHandle.remoteStream = null;
+    if (pluginHandle.volume != null) {
+      if (pluginHandle.volume['local'] != null &&
+          pluginHandle.volume['local']['timer'] != null)
+        pluginHandle.volume['local']['timer'].cancel();
+      if (pluginHandle.volume['remote'] &&
+          pluginHandle.volume['remote']['timer'] != null)
+        pluginHandle.volume['remote']['timer'].cancel();
+    }
+    pluginHandle.volume = {};
+    if (pluginHandle.bitrate['timer'] != null)
+      pluginHandle.bitrate['timer'].cancel();
+    pluginHandle.bitrate['timer'] = null;
+    pluginHandle.bitrate['bsnow'] = null;
+    pluginHandle.bitrate['bsbefore'] = null;
+    pluginHandle.bitrate['tsnow'] = null;
+    pluginHandle.bitrate['tsbefore'] = null;
+    pluginHandle.bitrate['value'] = null;
+    try {
+      // Try a MediaStreamTrack.stop() for each track
+      if (pluginHandle.streamExternal && pluginHandle.myStream != null) {
+        Janus.log("Stopping local stream tracks");
+        // var tracks = pluginHandle.myStream.getTracks();
+        // for (var mst in tracks) {
+        //   Janus.log(mst);
+        //   if (mst) mst.stop();
+        // }
+      }
+    } catch (e) {
+      // Do nothing if this fails
+    }
+    pluginHandle.streamExternal = false;
+    pluginHandle.myStream = null;
+    // Close PeerConnection
+    try {
+      pluginHandle.pc.dispose();
+    } catch (e) {
+      // Do nothing
+    }
+    pluginHandle.pc = null;
+    pluginHandle.candidates = [];
+    pluginHandle.mySdp = null;
+    pluginHandle.remoteSdp = null;
+    pluginHandle.iceDone = false;
+    pluginHandle.dataChannels = {};
+    pluginHandle.dtmfSender = null;
+
     pluginHandle.onCleanup();
   }
 
@@ -3213,8 +3187,8 @@ class Session {
     return (trickle == false) ? false : true;
   }
 
-  getMaxBitrates(Map<String, String> simulcastMaxBitrates) {
-    Map maxBitrates = {
+  getMaxBitrates(Map<String, dynamic> simulcastMaxBitrates) {
+    Map<String, dynamic> maxBitrates = {
       "high": 900000,
       "medium": 300000,
       "low": 100000,
