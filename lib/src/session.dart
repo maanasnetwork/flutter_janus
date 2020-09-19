@@ -1459,8 +1459,11 @@ class Session {
       };
 
       pluginHandle.pc.onAddStream = (MediaStream stream) {
-        Janus.log('onAddStream event call');
-        Janus.log(stream.toString());
+        Janus.log("Handling Remote Stream");
+        Janus.debug(stream);
+        if (stream == null) return;
+        pluginHandle.remoteStream = stream;
+        pluginHandle.onRemoteStream(stream);
       };
 
       pluginHandle.pc.onRemoveStream = (MediaStream stream) {

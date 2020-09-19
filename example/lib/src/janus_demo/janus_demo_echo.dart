@@ -177,6 +177,18 @@ class _JanusEchoState extends State<JanusEcho> {
     }
     var result = msg["result"];
     Janus.log(result);
+    if (result != null) {
+      if (result == "done") {
+        Janus.log("Echo Test is over");
+      }
+
+      var status = result["status"];
+      if (status == "slow_link") {
+        Janus.log(
+            "Janus apparently missed many packets we sent, maybe we should reduce the bitrate",
+            "Packet loss?");
+      }
+    }
   }
 
   _onLocalStream(MediaStream stream) {
