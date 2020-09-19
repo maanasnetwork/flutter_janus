@@ -1508,7 +1508,6 @@ class Session {
         // There is no equivalnet call in flutter_webrtc. We will add the stream to PC
         pluginHandle.pc.addStream(stream).then((void v) {
           Janus.log("Stream added to PC");
-          Janus.log(pluginHandle.pc.getLocalStreams().length);
         }).catchError((error, StackTrace stackTrace) {
           Janus.log(stackTrace);
           Janus.error(error.toString());
@@ -2205,7 +2204,8 @@ class Session {
   }
 
   prepareWebrtcPeer(int handleId, callbacks) {
-    var jsep = callbacks.jsep;
+    RTCSessionDescription jsep =
+        RTCSessionDescription(callbacks.jsep["sdp"], callbacks.jsep["type"]);
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
     if (pluginHandle == null) {
       Janus.warn("Invalid handle");
@@ -2213,16 +2213,17 @@ class Session {
       return;
     }
     if (jsep != null) {
-      if (pluginHandle.pc != null) {
+      if (pluginHandle.pc == null) {
         Janus.warn(
             "Wait, no PeerConnection?? if this is an answer, use createAnswer and not handleRemoteJsep");
         callbacks.error(
             "No PeerConnection: if this is an answer, use createAnswer and not handleRemoteJsep");
         return;
       }
+
       pluginHandle.pc.setRemoteDescription(jsep).then((void v) {
         Janus.log("Remote description accepted!");
-        pluginHandle.remoteSdp = jsep['sdp'];
+        pluginHandle.remoteSdp = callbacks.jsep["sdp"];
         // Any trickle candidate we cached?
         if (pluginHandle.candidates != null &&
             pluginHandle.candidates.length > 0) {
@@ -2487,7 +2488,6 @@ class Session {
         return;
       }
       Janus.log("Offer ready");
-      Janus.debug(callbacks.toString());
       callbacks.success(offer);
     }).catchError((error, StackTrace stackTrace) {
       callbacks.error(error);

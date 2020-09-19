@@ -17,8 +17,7 @@ class JanusEcho extends StatefulWidget {
 class _JanusEchoState extends State<JanusEcho> {
   String server = "wss://janutter.tzty.net:7007";
   // String server = "https://janutter.tzty.net:8008/janus";
-  var janus;
-  var echotest;
+
   String opaqueId = "echotest-" + Janus.randomString(12);
   var bitrateTimer;
   var spinner;
@@ -32,8 +31,8 @@ class _JanusEchoState extends State<JanusEcho> {
   String vCodec;
   bool simulcastStarted = false;
 
-  Session _session;
-  Plugin _plugin;
+  Session session;
+  Plugin echotest;
   Map<String, dynamic> _handle;
 
   List<dynamic> _peers;
@@ -59,7 +58,7 @@ class _JanusEchoState extends State<JanusEcho> {
   @override
   void deactivate() {
     super.deactivate();
-    if (_session != null) _session.destroy();
+    if (session != null) session.destroy();
     _localRenderer.dispose();
     _remoteRenderer.dispose();
   }
@@ -77,7 +76,7 @@ class _JanusEchoState extends State<JanusEcho> {
   }
 
   void _attach(int sessionId) {
-    this._session = Janus.sessions[sessionId.toString()];
+    session = Janus.sessions[sessionId.toString()];
 
     Callbacks callbacks = Callbacks();
     callbacks.plugin = "janus.plugin.echotest";
@@ -95,14 +94,13 @@ class _JanusEchoState extends State<JanusEcho> {
     callbacks.onDataOpen = _onDataOpen;
     callbacks.onData = _onData;
     callbacks.onCleanup = _onCleanup;
-    this._session.attach(callbacks: callbacks);
+    this.session.attach(callbacks: callbacks);
   }
 
   _success(Plugin pluginHandle) {
-    this._plugin = pluginHandle;
-    Plugin echotest = pluginHandle;
+    echotest = pluginHandle;
     Janus.log("Plugin attached! (" +
-        echotest.getPlugin() +
+        this.echotest.getPlugin() +
         ", id=" +
         echotest.getId().toString() +
         ")");
@@ -168,26 +166,35 @@ class _JanusEchoState extends State<JanusEcho> {
   }
 
   _onMessage(msg, jsep) {
-    Janus.log(msg);
-    Janus.log(jsep);
+    Janus.debug(" ::: Got a message :::");
+    Janus.debug(msg);
+    if (jsep != null) {
+      Janus.debug("Handling SDP as well...");
+      Janus.debug(jsep);
+      Callbacks callbacks = Callbacks();
+      callbacks.jsep = jsep;
+      echotest.handleRemoteJsep(callbacks);
+    }
+    var result = msg["result"];
+    Janus.log(result);
   }
 
   _onLocalStream(MediaStream stream) {
-    Janus.log('Local Stream available');
+    Janus.debug(" ::: Got a local stream :::");
     _localRenderer.srcObject = stream;
   }
 
   _onRemoteStream(MediaStream stream) {
-    Janus.log('Remote Stream available');
+    Janus.debug(" ::: Got a remote stream :::");
     _remoteRenderer.srcObject = stream;
   }
 
   _onDataOpen(data) {
-    Janus.log('Data Channel opened');
+    Janus.log("The DataChannel is available!");
   }
 
   _onData(data) {
-    Janus.log('Data received');
+    Janus.debug("We got data from the DataChannel! " + data);
   }
 
   _onCleanup() {
