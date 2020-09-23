@@ -114,8 +114,8 @@ class Session {
 
   getSessionId() => this.sessionId;
 
-  destroy({GatewayCallbacks callbacks}) =>
-      this.destroySession(callbacks: callbacks);
+  destroy({GatewayCallbacks gatewayCallbacks}) =>
+      this.destroySession(gatewayCallbacks: gatewayCallbacks);
 
   attach({Callbacks callbacks}) => this.createHandle(callbacks: callbacks);
 
@@ -580,7 +580,7 @@ class Session {
   }
 
   destroySession(
-      {GatewayCallbacks callbacks,
+      {GatewayCallbacks gatewayCallbacks,
       bool unload = true,
       bool notifyDestroyed = true,
       bool cleanupHandles = true}) {
@@ -592,20 +592,23 @@ class Session {
         ")");
     if (this.sessionId == null) {
       Janus.warn("No session to destroy");
-      if (callbacks.success is Function) callbacks.success();
-      if (notifyDestroyed) if (callbacks.destroyed is Function)
-        callbacks.destroyed();
+      if (gatewayCallbacks.success is Function) gatewayCallbacks.success();
+      if (notifyDestroyed) if (gatewayCallbacks.destroyed is Function)
+        gatewayCallbacks.destroyed();
       return;
     }
     if (cleanupHandles) {
-      this.pluginHandles.forEach((handleId, Plugin handle) {
-        handle.detach({'noRequest': true}); // FIXME
+      Callbacks callbacks = Callbacks();
+      this.pluginHandles.forEach((handleId, handle) {
+        callbacks.noRequest = true;
+        handle.detach(callbacks);
+        Janus.log("Reaching here");
       });
     }
     if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       this.sessionId = null;
-      callbacks.success();
+      gatewayCallbacks.success();
       return;
     }
     // No need to destroy all handles first, Janus will do that itself
@@ -624,7 +627,6 @@ class Session {
         this.ws = null;
       } else {
         // navigator.sendBeacon(this.server + "/" + this.sessionId, jsonEncode(request));
-        GatewayCallbacks httpCallbacks = GatewayCallbacks();
         Janus.httpAPICall(
             this.server + "/" + this.sessionId.toString(),
             {
@@ -632,14 +634,14 @@ class Session {
               'withCredentials': this.withCredentials,
               'body': request
             },
-            httpCallbacks);
+            gatewayCallbacks);
       }
       Janus.log("Destroyed session:");
       this.sessionId = null;
       this.connected = false;
-      if (callbacks.success is Function) callbacks.success();
-      if (notifyDestroyed) if (callbacks.destroyed is Function)
-        callbacks.destroyed();
+      if (gatewayCallbacks.success is Function) gatewayCallbacks.success();
+      if (notifyDestroyed) if (gatewayCallbacks.destroyed is Function)
+        gatewayCallbacks.destroyed();
       return;
     }
     if (this.websockets) {
@@ -668,14 +670,15 @@ class Session {
         if (data['session_id'] == request['session_id'] &&
             data['transaction'] == request['transaction']) {
           unbindWebSocket();
-          callbacks.success();
+          gatewayCallbacks.success();
           if (notifyDestroyed) gatewayCallbacks.destroyed();
         }
       };
 
       onUnbindError = (event) {
         unbindWebSocket();
-        callbacks.error("Failed to destroy the server: Is the server down?");
+        gatewayCallbacks
+            .error("Failed to destroy the server: Is the server down?");
         if (notifyDestroyed) gatewayCallbacks.destroyed();
       };
 
@@ -698,18 +701,18 @@ class Session {
             " " +
             json["error"].reason); // FIXME
       }
-      callbacks.success();
-      if (notifyDestroyed) if (callbacks.destroyed is Function)
-        callbacks.destroyed();
+      gatewayCallbacks.success();
+      if (notifyDestroyed) if (gatewayCallbacks.destroyed is Function)
+        gatewayCallbacks.destroyed();
     };
     httpCallbacks.error = (textStatus, errorThrown) {
       Janus.error(textStatus + ":" + errorThrown); // FIXME
       // Reset everything anyway
       this.sessionId = null;
       this.connected = false;
-      callbacks.success();
-      if (notifyDestroyed) if (callbacks.destroyed is Function)
-        callbacks.destroyed();
+      gatewayCallbacks.success();
+      if (notifyDestroyed) if (gatewayCallbacks.destroyed is Function)
+        gatewayCallbacks.destroyed();
     };
     Janus.httpAPICall(
         this.server + "/" + this.sessionId.toString(),
@@ -1186,19 +1189,20 @@ class Session {
         noRequest.toString() +
         ")");
     cleanupWebrtc(handleId, false);
+
     Plugin pluginHandle = this.pluginHandles[handleId.toString()];
-    if (pluginHandle == null) {
-      // Plugin was already detached by Janus, calling detach again will return a handle not found error, so just exit here
-      this.pluginHandles.remove(handleId.toString());
-      callbacks.success();
-      return;
-    }
-    if (noRequest) {
-      // We're only removing the handle locally
-      this.pluginHandles.remove(handleId.toString());
-      callbacks.success();
-      return;
-    }
+    // if (pluginHandle == null) {
+    //   // Plugin was already detached by Janus, calling detach again will return a handle not found error, so just exit here
+    //   this.pluginHandles.remove(handleId.toString());
+    //   if (callbacks.success is Function) callbacks.success();
+    //   return;
+    // }
+    // if (noRequest) {
+    //   // We're only removing the handle locally
+    //   this.pluginHandles.remove(handleId.toString());
+    //   if (callbacks.success is Function) callbacks.success("Plugin removed");
+    //   return;
+    // }
     if (!this.connected) {
       Janus.warn("Is the server down? (connected=false)");
       callbacks.error("Is the server down? (connected=false)");
@@ -3048,7 +3052,7 @@ class Session {
       if (pluginHandle.volume['local'] != null &&
           pluginHandle.volume['local']['timer'] != null)
         pluginHandle.volume['local']['timer'].cancel();
-      if (pluginHandle.volume['remote'] &&
+      if (pluginHandle.volume['remote'] != null &&
           pluginHandle.volume['remote']['timer'] != null)
         pluginHandle.volume['remote']['timer'].cancel();
     }
@@ -3078,9 +3082,9 @@ class Session {
     pluginHandle.myStream = null;
     // Close PeerConnection
     try {
-      pluginHandle.pc.dispose();
+      pluginHandle.pc.close();
     } catch (e) {
-      // Do nothing
+      Janus.log(e.toString());
     }
     pluginHandle.pc = null;
     pluginHandle.candidates = [];
@@ -3089,8 +3093,7 @@ class Session {
     pluginHandle.iceDone = false;
     pluginHandle.dataChannels = {};
     pluginHandle.dtmfSender = null;
-
-    pluginHandle.onCleanup();
+    if (pluginHandle.onCleanup() is Function) pluginHandle.onCleanup();
   }
 
   // Helper method to munge an SDP to enable simulcasting (Chrome only)

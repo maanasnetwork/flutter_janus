@@ -37,6 +37,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   List<dynamic> _peers;
   var _selfId;
+  MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   bool _inCalling = false;
@@ -193,6 +194,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   _onLocalStream(MediaStream stream) {
     Janus.debug(" ::: Got a local stream :::");
+    _localStream = stream;
     _localRenderer.srcObject = stream;
   }
 
@@ -213,7 +215,15 @@ class _JanusEchoState extends State<JanusEcho> {
     Janus.log(" ::: Got a cleanup notification :::");
   }
 
-  _hangUp() {
+  _hangUp() async {
+    try {
+      GatewayCallbacks gatewayCallbacks;
+      session.destroy(gatewayCallbacks: gatewayCallbacks);
+      _localRenderer.srcObject = null;
+      _remoteRenderer.srcObject = null;
+    } catch (e) {
+      print(e.toString());
+    }
     Janus.log('Hangup called');
     setState(() {
       _inCalling = false;

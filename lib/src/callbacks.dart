@@ -37,7 +37,7 @@ class Callbacks {
   dynamic data;
   dynamic label;
   dynamic dtmf;
-  dynamic noRequest;
+  bool noRequest;
   dynamic rtcConstraints;
 
   bool simulcast;
