@@ -13,11 +13,12 @@ The code is organised in four files
 
 ## Status
 
-| Feature         | Support | Well Tested |
-| --------------- | ------- | ----------- |
-| WebSocket       | Yes     | Yes         |
-| Rest/Http API   | Yes     | Yes         |
-| Echotest Plugin | Yes     | No          |
+| Feature          | Support | Well Tested |
+| ---------------- | ------- | ----------- |
+| WebSocket        | Yes     | Yes         |
+| Rest/Http API    | Yes     | Yes         |
+| Echotest Plugin  | Yes     | No          |
+| Videocall Plugin | WIP     | No          |
 
 ## Getting Started
 
