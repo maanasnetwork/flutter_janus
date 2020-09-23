@@ -1,8 +1,8 @@
 name: flutterjanus
 description: Flutter plugin for Janus Gateway
 version: 0.0.1
-author: maanasnetwork.com
-homepage: https://www.maanasnetwork.com
+author: https://github.com/maanasnetwork
+homepage: https://github.com/maanasnetwork/flutter_janus
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
