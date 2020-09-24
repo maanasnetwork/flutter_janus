@@ -1,5 +1,5 @@
 name: flutterjanus
-description: Flutter plugin for Janus Gateway. Janus Gateway project provides janus.js a javascript library which encapsulates all the callbacks for janus. Janus.js make things simple and the application needs to be written on top of janus.js. FlutterJanus is a port of janus.js in flutter, the functionality of janus.js is reproduced in flutterjanus.
+description: Flutter plugin for Janus Gateway. FlutterJanus is a port of janus.js in flutter, the functionality of janus.js is reproduced in flutterjanus.
 version: 0.0.2
 homepage: https://github.com/maanasnetwork/flutter_janus
 
