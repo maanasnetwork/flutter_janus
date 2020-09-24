@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:logger/logger.dart';
 import 'package:random_string/random_string.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class Janus {
@@ -156,8 +156,8 @@ class Janus {
         'audio': true,
         'video': true,
       };
-      navigator.getUserMedia(config).then((MediaStream stream) {
-        navigator.getSources().then((devices) {
+      MediaDevices.getUserMedia(config).then((MediaStream stream) {
+        MediaDevices.getSources().then((devices) {
           Janus.debug(devices.toString());
           callback(devices);
           // Get rid of the now useless stream

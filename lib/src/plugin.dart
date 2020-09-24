@@ -1,6 +1,5 @@
 import 'dart:core';
-import 'package:flutter_webrtc/webrtc.dart';
-import 'package:flutter_webrtc/rtc_peerconnection.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class Plugin {

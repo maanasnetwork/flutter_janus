@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'dart:core';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class JanusVideoCall extends StatefulWidget {

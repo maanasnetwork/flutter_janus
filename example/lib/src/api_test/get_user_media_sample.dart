@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'dart:core';
 
 /// getUserMedia sample
@@ -52,7 +52,7 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     };
 
     try {
-      navigator.getUserMedia(mediaConstraints).then((stream) {
+      MediaDevices.getUserMedia(mediaConstraints).then((stream) {
         _localStream = stream;
         _localRenderer.srcObject = _localStream;
       });

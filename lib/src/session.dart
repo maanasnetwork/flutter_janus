@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:sdp_transform/sdp_transform.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class Session {
@@ -1966,7 +1966,7 @@ class Session {
             Janus.log("Adding video constraint:", videoSupport);
           }
         } else if (media['video'] == 'screen' || media['video'] == 'window') {
-          if (navigator != null && navigator.getDisplayMedia != null) {
+          if (MediaDevices != null && MediaDevices.getDisplayMedia != null) {
             // The new experimental getDisplayMedia API is available, let's use that
             // https://groups.google.com/forum/#!topic/discuss-webrtc/Uf0SrR4uxzk
             // https://webrtchacks.com/chrome-screensharing-getdisplaymedia/
@@ -1981,11 +1981,12 @@ class Session {
               constraints['video']['width'] = media['screenshareWidth'];
             }
             constraints['audio'] = media['captureDesktopAudio'];
-            navigator.getDisplayMedia(constraints).then((MediaStream stream) {
+            MediaDevices.getDisplayMedia(constraints)
+                .then((MediaStream stream) {
               //pluginHandle.consentDialog(false);
               if (isAudioSendEnabled(media) && !media['keepAudio']) {
-                navigator.getUserMedia({'audio': true, 'video': false}).then(
-                    (MediaStream stream) {
+                MediaDevices.getUserMedia({'audio': true, 'video': false})
+                    .then((MediaStream stream) {
                   // stream.addTrack(stream.getAudioTracks()[0]);
                   streamsDone(handleId, jsep, media, callbacks, stream);
                 });
@@ -2012,10 +2013,10 @@ class Session {
           getScreenMedia(constraints, gsmCallback, useAudio) {
             Janus.log("Adding media constraint (screen capture)");
             Janus.debug(constraints);
-            navigator.getUserMedia(constraints).then((MediaStream stream) {
+            MediaDevices.getUserMedia(constraints).then((MediaStream stream) {
               if (useAudio) {
-                navigator.getUserMedia({'audio': true, 'video': false}).then(
-                    (audioStream) {
+                MediaDevices.getUserMedia({'audio': true, 'video': false})
+                    .then((audioStream) {
                   stream.addTrack(audioStream.getAudioTracks()[0]);
                   gsmCallback(null, stream);
                 });
@@ -2123,7 +2124,7 @@ class Session {
       // If we got here, we're not screensharing
       if (media == null || media['video'] != 'screen') {
         // Check whether all media sources are actually available or not
-        navigator.getSources().then((devices) {
+        MediaDevices.getSources().then((devices) {
           Janus.debug(devices.toString());
           bool audioExist = devices.any((device) {
             return device['kind'] == 'audioinput';
@@ -2185,7 +2186,8 @@ class Session {
               };
             }
             Janus.debug(gumConstraints);
-            navigator.getUserMedia(gumConstraints).then((MediaStream stream) {
+            MediaDevices.getUserMedia(gumConstraints)
+                .then((MediaStream stream) {
               // pluginHandle.consentDialog(false);
               streamsDone(handleId, jsep, media, callbacks, stream);
             }).catchError((error, StackTrace stackTrace) {

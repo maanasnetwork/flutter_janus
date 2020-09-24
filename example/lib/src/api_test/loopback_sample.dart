@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'dart:core';
 import 'dart:async';
 
@@ -127,7 +127,7 @@ class _MyAppState extends State<LoopBackSample> {
     if (_peerConnection != null) return;
 
     try {
-      _localStream = await navigator.getUserMedia(mediaConstraints);
+      _localStream = await MediaDevices.getUserMedia(mediaConstraints);
       _localRenderer.srcObject = _localStream;
 
       _peerConnection =

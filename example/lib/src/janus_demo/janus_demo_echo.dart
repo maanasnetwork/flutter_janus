@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'dart:core';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class JanusEcho extends StatefulWidget {
@@ -59,9 +59,9 @@ class _JanusEchoState extends State<JanusEcho> {
   @override
   void deactivate() {
     super.deactivate();
-    if (session != null) session.destroy();
     _localRenderer.dispose();
     _remoteRenderer.dispose();
+    if (session != null) session.destroy();
   }
 
   void _connect() async {
