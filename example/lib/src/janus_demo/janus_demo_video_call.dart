@@ -1,13 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'dart:core';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
 class JanusVideoCall extends StatefulWidget {
-  static String tag = 'janus_demo_video_call';
-
   JanusVideoCall({Key key}) : super(key: key);
 
   @override
@@ -34,11 +30,12 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   Session session;
   Plugin videocall;
 
-  var _selfId;
   MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   bool _inCalling = false;
+
+  TextEditingController nameController = TextEditingController();
 
   _JanusVideoCallState({Key key});
 
@@ -52,6 +49,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   initRenderers() async {
     await _localRenderer.initialize();
     await _remoteRenderer.initialize();
+    _connect();
   }
 
   @override
@@ -60,6 +58,91 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     if (session != null) session.destroy();
     _localRenderer.dispose();
     _remoteRenderer.dispose();
+  }
+
+  registerDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        child: AlertDialog(
+          title: Text("Register as"),
+          content: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: "Username"),
+                controller: nameController,
+              ),
+              RaisedButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                onPressed: () {
+                  registerUsername(nameController.text);
+                },
+                child: Text("Proceed"),
+              )
+            ],
+          ),
+        ));
+  }
+
+  makeCallDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        child: AlertDialog(
+          title: Text("Call Registered User or wait for user to call you"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: InputDecoration(
+                    labelText: "Name Of Registered User to call"),
+                controller: nameController,
+              ),
+              RaisedButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                onPressed: () {
+                  doCall(nameController.text);
+                  Navigator.of(context).pop();
+                },
+                child: Text("Call"),
+              )
+            ],
+          ),
+        ));
+  }
+
+  registerUsername(username) {
+    if (videocall != null) {
+      videocall.send({
+        "message": {"request": "register", "username": username}
+      });
+    }
+  }
+
+  doCall(username) {
+    if (videocall != null) {
+      Callbacks callbacks = Callbacks();
+      callbacks.media["data"] = false;
+      callbacks.simulcast = doSimulcast;
+      callbacks.simulcast2 = doSimulcast2;
+      callbacks.success = (RTCSessionDescription jsep) {
+        Janus.debug("Got SDP!");
+        Janus.debug(jsep.toMap());
+        Map<String, dynamic> body = {"request": "call", "username": username};
+        callbacks.message = body;
+        callbacks.jsep = jsep.toMap();
+        videocall.send(callbacks);
+      };
+      callbacks.error = (error) {
+        Janus.error("WebRTC error:", error);
+        Janus.log("WebRTC error... " + jsonEncode(error));
+      };
+      Janus.debug("Trying a createOffer too (audio/video sendrecv)");
+      videocall.createOffer(callbacks: callbacks);
+    }
   }
 
   void _connect() async {
@@ -110,25 +193,6 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     callbacks.message = body;
     videocall.send(callbacks);
     // No media provided: by default, it's sendrecv for audio and video
-
-    // Let's negotiate data channels as well
-    callbacks.media["data"] = false;
-    callbacks.simulcast = doSimulcast;
-    callbacks.simulcast2 = doSimulcast2;
-    callbacks.success = (RTCSessionDescription jsep) {
-      Janus.debug("Got SDP!");
-      Janus.debug(jsep.toMap());
-      callbacks.message = body;
-      callbacks.jsep = jsep.toMap();
-      videocall.send(callbacks);
-    };
-    callbacks.error = (error) {
-      Janus.error("WebRTC error:", error);
-      Janus.log("WebRTC error... " + jsonEncode(error));
-    };
-    Janus.debug("Trying a createOffer too (audio/video sendrecv)");
-
-    videocall.createOffer(callbacks: callbacks);
   }
 
   _error(error) {
@@ -236,7 +300,18 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Janus Echotest'),
+        title: new Text('Videocall Test'),
+        actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: registerDialog,
+                child: Icon(
+                  Icons.supervised_user_circle,
+                  size: 26.0,
+                ),
+              )),
+        ],
       ),
       body: new OrientationBuilder(
         builder: (context, orientation) {
@@ -276,7 +351,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _inCalling ? _hangUp : _connect,
+        onPressed: _inCalling ? _hangUp : doCall,
         tooltip: _inCalling ? 'Hangup' : 'Call',
         child: new Icon(_inCalling ? Icons.call_end : Icons.phone),
       ),

@@ -240,7 +240,7 @@ class _JanusEchoState extends State<JanusEcho> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Janus Echotest'),
+        title: new Text('Echo Test'),
       ),
       body: new OrientationBuilder(
         builder: (context, orientation) {
