@@ -1622,8 +1622,9 @@ class Session {
   }
 
   prepareWebrtc(int handleId, bool offer, Callbacks callbacks) {
-    var jsep = callbacks.jsep;
-
+    var jsep = offer
+        ? callbacks.jsep
+        : RTCSessionDescription(callbacks.jsep['sdp'], callbacks.jsep['type']);
     if (offer && jsep != null) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");
