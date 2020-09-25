@@ -318,8 +318,10 @@ class Session {
       pluginHandle.slowLink(json["uplink"], json["lost"]);
     } else if (json["janus"] == "error") {
       // Oops, something wrong happened
-      Janus.error(
-          "Ooops: " + json["error"].code + " " + json["error"].reason); // FIXME
+      Janus.error("Ooops: " +
+          json["error"]["code"].toString() +
+          " " +
+          json["error"]["reason"]);
       Janus.debug(json);
       String transaction = json["transaction"];
       if (transaction != null) {
@@ -490,9 +492,9 @@ class Session {
           Janus.debug(json);
           if (json["janus"] != "success") {
             Janus.error("Ooops: " +
-                json["error"].code +
+                json["error"]["code"].toString() +
                 " " +
-                json["error"].reason); // FIXME
+                json["error"]["reason"]);
             callbacks.error(json["error"]["reason"]);
             return;
           }
@@ -696,9 +698,9 @@ class Session {
       this.connected = false;
       if (json["janus"] != "success") {
         Janus.error("Ooops: " +
-            json["error"].code +
+            json["error"]["code"].toString() +
             " " +
-            json["error"].reason); // FIXME
+            json["error"]["reason"]);
       }
       gatewayCallbacks.success();
       if (notifyDestroyed) if (gatewayCallbacks.destroyed is Function)
@@ -754,11 +756,13 @@ class Session {
         Janus.debug(json);
         if (json["janus"] != "success") {
           Janus.error("Ooops: " +
-              json["error"].code +
+              json["error"]["code"].toString() +
               " " +
-              json["error"].reason); // FIXME
-          callbacks.error(
-              "Ooops: " + json["error"].code + " " + json["error"].reason);
+              json["error"]["reason"]);
+          callbacks.error("Ooops: " +
+              json["error"]["code"] +
+              " " +
+              json["error"]["reason"]);
           return;
         }
         int handleId = json["data"]["id"];
@@ -785,11 +789,13 @@ class Session {
       Janus.debug(json);
       if (json["janus"] != "success") {
         Janus.error("Ooops: " +
-            json["error"].code +
+            json["error"]["code"].toString() +
             " " +
-            json["error"].reason); // FIXME
-        callbacks
-            .error("Ooops: " + json["error"].code + " " + json["error"].reason);
+            json["error"]["reason"]);
+        callbacks.error("Ooops: " +
+            json["error"]["code"].toString() +
+            " " +
+            json["error"]["reason"]);
         return;
       }
       int handleId = json["data"]["id"];
@@ -879,10 +885,12 @@ class Session {
           // Not a success and not an ack, must be an error
           if (json["error"]) {
             Janus.error("Ooops: " +
-                json["error"].code +
+                json["error"]["code"].toString() +
                 " " +
-                json["error"].reason); // FIXME
-            callbacks.error(json["error"].code + " " + json["error"].reason);
+                json["error"]["reason"]);
+            callbacks.error(json["error"]["code"].toString() +
+                " " +
+                json["error"]["reason"]);
           } else {
             Janus.error("Unknown error"); // FIXME
             callbacks.error("Unknown error");
@@ -920,10 +928,11 @@ class Session {
         // Not a success and not an ack, must be an error
         if (json["error"]) {
           Janus.error("Ooops: " +
-              json["error"].code +
+              json["error"]["code"].toString() +
               " " +
-              json["error"].reason); // FIXME
-          callbacks.error(json["error"].code + " " + json["error"].reason);
+              json["error"]["reason"]);
+          callbacks.error(
+              json["error"]["code"].toString() + " " + json["error"]["reason"]);
         } else {
           Janus.error("Unknown error"); // FIXME
           callbacks.error("Unknown error");
@@ -988,9 +997,9 @@ class Session {
       Janus.vdebug(json);
       if (json["janus"] != "ack") {
         Janus.error("Ooops: " +
-            json["error"].code +
+            json["error"]["code"].toString() +
             " " +
-            json["error"].reason); // FIXME
+            json["error"]["reason"]);
         return;
       }
     };
@@ -1229,9 +1238,9 @@ class Session {
       Janus.debug(json);
       if (json["janus"] != "success") {
         Janus.error("Ooops: " +
-            json["error"].code.toString() +
+            json["error"]["code"].toString() +
             " " +
-            json["error"].reason.toString()); // FIXME
+            json["error"]["reason"]);
       }
       this.pluginHandles.remove(handleId.toString());
       callbacks.success();
