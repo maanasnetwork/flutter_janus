@@ -4,6 +4,7 @@ import '../route_item.dart';
 import 'not_ready.dart';
 import 'janus_demo_echo.dart';
 import 'janus_demo_video_call.dart';
+import 'janus_demo_sip_call.dart';
 
 typedef void RouteCallback(BuildContext context);
 
@@ -37,16 +38,16 @@ final List<RouteItem> items = <RouteItem>[
             new MaterialPageRoute(
                 builder: (BuildContext context) => new JanusVideoCall()));
       }),
-  // RouteItem(
-  //     title: 'SIP Gateway',
-  //     subtitle:
-  //         'A SIP Gateway demo, allowing you to register at a SIP server and start/receive calls.',
-  //     push: (BuildContext context) {
-  //       Navigator.push(
-  //           context,
-  //           new MaterialPageRoute(
-  //               builder: (BuildContext context) => new NotReady()));
-  //     }),
+  RouteItem(
+      title: 'SIP Gateway',
+      subtitle:
+          'A SIP Gateway demo, allowing you to register at a SIP server and start/receive calls.',
+      push: (BuildContext context) {
+        Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (BuildContext context) => new JanusSipCall()));
+      }),
   // RouteItem(
   //     title: 'Video Room',
   //     subtitle:
