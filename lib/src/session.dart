@@ -602,7 +602,6 @@ class Session {
       this.pluginHandles.forEach((handleId, handle) {
         callbacks.noRequest = true;
         handle.detach(callbacks);
-        Janus.log("Reaching here");
       });
     }
     if (!this.connected) {

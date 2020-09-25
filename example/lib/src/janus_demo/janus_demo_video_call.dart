@@ -22,6 +22,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
 
   String myUsername;
   String yourUsername;
+  var peers;
 
   bool doSimulcast = false;
   bool doSimulcast2 = false;
@@ -34,8 +35,9 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   bool _inCalling = false;
+  bool _registered = false;
 
-  TextEditingController nameController = TextEditingController();
+  TextEditingController textController = TextEditingController();
 
   _JanusVideoCallState({Key key});
 
@@ -63,27 +65,66 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   registerDialog() {
     showDialog(
         context: context,
-        barrierDismissible: false,
-        child: AlertDialog(
-          title: Text("Register as"),
-          content: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: "Username"),
-                controller: nameController,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)), //this right here
+            child: Container(
+              height: 200,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Register as username ...'),
+                      controller: textController,
+                    ),
+                    SizedBox(
+                      width: 320.0,
+                      child: RaisedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          registerUsername(textController.text);
+                        },
+                        child: Text(
+                          "Register",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        color: Colors.green,
+                      ),
+                    )
+                  ],
+                ),
               ),
-              RaisedButton(
-                color: Colors.green,
-                textColor: Colors.white,
-                onPressed: () {
-                  registerUsername(nameController.text);
-                },
-                child: Text("Proceed"),
-              )
-            ],
-          ),
-        ));
+            ),
+          );
+        });
+  }
+
+  showAlert(String title, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(text),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   makeCallDialog() {
@@ -98,13 +139,13 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
               TextFormField(
                 decoration: InputDecoration(
                     labelText: "Name Of Registered User to call"),
-                controller: nameController,
+                controller: textController,
               ),
               RaisedButton(
                 color: Colors.green,
                 textColor: Colors.white,
                 onPressed: () {
-                  doCall(nameController.text);
+                  doCall(textController.text);
                   Navigator.of(context).pop();
                 },
                 child: Text("Call"),
@@ -115,10 +156,11 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   }
 
   registerUsername(username) {
+    Janus.log(username.toString());
     if (videocall != null) {
-      videocall.send({
-        "message": {"request": "register", "username": username}
-      });
+      Callbacks callbacks = Callbacks();
+      callbacks.message = {"request": "register", "username": username};
+      videocall.send(callbacks);
     }
   }
 
@@ -186,13 +228,6 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         ", id=" +
         videocall.getId().toString() +
         ")");
-    Map<String, dynamic> body = {"audio": true, "video": true};
-    Janus.debug("Sending message (" + jsonEncode(body) + ")");
-    // Create am empty callback for the message
-    Callbacks callbacks = Callbacks();
-    callbacks.message = body;
-    videocall.send(callbacks);
-    // No media provided: by default, it's sendrecv for audio and video
   }
 
   _error(error) {
@@ -229,26 +264,19 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   _onMessage(msg, jsep) {
     Janus.debug(" ::: Got a message :::");
     Janus.debug(msg);
-    if (jsep != null) {
-      Janus.debug("Handling SDP as well...");
-      Janus.debug(jsep);
-      Callbacks callbacks = Callbacks();
-      callbacks.jsep = jsep;
-      videocall.handleRemoteJsep(callbacks);
-    }
     var result = msg["result"];
-    Janus.log(result);
-    if (result != null) {
-      if (result == "done") {
-        Janus.log("Echo Test is over");
+    if (result != null) if (jsep != null) {
+      if (result["list"] != null) {
+        peers = result["list"];
+        Janus.debug("Got a list of registered peers:");
+        Janus.debug(peers.toString());
+      } else if (result["event"] != null) {
+        var event = result["event"];
       }
-
-      var status = result["status"];
-      if (status == "slow_link") {
-        Janus.log(
-            "Janus apparently missed many packets we sent, maybe we should reduce the bitrate",
-            "Packet loss?");
-      }
+    } else {
+      var error = msg["error"];
+      showAlert("Error", error.toString());
+      _hangUp();
     }
   }
 
