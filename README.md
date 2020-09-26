@@ -19,6 +19,7 @@ The code is organised in four files
 | Rest/Http API    | Yes     | Yes         |
 | Echotest Plugin  | Yes     | No          |
 | Videocall Plugin | WIP     | No          |
+| Sipcall Plugin   | WIP     | No          |
 
 ## Getting Started
 

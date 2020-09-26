@@ -33,9 +33,7 @@ class _JanusEchoState extends State<JanusEcho> {
 
   Session session;
   Plugin echotest;
-  Map<String, dynamic> _handle;
 
-  List<dynamic> _peers;
   var _selfId;
   MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();

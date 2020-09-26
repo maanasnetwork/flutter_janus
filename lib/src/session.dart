@@ -1062,10 +1062,8 @@ class Session {
         pluginHandle.onDataOpen(label);
       }
     };
-    var onDataChannelError = (error) => {
-          Janus.error('Got error on data channel:' + error)
-          // TODO
-        };
+    // var onDataChannelError =
+    //     (error) => {Janus.error('Got error on data channel:' + error)};
     if (incoming == null) {
       Janus.log("Creating a data channel with label" + label);
       // Add options (ordered, maxRetransmits, etc.)

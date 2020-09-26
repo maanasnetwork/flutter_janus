@@ -322,7 +322,9 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     Janus.log('Switching camera');
   }
 
-  _muteMic() {}
+  _muteMic() {
+    Janus.log('Mute mic.');
+  }
 
   @override
   Widget build(BuildContext context) {
