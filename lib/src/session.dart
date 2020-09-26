@@ -1135,22 +1135,26 @@ class Session {
     if (pluginHandle.dtmfSender == null) {
       // Create the DTMF sender the proper way, if possible
       if (pluginHandle.pc != null) {
-        // FIX ME
-        // var senders = pc.getSenders();
-        // var audioSender = senders.find((sender) {
-        //   sender.track && sender.track.kind == 'audio';
-        // });
-        var audioSender = {'dtmf': null};
+        MediaStreamTrack audioSender;
+        List<MediaStream> senders = pluginHandle.pc.getLocalStreams();
+        senders.forEach((sender) {
+          pluginHandle.dtmfSender = sender
+              .getAudioTracks()
+              .firstWhere((track) => track.kind == 'audio');
+        });
         if (audioSender != null) {
           Janus.warn("Invalid DTMF configuration (no audio track)");
           callbacks.error("Invalid DTMF configuration (no audio track)");
           return;
         }
-        pluginHandle.dtmfSender = audioSender['dtmf'];
+
+        pluginHandle.dtmfSender = pluginHandle.pc.createDtmfSender(audioSender);
+
         if (pluginHandle.dtmfSender != null) {
           Janus.log("Created DTMF Sender");
-          pluginHandle.dtmfSender['ontonechange'] = (tone) =>
-              Janus.debug("Sent DTMF tone: " + tone['tone'].toString());
+          // Not implemented in flutter_webrtc
+          // pluginHandle.dtmfSender.ontonechange = (tone) =>
+          // Janus.debug("Sent DTMF tone: " + tone['tone'].toString());
         }
       }
       if (pluginHandle.dtmfSender == null) {
@@ -1165,16 +1169,16 @@ class Session {
       callbacks.error("Invalid DTMF parameters");
       return;
     }
-    var tones = dtmf['tones'];
+    String tones = dtmf['tones'];
     if (tones == null) {
       Janus.warn("Invalid DTMF string");
       callbacks.error("Invalid DTMF string");
       return;
     }
-    var duration = (dtmf['duration'] is int)
+    int duration = (dtmf['duration'] is int)
         ? dtmf['duration']
         : 500; // We choose 500ms as the default duration for a tone
-    var gap = (dtmf['gap'] is int)
+    int gap = (dtmf['gap'] is int)
         ? dtmf['gap']
         : 50; // We choose 50ms as the default gap between tones
     Janus.debug("Sending DTMF string " +
@@ -1184,7 +1188,10 @@ class Session {
         "ms, gap " +
         gap.toString() +
         "ms)");
-    pluginHandle.dtmfSender.insertDTMF(tones, duration, gap);
+    // FIX ME the upstream flutter_webrtc call name is not in compliance with WebRTC
+    // pluginHandle.dtmfSender.insertDTMF(tones, duration, gap);
+    pluginHandle.dtmfSender
+        .sendDtmf(tones, duration: duration, interToneGap: gap);
     callbacks.success();
   }
 

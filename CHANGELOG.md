@@ -1,3 +1,8 @@
+[0.0.3] - 2020-09-26
+
+- Bug fix dtmf_sender
+- Updated the callback static types for dtmfsender
+
 [0.0.2] - 2020-09-25
 
 - Upgrade flutter_webrtc (0.3.3)

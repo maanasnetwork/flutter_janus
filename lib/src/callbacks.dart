@@ -36,7 +36,7 @@ class Callbacks {
 
   dynamic data;
   dynamic label;
-  dynamic dtmf;
+  Map<String, dynamic> dtmf;
   bool noRequest;
   dynamic rtcConstraints;
 

@@ -14,7 +14,7 @@ class Plugin {
   Map<String, dynamic> mediaConstraints;
   RTCPeerConnection pc;
   Map<String, dynamic> dataChannels;
-  var dtmfSender;
+  RTCDTMFSender dtmfSender;
   bool trickle = true;
   bool iceDone = false;
   Map<String, dynamic> volume = {'value': null, 'timer': null};
