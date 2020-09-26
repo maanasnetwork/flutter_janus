@@ -1138,7 +1138,7 @@ class Session {
         MediaStreamTrack audioSender;
         List<MediaStream> senders = pluginHandle.pc.getLocalStreams();
         senders.forEach((sender) {
-          pluginHandle.dtmfSender = sender
+          audioSender = sender
               .getAudioTracks()
               .firstWhere((track) => track.kind == 'audio');
         });
