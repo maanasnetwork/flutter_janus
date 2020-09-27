@@ -266,7 +266,7 @@ class Session {
         return;
       }
       pluginHandle.webrtcState(false, json["reason"]);
-      pluginHandle.hangup({});
+      pluginHandle.hangup(true);
     } else if (json["janus"] == "detached") {
       // A plugin asked the core to detach one of our handles
       Janus.debug(

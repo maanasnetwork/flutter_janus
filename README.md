@@ -18,7 +18,7 @@ The code is organised in four files
 | WebSocket        | Yes     | Yes         |
 | Rest/Http API    | Yes     | Yes         |
 | Echotest Plugin  | Yes     | No          |
-| Videocall Plugin | WIP     | No          |
+| Videocall Plugin | Yes     | No          |
 | Sipcall Plugin   | WIP     | No          |
 
 ## Getting Started

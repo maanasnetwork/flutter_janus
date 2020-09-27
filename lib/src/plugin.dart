@@ -77,7 +77,7 @@ class Plugin {
   onDataOpen(label) => callbacks.onDataOpen(label);
   onCleanup() => callbacks.onCleanup();
   onDetached() => callbacks.onDetached();
-  hangup(sendRequest) =>
-      this.session.cleanupWebrtc(this.handleId, sendRequest == true);
+  hangup(bool sendRequest) =>
+      this.session.cleanupWebrtc(this.handleId, sendRequest = true);
   detach(callbacks) => this.session.destroyHandle(this.handleId, callbacks);
 }

@@ -22,7 +22,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
 
   String myUsername;
   String yourUsername;
-  var peers;
+  Map<String, dynamic> peers;
 
   bool doSimulcast = false;
   bool doSimulcast2 = false;
@@ -87,8 +87,8 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
                       width: 320.0,
                       child: RaisedButton(
                         onPressed: () {
-                          Navigator.of(context).pop();
                           registerUsername(textController.text);
+                          Navigator.of(context).pop();
                         },
                         child: Text(
                           "Register",
@@ -132,13 +132,15 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         context: context,
         barrierDismissible: false,
         child: AlertDialog(
-          title: Text("Call Registered User or wait for user to call you"),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          title: Text("Call"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text("Wait for user to call you."),
               TextFormField(
-                decoration: InputDecoration(
-                    labelText: "Name Of Registered User to call"),
+                decoration: InputDecoration(labelText: "or Call user"),
                 controller: textController,
               ),
               RaisedButton(
@@ -149,14 +151,54 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
                   Navigator.of(context).pop();
                 },
                 child: Text("Call"),
-              )
+              ),
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             ],
           ),
         ));
   }
 
+  answerCallDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Incoming call'),
+          content: Text("Incoming call from " + yourUsername + "!"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                answerCall();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("No"),
+              onPressed: () {
+                //Put your code here which you want to execute on No button click.
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                //Put your code here which you want to execute on Cancel button click.
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   registerUsername(username) {
-    Janus.log(username.toString());
     if (videocall != null) {
       Callbacks callbacks = Callbacks();
       callbacks.message = {"request": "register", "username": username};
@@ -164,7 +206,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     }
   }
 
-  doCall(username) {
+  doCall(String username) {
     if (videocall != null) {
       Callbacks callbacks = Callbacks();
       callbacks.media["data"] = false;
@@ -177,6 +219,9 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         callbacks.message = body;
         callbacks.jsep = jsep.toMap();
         videocall.send(callbacks);
+        setState(() {
+          _inCalling = true;
+        });
       };
       callbacks.error = (error) {
         Janus.error("WebRTC error:", error);
@@ -187,6 +232,180 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     }
   }
 
+  answerCall() {
+    Callbacks callbacks = Callbacks();
+    callbacks.media["data"] = false;
+    callbacks.simulcast = doSimulcast;
+    callbacks.simulcast2 = doSimulcast2;
+    callbacks.success = (RTCSessionDescription jsep) {
+      Janus.debug("Got SDP!");
+      Janus.debug(jsep.toMap());
+      callbacks.message = {"request": "accept"};
+      callbacks.jsep = jsep.toMap();
+      videocall.send(callbacks);
+      setState(() {
+        _inCalling = true;
+      });
+    };
+    callbacks.error = (error) {
+      Janus.error("WebRTC error:", error);
+      Janus.log("WebRTC error... " + jsonEncode(error));
+    };
+    videocall.createAnswer(callbacks);
+  }
+
+  updateCall(jsep) {
+    Callbacks callbacks = Callbacks();
+    callbacks.jsep = jsep;
+    if (jsep.type == 'answer') {
+      videocall.handleRemoteJsep(callbacks);
+    } else {
+      callbacks.media["data"] = false;
+      callbacks.simulcast = doSimulcast;
+      callbacks.simulcast2 = doSimulcast2;
+      callbacks.success = (RTCSessionDescription jsep) {
+        Janus.debug("Got SDP!");
+        Janus.debug(jsep.toMap());
+        callbacks.message = {"request": "set"};
+        callbacks.jsep = jsep.toMap();
+        videocall.send(callbacks);
+      };
+      callbacks.error = (error) {
+        Janus.error("WebRTC error:", error);
+        Janus.log("WebRTC error... " + jsonEncode(error));
+      };
+      videocall.createAnswer(callbacks);
+    }
+  }
+
+  getRegisteredUsers() {
+    Callbacks callbacks = Callbacks();
+    callbacks.message = {"request": "list"};
+    videocall.send(callbacks);
+  }
+
+  _onMessage(msg, jsep) {
+    Janus.debug(" ::: Got a message :::");
+    Janus.debug(msg);
+    Map<String, dynamic> result = msg["result"];
+    if (result != null) {
+      if (result["list"] != null) {
+        peers = result["list"];
+        Janus.debug("Got a list of registered peers:");
+        Janus.debug(peers.toString());
+      } else if (result["event"] != null) {
+        String event = result["event"];
+        if (event == 'registered') {
+          setState(() {
+            _registered = true;
+          });
+
+          myUsername = result["username"];
+          Janus.log("Successfully registered as " + myUsername + "!");
+          showAlert(
+              "Registered", "Successfully registered as " + myUsername + "!");
+          // Get a list of available peers, just for fun
+          getRegisteredUsers();
+          // TODO Enable buttons to call now
+        } else if (event == 'calling') {
+          Janus.log("Waiting for the peer to answer...");
+          // TODO Any ringtone?
+          showAlert('Calling', "Waiting for the peer to answer...");
+        } else if (event == 'incomingcall') {
+          Janus.log("Incoming call from " + result["username"] + "!");
+          yourUsername = result["username"];
+          // Notify user
+          answerCallDialog();
+        } else if (event == 'accepted') {
+          if (result["username"] == null) {
+            Janus.log("Call started!");
+          } else {
+            yourUsername = result["username"];
+            Janus.log(yourUsername + " accepted the call!");
+          }
+          // Video call can start
+          if (jsep != null) {
+            Callbacks callbacks = Callbacks();
+            callbacks.jsep = jsep;
+            videocall.handleRemoteJsep(callbacks);
+          }
+        } else if (event == 'update') {
+          if (jsep != null) {
+            updateCall(jsep);
+          }
+        } else if (event == 'hangup') {
+          Janus.log("Call hung up by " +
+              result["username"] +
+              " (" +
+              result["reason"] +
+              ")!");
+          videocall.hangup(false);
+          _hangUp();
+        }
+      }
+    } else {
+      var error = msg["error"];
+      showAlert("Error", error.toString());
+      _hangUp();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Videocall Test'),
+        actions: <Widget>[],
+      ),
+      body: new OrientationBuilder(
+        builder: (context, orientation) {
+          return new Center(
+            child: new Container(
+              decoration: new BoxDecoration(color: Colors.white),
+              child: new Stack(
+                children: <Widget>[
+                  new Align(
+                    alignment: orientation == Orientation.portrait
+                        ? const FractionalOffset(0.5, 0.1)
+                        : const FractionalOffset(0.0, 0.5),
+                    child: new Container(
+                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      width: 320.0,
+                      height: 240.0,
+                      child: new RTCVideoView(_localRenderer),
+                      decoration: new BoxDecoration(color: Colors.black54),
+                    ),
+                  ),
+                  new Align(
+                    alignment: orientation == Orientation.portrait
+                        ? const FractionalOffset(0.5, 0.9)
+                        : const FractionalOffset(1.0, 0.5),
+                    child: new Container(
+                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      width: 320.0,
+                      height: 240.0,
+                      child: new RTCVideoView(_remoteRenderer),
+                      decoration: new BoxDecoration(color: Colors.black54),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: _registered
+            ? (_inCalling ? _hangUp : makeCallDialog)
+            : registerDialog,
+        tooltip: _registered ? (_inCalling ? 'Hangup' : 'Call') : 'Register',
+        child: new Icon(_registered
+            ? (_inCalling ? Icons.call_end : Icons.phone)
+            : Icons.verified_user),
+      ),
+    );
+  }
+
   void _connect() async {
     GatewayCallbacks gatewayCallbacks = GatewayCallbacks();
     gatewayCallbacks.server = this.server;
@@ -194,9 +413,6 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     gatewayCallbacks.error = (error) => Janus.log(error.toString());
     gatewayCallbacks.destroyed = () => deactivate();
     Session(gatewayCallbacks); // async httpd call
-    setState(() {
-      _inCalling = true;
-    });
   }
 
   void _attach(int sessionId) {
@@ -261,25 +477,6 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         " lost packets)");
   }
 
-  _onMessage(msg, jsep) {
-    Janus.debug(" ::: Got a message :::");
-    Janus.debug(msg);
-    var result = msg["result"];
-    if (result != null) if (jsep != null) {
-      if (result["list"] != null) {
-        peers = result["list"];
-        Janus.debug("Got a list of registered peers:");
-        Janus.debug(peers.toString());
-      } else if (result["event"] != null) {
-        var event = result["event"];
-      }
-    } else {
-      var error = msg["error"];
-      showAlert("Error", error.toString());
-      _hangUp();
-    }
-  }
-
   _onLocalStream(MediaStream stream) {
     Janus.debug(" ::: Got a local stream :::");
     _localStream = stream;
@@ -324,67 +521,5 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
 
   _muteMic() {
     Janus.log('Mute mic.');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Videocall Test'),
-        actions: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: registerDialog,
-                child: Icon(
-                  Icons.supervised_user_circle,
-                  size: 26.0,
-                ),
-              )),
-        ],
-      ),
-      body: new OrientationBuilder(
-        builder: (context, orientation) {
-          return new Center(
-            child: new Container(
-              decoration: new BoxDecoration(color: Colors.white),
-              child: new Stack(
-                children: <Widget>[
-                  new Align(
-                    alignment: orientation == Orientation.portrait
-                        ? const FractionalOffset(0.5, 0.1)
-                        : const FractionalOffset(0.0, 0.5),
-                    child: new Container(
-                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                      width: 320.0,
-                      height: 240.0,
-                      child: new RTCVideoView(_localRenderer),
-                      decoration: new BoxDecoration(color: Colors.black54),
-                    ),
-                  ),
-                  new Align(
-                    alignment: orientation == Orientation.portrait
-                        ? const FractionalOffset(0.5, 0.9)
-                        : const FractionalOffset(1.0, 0.5),
-                    child: new Container(
-                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                      width: 320.0,
-                      height: 240.0,
-                      child: new RTCVideoView(_remoteRenderer),
-                      decoration: new BoxDecoration(color: Colors.black54),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _inCalling ? _hangUp : doCall,
-        tooltip: _inCalling ? 'Hangup' : 'Call',
-        child: new Icon(_inCalling ? Icons.call_end : Icons.phone),
-      ),
-    );
   }
 }
