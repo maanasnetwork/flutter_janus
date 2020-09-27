@@ -20,6 +20,7 @@ The code is organised in four files
 | Echotest Plugin  | Yes     | No          |
 | Videocall Plugin | Yes     | No          |
 | Sipcall Plugin   | WIP     | No          |
+| Videoroom Plugin | WIP     | No          |
 
 ## Getting Started
 

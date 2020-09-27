@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
 import '../route_item.dart';
-import 'not_ready.dart';
 import 'janus_demo_echo.dart';
 import 'janus_demo_video_call.dart';
 import 'janus_demo_sip_call.dart';
+import 'janus_demo_video_room.dart';
 
 typedef void RouteCallback(BuildContext context);
 
@@ -48,16 +48,16 @@ final List<RouteItem> items = <RouteItem>[
             new MaterialPageRoute(
                 builder: (BuildContext context) => new JanusSipCall()));
       }),
-  // RouteItem(
-  //     title: 'Video Room',
-  //     subtitle:
-  //         'A videoconferencing demo, allowing you to join a video room with up to six users.',
-  //     push: (BuildContext context) {
-  //       Navigator.push(
-  //           context,
-  //           new MaterialPageRoute(
-  //               builder: (BuildContext context) => new NotReady()));
-  //     }),
+  RouteItem(
+      title: 'Video Room',
+      subtitle:
+          'A videoconferencing demo, allowing you to join a video room with up to six users.',
+      push: (BuildContext context) {
+        Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (BuildContext context) => new JanusVideoRoom()));
+      }),
   // RouteItem(
   //     title: 'Audio Room',
   //     subtitle:

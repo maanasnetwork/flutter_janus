@@ -1,21 +1,20 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
 
-class JanusVideoCall extends StatefulWidget {
-  JanusVideoCall({Key key}) : super(key: key);
+class JanusVideoRoom extends StatefulWidget {
+  JanusVideoRoom({Key key}) : super(key: key);
 
   @override
-  _JanusVideoCallState createState() => _JanusVideoCallState();
+  _JanusVideoRoomState createState() => _JanusVideoRoomState();
 }
 
-class _JanusVideoCallState extends State<JanusVideoCall> {
+class _JanusVideoRoomState extends State<JanusVideoRoom> {
   String server = "wss://janutter.tzty.net:7007";
   // String server = "https://janutter.tzty.net:8008/janus";
 
-  String opaqueId = "videocalltest-" + Janus.randomString(12);
+  String opaqueId = "videoroomtest-" + Janus.randomString(12);
   var bitrateTimer;
 
   bool audioEnabled = false;
@@ -30,7 +29,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   bool simulcastStarted = false;
 
   Session session;
-  Plugin videocall;
+  Plugin videoroom;
 
   MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
@@ -40,7 +39,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
 
   TextEditingController textController = TextEditingController();
 
-  _JanusVideoCallState({Key key});
+  _JanusVideoRoomState({Key key});
 
   @override
   void initState() {
@@ -173,16 +172,23 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
           content: Text("Incoming call from " + yourUsername + "!"),
           actions: <Widget>[
             FlatButton(
-              child: Text("Accept"),
+              child: Text("Yes"),
               onPressed: () {
                 answerCall();
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
-              child: Text("Decline"),
+              child: Text("No"),
               onPressed: () {
-                declineCall();
+                //Put your code here which you want to execute on No button click.
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                //Put your code here which you want to execute on Cancel button click.
                 Navigator.of(context).pop();
               },
             ),
@@ -193,15 +199,15 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   }
 
   registerUsername(username) {
-    if (videocall != null) {
+    if (videoroom != null) {
       Callbacks callbacks = Callbacks();
       callbacks.message = {"request": "register", "username": username};
-      videocall.send(callbacks);
+      videoroom.send(callbacks);
     }
   }
 
   doCall(String username) {
-    if (videocall != null) {
+    if (videoroom != null) {
       Callbacks callbacks = Callbacks();
       callbacks.media["data"] = false;
       callbacks.simulcast = doSimulcast;
@@ -212,7 +218,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         Map<String, dynamic> body = {"request": "call", "username": username};
         callbacks.message = body;
         callbacks.jsep = jsep.toMap();
-        videocall.send(callbacks);
+        videoroom.send(callbacks);
         setState(() {
           _inCalling = true;
         });
@@ -222,14 +228,12 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         Janus.log("WebRTC error... " + jsonEncode(error));
       };
       Janus.debug("Trying a createOffer too (audio/video sendrecv)");
-      videocall.createOffer(callbacks: callbacks);
+      videoroom.createOffer(callbacks: callbacks);
     }
   }
 
-  answerCall(jsep) {
-    Janus.debug(jsep.toString());
+  answerCall() {
     Callbacks callbacks = Callbacks();
-    callbacks.jsep = jsep;
     callbacks.media["data"] = false;
     callbacks.simulcast = doSimulcast;
     callbacks.simulcast2 = doSimulcast2;
@@ -238,7 +242,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
       Janus.debug(jsep.toMap());
       callbacks.message = {"request": "accept"};
       callbacks.jsep = jsep.toMap();
-      videocall.send(callbacks);
+      videoroom.send(callbacks);
       setState(() {
         _inCalling = true;
       });
@@ -247,18 +251,14 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
       Janus.error("WebRTC error:", error);
       Janus.log("WebRTC error... " + jsonEncode(error));
     };
-    videocall.createAnswer(callbacks);
-  }
-
-  declineCall() {
-    Janus.log("Decline call pressed");
+    videoroom.createAnswer(callbacks);
   }
 
   updateCall(jsep) {
     Callbacks callbacks = Callbacks();
     callbacks.jsep = jsep;
     if (jsep.type == 'answer') {
-      videocall.handleRemoteJsep(callbacks);
+      videoroom.handleRemoteJsep(callbacks);
     } else {
       callbacks.media["data"] = false;
       callbacks.simulcast = doSimulcast;
@@ -268,20 +268,20 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         Janus.debug(jsep.toMap());
         callbacks.message = {"request": "set"};
         callbacks.jsep = jsep.toMap();
-        videocall.send(callbacks);
+        videoroom.send(callbacks);
       };
       callbacks.error = (error) {
         Janus.error("WebRTC error:", error);
         Janus.log("WebRTC error... " + jsonEncode(error));
       };
-      videocall.createAnswer(callbacks);
+      videoroom.createAnswer(callbacks);
     }
   }
 
   getRegisteredUsers() {
     Callbacks callbacks = Callbacks();
     callbacks.message = {"request": "list"};
-    videocall.send(callbacks);
+    videoroom.send(callbacks);
   }
 
   _onMessage(msg, jsep) {
@@ -315,7 +315,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
           Janus.log("Incoming call from " + result["username"] + "!");
           yourUsername = result["username"];
           // Notify user
-          answerCallDialog(jsep);
+          answerCallDialog();
         } else if (event == 'accepted') {
           if (result["username"] == null) {
             Janus.log("Call started!");
@@ -327,7 +327,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
           if (jsep != null) {
             Callbacks callbacks = Callbacks();
             callbacks.jsep = jsep;
-            videocall.handleRemoteJsep(callbacks);
+            videoroom.handleRemoteJsep(callbacks);
           }
         } else if (event == 'update') {
           if (jsep != null) {
@@ -339,7 +339,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
               " (" +
               result["reason"] +
               ")!");
-          videocall.hangup(false);
+          videoroom.hangup(false);
           _hangUp();
         }
       }
@@ -419,7 +419,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     session = Janus.sessions[sessionId.toString()];
 
     Callbacks callbacks = Callbacks();
-    callbacks.plugin = "janus.plugin.videocall";
+    callbacks.plugin = "janus.plugin.videoroom";
     callbacks.opaqueId = opaqueId;
     callbacks.success = _success;
     callbacks.error = _error;
@@ -438,11 +438,11 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
   }
 
   _success(Plugin pluginHandle) {
-    videocall = pluginHandle;
+    videoroom = pluginHandle;
     Janus.log("Plugin attached! (" +
-        this.videocall.getPlugin() +
+        this.videoroom.getPlugin() +
         ", id=" +
-        videocall.getId().toString() +
+        videoroom.getId().toString() +
         ")");
   }
 
