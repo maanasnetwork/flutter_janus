@@ -1627,9 +1627,12 @@ class Session {
   }
 
   prepareWebrtc(int handleId, bool offer, Callbacks callbacks) {
-    var jsep = offer
-        ? callbacks.jsep
-        : RTCSessionDescription(callbacks.jsep['sdp'], callbacks.jsep['type']);
+    RTCSessionDescription jsep;
+    if (callbacks.jsep != null) {
+      jsep =
+          RTCSessionDescription(callbacks.jsep['sdp'], callbacks.jsep['type']);
+    }
+
     if (offer && jsep != null) {
       Janus.error("Provided a JSEP to a createOffer");
       callbacks.error("Provided a JSEP to a createOffer");
@@ -1918,7 +1921,7 @@ class Session {
       if (videoSupport && media != null) {
         bool simulcast = (callbacks.simulcast == true);
         bool simulcast2 = (callbacks.simulcast2 == true);
-        if ((simulcast || simulcast2) && !jsep && !media['video'])
+        if ((simulcast || simulcast2) && jsep == null && !media['video'])
           media['video'] = "hires";
         if (media['video'] &&
             media['video'] != 'screen' &&
@@ -2524,7 +2527,7 @@ class Session {
       callbacks.error("Invalid handle");
       return;
     }
-    var simulcast = (callbacks['simulcast'] == true);
+    bool simulcast = callbacks.simulcast == true;
     if (!simulcast) {
       Janus.log(
           "Creating answer (iceDone=" + pluginHandle.iceDone.toString() + ")");
@@ -2812,18 +2815,14 @@ class Session {
       Janus.warn("Local SDP instance is invalid, not sending anything...");
       return;
     }
-    pluginHandle.pc
-        .getLocalDescription()
-        .then((RTCSessionDescription rtcSessionDescription) {
-      pluginHandle.mySdp = {
-        "type": rtcSessionDescription.type,
-        "sdp": rtcSessionDescription.sdp,
-      };
+    pluginHandle.pc.getLocalDescription().then((RTCSessionDescription jsep) {
+      pluginHandle.mySdp = jsep.sdp;
     }).catchError((error, StackTrace stackTrace) {
       Janus.log(error);
     });
 
-    if (pluginHandle.trickle == false) pluginHandle.mySdp["trickle"] = false;
+    // FIX ME
+    // if (pluginHandle.trickle == false) pluginHandle.mySdp["trickle"] = false;
     Janus.debug(callbacks);
     pluginHandle.sdpSent = true;
     callbacks.success(pluginHandle.mySdp);

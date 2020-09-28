@@ -8,8 +8,8 @@ class Plugin {
   MediaStream myStream;
   bool streamExternal;
   MediaStream remoteStream;
-  var mySdp;
-  var remoteSdp;
+  String mySdp;
+  String remoteSdp;
   bool sdpSent;
   Map<String, dynamic> mediaConstraints;
   RTCPeerConnection pc;

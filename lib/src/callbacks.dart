@@ -40,8 +40,8 @@ class Callbacks {
   bool noRequest;
   dynamic rtcConstraints;
 
-  bool simulcast;
-  bool simulcast2;
+  bool simulcast = false;
+  bool simulcast2 = false;
   bool trickle = true;
   bool iceRestart = false;
   MediaStream stream;

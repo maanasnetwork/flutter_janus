@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -164,7 +163,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
         ));
   }
 
-  answerCallDialog() {
+  answerCallDialog(jsep) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -175,7 +174,7 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
             FlatButton(
               child: Text("Accept"),
               onPressed: () {
-                answerCall();
+                answerCall(jsep);
                 Navigator.of(context).pop();
               },
             ),
