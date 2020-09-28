@@ -1,3 +1,8 @@
+[0.0.4] - 2020-09-27
+
+- Bug fix incomingcall jsep
+- Add documentation for the package
+
 [0.0.3] - 2020-09-26
 
 - Bug fix dtmf_sender
