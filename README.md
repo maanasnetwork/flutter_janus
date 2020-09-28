@@ -19,8 +19,27 @@ The code is organised in four files
 | Rest/Http API    | Yes     | Yes         |
 | Echotest Plugin  | Yes     | No          |
 | Videocall Plugin | Yes     | No          |
-| Sipcall Plugin   | WIP     | No          |
+| Sipcall Plugin   | Yes     | No          |
 | Videoroom Plugin | WIP     | No          |
+
+For SIP call, please modify the registerUsername function in janus_demo_sip_call.dart. I will be adding the code for UI shortly.
+
+```
+registerUsername(username) {
+    if (sipcall != null) {
+      final _body = {
+        "authuser": "authUser",
+        "display_name": "displayName",
+        "request": "register",
+        "username": "sip:authUser@sipServer",
+        "secret": "secret"
+      };
+      Callbacks callbacks = Callbacks();
+      callbacks.message = _body;
+      sipcall.send(callbacks);
+    }
+}
+```
 
 ## Getting Started
 

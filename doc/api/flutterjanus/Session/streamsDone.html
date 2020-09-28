@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the streamsDone method from the Session class, for the Dart programming language.">
+  <title>streamsDone method - Session class - flutterjanus library - Dart API</title>
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../../static-assets/github.css">
+  <link rel="stylesheet" href="../../static-assets/styles.css">
+  <link rel="icon" href="../../static-assets/favicon.png">
+
+</head>
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+    <li class="self-crumb">streamsDone method</li>
+  </ol>
+  <div class="self-name">streamsDone</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="../../index.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+      <li class="self-crumb">streamsDone method</li>
+    </ol>
+    
+    <h5>Session class</h5>
+    <ol>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#constructors">Constructors</a></li>
+        <li><a href="../../flutterjanus/Session/Session.html">Session</a></li>
+    
+        <li class="section-title">
+            <a href="../../flutterjanus/Session-class.html#instance-properties">Properties</a>
+        </li>
+        <li><a href="../../flutterjanus/Session/apiSecret.html">apiSecret</a></li>
+        <li><a href="../../flutterjanus/Session/bundlePolicy.html">bundlePolicy</a></li>
+        <li><a href="../../flutterjanus/Session/connected.html">connected</a></li>
+        <li><a href="../../flutterjanus/Session/destroyOnUnload.html">destroyOnUnload</a></li>
+        <li><a href="../../flutterjanus/Session/gatewayCallbacks.html">gatewayCallbacks</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+        <li><a href="../../flutterjanus/Session/iceServers.html">iceServers</a></li>
+        <li><a href="../../flutterjanus/Session/iceTransportPolicy.html">iceTransportPolicy</a></li>
+        <li><a href="../../flutterjanus/Session/ipv6Support.html">ipv6Support</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlivePeriod.html">keepAlivePeriod</a></li>
+        <li><a href="../../flutterjanus/Session/longPollTimeout.html">longPollTimeout</a></li>
+        <li><a href="../../flutterjanus/Session/maxev.html">maxev</a></li>
+        <li><a href="../../flutterjanus/Session/maxPollEvents.html">maxPollEvents</a></li>
+        <li><a href="../../flutterjanus/Session/pluginHandles.html">pluginHandles</a></li>
+        <li><a href="../../flutterjanus/Session/protocols.html">protocols</a></li>
+        <li><a href="../../flutterjanus/Session/retries.html">retries</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+        <li><a href="../../flutterjanus/Session/server.html">server</a></li>
+        <li><a href="../../flutterjanus/Session/servers.html">servers</a></li>
+        <li><a href="../../flutterjanus/Session/serversIndex.html">serversIndex</a></li>
+        <li><a href="../../flutterjanus/Session/sessionId.html">sessionId</a></li>
+        <li><a href="../../flutterjanus/Session/token.html">token</a></li>
+        <li><a href="../../flutterjanus/Session/transactions.html">transactions</a></li>
+        <li><a href="../../flutterjanus/Session/websockets.html">websockets</a></li>
+        <li><a href="../../flutterjanus/Session/withCredentials.html">withCredentials</a></li>
+        <li><a href="../../flutterjanus/Session/ws.html">ws</a></li>
+        <li><a href="../../flutterjanus/Session/wsHandlers.html">wsHandlers</a></li>
+        <li><a href="../../flutterjanus/Session/wsKeepaliveTimeoutId.html">wsKeepaliveTimeoutId</a></li>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#instance-methods">Methods</a></li>
+        <li><a href="../../flutterjanus/Session/attach.html">attach</a></li>
+        <li><a href="../../flutterjanus/Session/cleanupWebrtc.html">cleanupWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/createAnswer.html">createAnswer</a></li>
+        <li><a href="../../flutterjanus/Session/createDataChannel.html">createDataChannel</a></li>
+        <li><a href="../../flutterjanus/Session/createHandle.html">createHandle</a></li>
+        <li><a href="../../flutterjanus/Session/createOffer.html">createOffer</a></li>
+        <li><a href="../../flutterjanus/Session/createSession.html">createSession</a></li>
+        <li><a href="../../flutterjanus/Session/destroy.html">destroy</a></li>
+        <li><a href="../../flutterjanus/Session/destroyHandle.html">destroyHandle</a></li>
+        <li><a href="../../flutterjanus/Session/destroySession.html">destroySession</a></li>
+        <li><a href="../../flutterjanus/Session/eventHandler.html">eventHandler</a></li>
+        <li><a href="../../flutterjanus/Session/getBitrate.html">getBitrate</a></li>
+        <li><a href="../../flutterjanus/Session/getMaxBitrates.html">getMaxBitrates</a></li>
+        <li><a href="../../flutterjanus/Session/getServer.html">getServer</a></li>
+        <li><a href="../../flutterjanus/Session/getSessionId.html">getSessionId</a></li>
+        <li><a href="../../flutterjanus/Session/getVolume.html">getVolume</a></li>
+        <li><a href="../../flutterjanus/Session/handleEvent.html">handleEvent</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioRecvEnabled.html">isAudioRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendEnabled.html">isAudioSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendRequired.html">isAudioSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/isConnected.html">isConnected</a></li>
+        <li><a href="../../flutterjanus/Session/isDataEnabled.html">isDataEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isMuted.html">isMuted</a></li>
+        <li><a href="../../flutterjanus/Session/isScreenSendEnabled.html">isScreenSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isTrickleEnabled.html">isTrickleEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoRecvEnabled.html">isVideoRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendEnabled.html">isVideoSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendRequired.html">isVideoSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlive.html">keepAlive</a></li>
+        <li><a href="../../flutterjanus/Session/mungeSdpForSimulcasting.html">mungeSdpForSimulcasting</a></li>
+        <li><a href="../../flutterjanus/Session/mute.html">mute</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtc.html">prepareWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtcPeer.html">prepareWebrtcPeer</a></li>
+        <li><a href="../../flutterjanus/Session/reconnect.html">reconnect</a></li>
+        <li><a href="../../flutterjanus/Session/sendData.html">sendData</a></li>
+        <li><a href="../../flutterjanus/Session/sendDtmf.html">sendDtmf</a></li>
+        <li><a href="../../flutterjanus/Session/sendMessage.html">sendMessage</a></li>
+        <li><a href="../../flutterjanus/Session/sendSDP.html">sendSDP</a></li>
+        <li><a href="../../flutterjanus/Session/sendTrickleCandidate.html">sendTrickleCandidate</a></li>
+        <li><a href="../../flutterjanus/Session/streamsDone.html">streamsDone</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+        <li><a href="../../flutterjanus/Session/webrtcError.html">webrtcError</a></li>
+    
+        <li class="section-title inherited"><a href="../../flutterjanus/Session-class.html#operators">Operators</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+    
+    
+    
+    
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">streamsDone</span> method </h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">Future</span>
+            <span class="name ">streamsDone</span>
+(<wbr><ol class="parameter-list"><li><span class="parameter" id="streamsDone-param-handleId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">handleId</span>, </span></li>
+<li><span class="parameter" id="streamsDone-param-jsep"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_webrtc/0.3.3/flutter_webrtc/RTCSessionDescription-class.html">RTCSessionDescription</a></span> <span class="parameter-name">jsep</span>, </span></li>
+<li><span class="parameter" id="streamsDone-param-media"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a></span> <span class="parameter-name">media</span>, </span></li>
+<li><span class="parameter" id="streamsDone-param-callbacks"><span class="type-annotation">dynamic</span> <span class="parameter-name">callbacks</span>, </span></li>
+<li><span class="parameter" id="streamsDone-param-stream"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_webrtc/0.3.3/flutter_webrtc/MediaStream-class.html">MediaStream</a></span> <span class="parameter-name">stream</span></span></li>
+</ol>)
+      
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">streamsDone(int handleId, RTCSessionDescription jsep, Map media, callbacks,
+    MediaStream stream) async {
+  Plugin pluginHandle = this.pluginHandles[handleId.toString()];
+  if (pluginHandle == null) {
+    Janus.warn(&quot;Invalid handle&quot;);
+    callbacks.error(&quot;Invalid handle&quot;);
+    return;
+  }
+  Janus.debug(&quot;streamsDone:&quot; + stream.toString());
+  if (stream != null) {
+    Janus.debug(&quot;  -- Audio tracks:&quot; + stream.getAudioTracks().toString());
+    Janus.debug(&quot;  -- Video tracks:&quot; + stream.getVideoTracks().toString());
+  }
+  &#47;&#47; We&#39;re now capturing the new stream: check if we&#39;re updating or if it&#39;s a new thing
+  bool addTracks = false;
+  if (pluginHandle.myStream == null ||
+      !media[&#39;update&#39;] ||
+      pluginHandle.streamExternal) {
+    pluginHandle.myStream = stream;
+    addTracks = true;
+  } else {
+    &#47;&#47; We only need to update the existing stream
+    if (((!media[&#39;update&#39;] &amp;&amp; isAudioSendEnabled(media)) ||
+            (media[&#39;update&#39;] &amp;&amp;
+                (media[&#39;addAudio&#39;] || media[&#39;replaceAudio&#39;]))) &amp;&amp;
+        stream.getAudioTracks() != null &amp;&amp;
+        stream.getAudioTracks().length &gt; 0) {
+      pluginHandle.myStream.addTrack(stream.getAudioTracks()[0]);
+      if (Janus.unifiedPlan) {
+        &#47;&#47; Use Transceivers
+        Janus.log((media[&#39;replaceAudio&#39;] ? &quot;Replacing&quot; : &quot;Adding&quot;) +
+            &quot; audio track:&quot; +
+            stream.getAudioTracks()[0].toString());
+        Map&lt;String, dynamic&gt; audioTransceiver;
+        &#47;&#47; FIX ME
+        &#47;&#47; List transceivers = pc.getTransceivers();
+        List transceivers = [];
+        if (transceivers != null &amp;&amp; transceivers.length &gt; 0) {
+          for (var t in transceivers) {
+            &#47;&#47; TODO sender is MediaStreamTrack
+            if ((t[&#39;sender&#39;] &amp;&amp;
+                    t[&#39;sender&#39;].track &amp;&amp;
+                    t[&#39;sender&#39;].track.kind == &quot;audio&quot;) ||
+                (t[&#39;receiver&#39;] &amp;&amp;
+                    t[&#39;receiver&#39;].track &amp;&amp;
+                    t[&#39;receiver&#39;].track.kind == &quot;audio&quot;)) {
+              audioTransceiver = t;
+              break;
+            }
+          }
+        }
+        if (audioTransceiver != null &amp;&amp; audioTransceiver[&#39;sender&#39;] != null) {
+          &#47;&#47; Todo implement replaceTrack
+          audioTransceiver[&#39;sender&#39;].replaceTrack(stream.getAudioTracks()[0]);
+        } else {
+          &#47;&#47; FIX ME
+          &#47;&#47; pc.addTrack(stream.getAudioTracks()[0], stream);
+          pluginHandle.pc.addStream(stream);
+        }
+      } else {
+        Janus.log((media[&#39;replaceAudio&#39;] ? &quot;Replacing&quot; : &quot;Adding&quot;) +
+            &quot; audio track:&quot; +
+            stream.getAudioTracks()[0].toString());
+        &#47;&#47; FIX ME
+        &#47;&#47; pc.addTrack(stream.getAudioTracks()[0], stream);
+        pluginHandle.pc.addStream(stream);
+      }
+    }
+    if (((!media[&#39;update&#39;] &amp;&amp; isVideoSendEnabled(media)) ||
+            (media[&#39;update&#39;] &amp;&amp;
+                (media[&#39;addVideo&#39;] || media[&#39;replaceVideo&#39;]))) &amp;&amp;
+        stream.getVideoTracks() != null &amp;&amp;
+        stream.getVideoTracks().length &gt; 0) {
+      pluginHandle.myStream.addTrack(stream.getVideoTracks()[0]);
+      if (Janus.unifiedPlan) {
+        &#47;&#47; Use Transceivers
+        Janus.log((media[&#39;replaceVideo&#39;] ? &quot;Replacing&quot; : &quot;Adding&quot;) +
+            &quot; video track:&quot; +
+            stream.getVideoTracks()[0].toString());
+        Map&lt;String, dynamic&gt; videoTransceiver;
+        &#47;&#47; List transceivers = pc.getTransceivers();
+        List transceivers = [];
+        if (transceivers != null &amp;&amp; transceivers.length &gt; 0) {
+          for (var t in transceivers) {
+            &#47;&#47; TODO sender is MediaStreamTrack
+            if ((t[&#39;sender&#39;] &amp;&amp;
+                    t[&#39;sender&#39;].track &amp;&amp;
+                    t[&#39;sender&#39;].track.kind == &quot;video&quot;) ||
+                (t[&#39;receiver&#39;] &amp;&amp;
+                    t[&#39;receiver&#39;].track &amp;&amp;
+                    t[&#39;receiver&#39;].track.kind == &quot;video&quot;)) {
+              videoTransceiver = t;
+              break;
+            }
+          }
+        }
+        if (videoTransceiver != null &amp;&amp; videoTransceiver[&#39;sender&#39;] != null) {
+          &#47;&#47; Todo implement replaceTrack
+          videoTransceiver[&#39;sender&#39;].replaceTrack(stream.getVideoTracks()[0]);
+        } else {
+          &#47;&#47; FIX ME
+          &#47;&#47; pc.addTrack(stream.getVideoTracks()[0], stream);
+          pluginHandle.pc.addStream(stream);
+        }
+      } else {
+        Janus.log((media[&#39;replaceVideo&#39;] ? &quot;Replacing&quot; : &quot;Adding&quot;) +
+            &quot; video track:&quot; +
+            stream.getVideoTracks()[0].toString());
+        &#47;&#47; FIX ME
+        &#47;&#47; pc.addTrack(stream.getVideoTracks()[0], stream);
+        pluginHandle.pc.addStream(stream);
+      }
+    }
+  }
+  &#47;&#47; If we still need to create a PeerConnection, let&#39;s do that
+  if (pluginHandle.pc == null) {
+    Map&lt;String, dynamic&gt; pcConfig = {&quot;iceServers&quot;: this.iceServers};
+    if (this.iceTransportPolicy != null)
+      pcConfig[&quot;iceTransportPolicy&quot;] = this.iceTransportPolicy;
+    if (this.bundlePolicy != null)
+      pcConfig[&quot;bundlePolicy&quot;] = this.bundlePolicy;
+    if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;chrome&quot;) {
+      &#47;&#47; For Chrome versions before 72, we force a plan-b semantic, and unified-plan otherwise
+      pcConfig[&quot;sdpSemantics&quot;] =
+          (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;version&#39;] &lt; 72)
+              ? &quot;plan-b&quot;
+              : &quot;unified-plan&quot;;
+    }
+    Map&lt;String, dynamic&gt; pcConstraints = {
+      &quot;mandatory&quot;: {},
+      &quot;optional&quot;: [
+        {&quot;DtlsSrtpKeyAgreement&quot;: true}
+      ]
+    };
+    if (this.ipv6Support) {
+      pcConstraints[&#39;optional&#39;].add({&quot;googIPv6&quot;: true});
+    }
+    &#47;&#47; Any custom constraint to add?
+    if (callbacks.rtcConstraints != null) {
+      Janus.debug(&quot;Adding custom PeerConnection constraints:&quot; +
+          callbacks.rtcConstraints.toString()); &#47;&#47; FIX ME
+      for (var i in callbacks.rtcConstraints) {
+        pcConstraints[&#39;optional&#39;].add(callbacks.rtcConstraints[i]);
+      }
+    }
+    if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;edge&quot;) {
+      &#47;&#47; This is Edge, enable BUNDLE explicitly
+      pcConfig[&#39;bundlePolicy&#39;] = &quot;max-bundle&quot;;
+    }
+    Janus.log(&quot;Creating PeerConnection&quot;);
+    Janus.debug(pcConstraints.toString());
+    Janus.debug(pcConfig.toString());
+    &#47;&#47; From webrtc
+    pluginHandle.pc = await createPeerConnection(pcConfig, pcConstraints);
+    Janus.debug(&quot;Peer Connection is ready&quot;);
+    Janus.debug(pluginHandle.pc.toString());
+    &#47;&#47; FIXME
+
+    &#47;&#47; pluginHandle.pc.getStats().then((List&lt;StatsReport&gt; stats) {
+    &#47;&#47;   if (stats != null) {
+    &#47;&#47;     Janus.log(
+    &#47;&#47;         &quot;PC Stats: &quot; + stats[1].type + stats[1].values.toString());
+    &#47;&#47;     pluginHandle.volume = {};
+    &#47;&#47;     pluginHandle.bitrate[&#39;value&#39;] = &quot;0 kbits&#47;sec&quot;;
+    &#47;&#47;   }
+    &#47;&#47; }).catchError((error, StackTrace stackTrace) {
+    &#47;&#47;   Janus.error(error.toString());
+    &#47;&#47; });
+
+    Janus.log(&quot;Preparing local SDP and gathering candidates (trickle=&quot; +
+        pluginHandle.trickle.toString() +
+        &quot;)&quot;);
+
+    pluginHandle.pc.onIceConnectionState = (RTCIceConnectionState state) {
+      if (pluginHandle.pc != null) pluginHandle.iceState(state);
+    };
+
+    pluginHandle.pc.onIceCandidate = (RTCIceCandidate candidate) {
+      if (candidate == null ||
+          (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &#39;edge&#39; &amp;&amp;
+              candidate.candidate.indexOf(&#39;endOfCandidates&#39;) &gt; 0)) {
+        Janus.log(&quot;End of candidates.&quot;);
+        pluginHandle.iceDone = true;
+        Janus.log(pluginHandle.trickle);
+        if (pluginHandle.trickle == true) {
+          &#47;&#47; Notify end of candidates
+          sendTrickleCandidate(handleId, {&quot;completed&quot;: true});
+        } else {
+          &#47;&#47; No trickle, time to send the complete SDP (including all candidates)
+          sendSDP(handleId, callbacks);
+        }
+      } else {
+        &#47;&#47; JSON.stringify doesn&#39;t work on some WebRTC objects anymore
+        &#47;&#47; See https:&#47;&#47;code.google.com&#47;p&#47;chromium&#47;issues&#47;detail?id=467366
+        &#47;&#47; RTCIceCandidate candidate = RTCIceCandidate(iceCandidate.candidate,
+        &#47;&#47;     iceCandidate.sdpMid, iceCandidate.sdpMlineIndex);
+        if (pluginHandle.trickle == true) {
+          &#47;&#47; Send candidate
+          sendTrickleCandidate(handleId, candidate.toMap());
+          Janus.debug(candidate.toMap());
+        }
+      }
+    };
+
+    pluginHandle.pc.onAddStream = (MediaStream stream) {
+      Janus.log(&quot;Handling Remote Stream&quot;);
+      Janus.debug(stream);
+      if (stream == null) return;
+      pluginHandle.remoteStream = stream;
+      pluginHandle.onRemoteStream(stream);
+    };
+
+    pluginHandle.pc.onRemoveStream = (MediaStream stream) {
+      Janus.log(&#39;onRemoveStream event call&#39;);
+      Janus.log(stream.toString());
+    };
+
+    pluginHandle.pc.onAddTrack =
+        (MediaStream stream, MediaStreamTrack track) {
+      Janus.log(&quot;Handling Remote Track&quot;);
+      Janus.debug(stream);
+      if (stream == null) return;
+      pluginHandle.remoteStream = stream;
+      pluginHandle.onRemoteStream(stream);
+
+      &#47;&#47; FIX ME no equivalent call exists in flutter_webrtc
+      &#47;&#47; if (event.track.onended) return;
+      &#47;&#47; Janus.log(&quot;Adding onended callback to track:&quot; + event.track);
+      &#47;&#47; event.track.onended = (ev) {
+      &#47;&#47;   Janus.log(&quot;Remote track muted&#47;removed:&quot; + ev);
+      &#47;&#47;   if (pluginHandle.remoteStream) {
+      &#47;&#47;     pluginHandle.remoteStream.removeTrack(ev.target);
+      &#47;&#47;     pluginHandle.onremotestream(pluginHandle.remoteStream);
+      &#47;&#47;   }
+      &#47;&#47; };
+
+      &#47;&#47; FIX ME no equivalent call exists in flutter_webrtc
+      &#47;&#47; event.track.onmute = event.track.onended;
+      &#47;&#47; event.track.onunmute = (ev) {
+      &#47;&#47;   Janus.log(&quot;Remote track flowing again:&quot; + ev);
+      &#47;&#47;   try {
+      &#47;&#47;     pluginHandle.remoteStream.addTrack(ev.target);
+      &#47;&#47;     pluginHandle.onremotestream(pluginHandle.remoteStream);
+      &#47;&#47;   } catch (e) {
+      &#47;&#47;     Janus.error(e);
+      &#47;&#47;   }
+      &#47;&#47;   ;
+      &#47;&#47; };
+    };
+
+    &#47;&#47; TODO connect addTrack
+    if (addTracks &amp;&amp; stream != null) {
+      &#47;&#47; var simulcast2 = (callbacks.simulcast2 == true);
+      &#47;&#47; FIX ME: janus.js  find out all the track from the stream and then add to the PC
+      &#47;&#47; There is no equivalnet call in flutter_webrtc. We will add the stream to PC
+      pluginHandle.pc.addStream(stream).then((void v) {
+        Janus.log(&quot;Stream added to PC&quot;);
+      }).catchError((error, StackTrace stackTrace) {
+        Janus.log(stackTrace);
+        Janus.error(error.toString());
+      });
+      &#47;&#47; &#47;&#47; Get a list of audio and video tracks
+      &#47;&#47; List&lt;MediaStreamTrack&gt; tracks =
+      &#47;&#47;     stream.getAudioTracks() + stream.getVideoTracks();
+      &#47;&#47; tracks.forEach((MediaStreamTrack track) {
+      &#47;&#47;   Janus.log(&#39;Adding local track:&#39; + track.toString());
+      &#47;&#47;   if (!simulcast2) {
+      &#47;&#47;     Janus.log(&#39;here i am&#39;);
+      &#47;&#47;     pluginHandle.pc.addTrack(track, stream);
+      &#47;&#47;   } else {
+      &#47;&#47;     if (track.kind == &quot;audio&quot;) {
+      &#47;&#47;       pluginHandle.pc.addTrack(track, stream);
+      &#47;&#47;     } else {
+      &#47;&#47;       Janus.log(
+      &#47;&#47;           &#39;Enabling rid-based simulcasting:&#39; + track.toString());
+      &#47;&#47;       var maxBitrates =
+      &#47;&#47;           getMaxBitrates(callbacks.simulcastMaxBitrates);
+      &#47;&#47;       pc.addTransceiver(track, {
+      &#47;&#47;         &#39;direction&#39;: &quot;sendrecv&quot;,
+      &#47;&#47;         &#39;streams&#39;: [stream],
+      &#47;&#47;         &#39;sendEncodings&#39;: [
+      &#47;&#47;           {
+      &#47;&#47;             &#39;rid&#39;: &quot;h&quot;,
+      &#47;&#47;             &#39;active&#39;: true,
+      &#47;&#47;             &#39;maxBitrate&#39;: maxBitrates[&#39;high&#39;]
+      &#47;&#47;           },
+      &#47;&#47;           {
+      &#47;&#47;             &#39;rid&#39;: &quot;m&quot;,
+      &#47;&#47;             &#39;active&#39;: true,
+      &#47;&#47;             &#39;maxBitrate&#39;: maxBitrates[&#39;medium&#39;],
+      &#47;&#47;             &#39;scaleResolutionDownBy&#39;: 2
+      &#47;&#47;           },
+      &#47;&#47;           {
+      &#47;&#47;             &#39;rid&#39;: &quot;l&quot;,
+      &#47;&#47;             &#39;active&#39;: true,
+      &#47;&#47;             &#39;maxBitrate&#39;: maxBitrates[&#39;low&#39;],
+      &#47;&#47;             &#39;scaleResolutionDownBy&#39;: 4
+      &#47;&#47;           }
+      &#47;&#47;         ]
+      &#47;&#47;       });
+      &#47;&#47;     }
+      &#47;&#47;   }
+      &#47;&#47; });
+    }
+
+    &#47;&#47; Any data channel to create?
+    if (isDataEnabled(media) &amp;&amp;
+        pluginHandle.dataChannels[Janus.dataChanDefaultLabel] == null) {
+      Janus.log(&quot;Creating data channel&quot;);
+      createDataChannel(handleId, Janus.dataChanDefaultLabel, null, null);
+      Janus.log(&#39;failing here&#39;);
+      pluginHandle.pc.onDataChannel = (var channel) {
+        Janus.log(
+            &quot;Data channel created by Janus:&quot; + channel.toString()); &#47;&#47; FIX ME
+        createDataChannel(handleId, &quot;label&quot;, channel, null);
+      };
+    }
+
+    &#47;&#47; If there&#39;s a new local stream, let&#39;s notify the application
+    if (pluginHandle.myStream != null) {
+      pluginHandle.onLocalStream(pluginHandle.myStream);
+    }
+
+    &#47;&#47; Create offer&#47;answer now
+    if (jsep == null) {
+      createOffer(handleId, media, callbacks);
+    } else {
+      pluginHandle.pc.setRemoteDescription(jsep).then((void v) {
+        Janus.log(&quot;Remote description accepted!&quot;);
+        pluginHandle.remoteSdp = jsep.sdp;
+        &#47;&#47; Any trickle candidate we cached?
+        if (pluginHandle.candidates != null &amp;&amp;
+            pluginHandle.candidates.length &gt; 0) {
+          for (var i = 0; i &lt; pluginHandle.candidates.length; i++) {
+            RTCIceCandidate candidate = pluginHandle.candidates[i];
+            Janus.debug(&quot;Adding remote candidate:&quot; + candidate.toString());
+            if (candidate == null) {
+              &#47;&#47; end-of-candidates
+              pluginHandle.pc.addCandidate(Janus.endOfCandidates);
+            } else {
+              &#47;&#47; New candidate
+              pluginHandle.pc.addCandidate(candidate);
+            }
+          }
+          pluginHandle.candidates = [];
+        }
+        &#47;&#47; Create the answer now
+        createAnswer(handleId, media, callbacks, null);
+      }).catchError((error, StackTrace stackTrade) {
+        callbacks.error(error);
+      });
+    }
+  }
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutterjanus
+      0.0.3
+  </span>
+
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../../static-assets/typeahead.bundle.min.js"></script>
+<script src="../../static-assets/highlight.pack.js"></script>
+<script src="../../static-assets/URI.js"></script>
+<script src="../../static-assets/script.js"></script>
+
+
+</body>
+
+</html>

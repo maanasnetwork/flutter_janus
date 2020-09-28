@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the prepareWebrtc method from the Session class, for the Dart programming language.">
+  <title>prepareWebrtc method - Session class - flutterjanus library - Dart API</title>
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../../static-assets/github.css">
+  <link rel="stylesheet" href="../../static-assets/styles.css">
+  <link rel="icon" href="../../static-assets/favicon.png">
+
+</head>
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+    <li class="self-crumb">prepareWebrtc method</li>
+  </ol>
+  <div class="self-name">prepareWebrtc</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="../../index.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+      <li class="self-crumb">prepareWebrtc method</li>
+    </ol>
+    
+    <h5>Session class</h5>
+    <ol>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#constructors">Constructors</a></li>
+        <li><a href="../../flutterjanus/Session/Session.html">Session</a></li>
+    
+        <li class="section-title">
+            <a href="../../flutterjanus/Session-class.html#instance-properties">Properties</a>
+        </li>
+        <li><a href="../../flutterjanus/Session/apiSecret.html">apiSecret</a></li>
+        <li><a href="../../flutterjanus/Session/bundlePolicy.html">bundlePolicy</a></li>
+        <li><a href="../../flutterjanus/Session/connected.html">connected</a></li>
+        <li><a href="../../flutterjanus/Session/destroyOnUnload.html">destroyOnUnload</a></li>
+        <li><a href="../../flutterjanus/Session/gatewayCallbacks.html">gatewayCallbacks</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+        <li><a href="../../flutterjanus/Session/iceServers.html">iceServers</a></li>
+        <li><a href="../../flutterjanus/Session/iceTransportPolicy.html">iceTransportPolicy</a></li>
+        <li><a href="../../flutterjanus/Session/ipv6Support.html">ipv6Support</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlivePeriod.html">keepAlivePeriod</a></li>
+        <li><a href="../../flutterjanus/Session/longPollTimeout.html">longPollTimeout</a></li>
+        <li><a href="../../flutterjanus/Session/maxev.html">maxev</a></li>
+        <li><a href="../../flutterjanus/Session/maxPollEvents.html">maxPollEvents</a></li>
+        <li><a href="../../flutterjanus/Session/pluginHandles.html">pluginHandles</a></li>
+        <li><a href="../../flutterjanus/Session/protocols.html">protocols</a></li>
+        <li><a href="../../flutterjanus/Session/retries.html">retries</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+        <li><a href="../../flutterjanus/Session/server.html">server</a></li>
+        <li><a href="../../flutterjanus/Session/servers.html">servers</a></li>
+        <li><a href="../../flutterjanus/Session/serversIndex.html">serversIndex</a></li>
+        <li><a href="../../flutterjanus/Session/sessionId.html">sessionId</a></li>
+        <li><a href="../../flutterjanus/Session/token.html">token</a></li>
+        <li><a href="../../flutterjanus/Session/transactions.html">transactions</a></li>
+        <li><a href="../../flutterjanus/Session/websockets.html">websockets</a></li>
+        <li><a href="../../flutterjanus/Session/withCredentials.html">withCredentials</a></li>
+        <li><a href="../../flutterjanus/Session/ws.html">ws</a></li>
+        <li><a href="../../flutterjanus/Session/wsHandlers.html">wsHandlers</a></li>
+        <li><a href="../../flutterjanus/Session/wsKeepaliveTimeoutId.html">wsKeepaliveTimeoutId</a></li>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#instance-methods">Methods</a></li>
+        <li><a href="../../flutterjanus/Session/attach.html">attach</a></li>
+        <li><a href="../../flutterjanus/Session/cleanupWebrtc.html">cleanupWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/createAnswer.html">createAnswer</a></li>
+        <li><a href="../../flutterjanus/Session/createDataChannel.html">createDataChannel</a></li>
+        <li><a href="../../flutterjanus/Session/createHandle.html">createHandle</a></li>
+        <li><a href="../../flutterjanus/Session/createOffer.html">createOffer</a></li>
+        <li><a href="../../flutterjanus/Session/createSession.html">createSession</a></li>
+        <li><a href="../../flutterjanus/Session/destroy.html">destroy</a></li>
+        <li><a href="../../flutterjanus/Session/destroyHandle.html">destroyHandle</a></li>
+        <li><a href="../../flutterjanus/Session/destroySession.html">destroySession</a></li>
+        <li><a href="../../flutterjanus/Session/eventHandler.html">eventHandler</a></li>
+        <li><a href="../../flutterjanus/Session/getBitrate.html">getBitrate</a></li>
+        <li><a href="../../flutterjanus/Session/getMaxBitrates.html">getMaxBitrates</a></li>
+        <li><a href="../../flutterjanus/Session/getServer.html">getServer</a></li>
+        <li><a href="../../flutterjanus/Session/getSessionId.html">getSessionId</a></li>
+        <li><a href="../../flutterjanus/Session/getVolume.html">getVolume</a></li>
+        <li><a href="../../flutterjanus/Session/handleEvent.html">handleEvent</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioRecvEnabled.html">isAudioRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendEnabled.html">isAudioSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendRequired.html">isAudioSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/isConnected.html">isConnected</a></li>
+        <li><a href="../../flutterjanus/Session/isDataEnabled.html">isDataEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isMuted.html">isMuted</a></li>
+        <li><a href="../../flutterjanus/Session/isScreenSendEnabled.html">isScreenSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isTrickleEnabled.html">isTrickleEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoRecvEnabled.html">isVideoRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendEnabled.html">isVideoSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendRequired.html">isVideoSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlive.html">keepAlive</a></li>
+        <li><a href="../../flutterjanus/Session/mungeSdpForSimulcasting.html">mungeSdpForSimulcasting</a></li>
+        <li><a href="../../flutterjanus/Session/mute.html">mute</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtc.html">prepareWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtcPeer.html">prepareWebrtcPeer</a></li>
+        <li><a href="../../flutterjanus/Session/reconnect.html">reconnect</a></li>
+        <li><a href="../../flutterjanus/Session/sendData.html">sendData</a></li>
+        <li><a href="../../flutterjanus/Session/sendDtmf.html">sendDtmf</a></li>
+        <li><a href="../../flutterjanus/Session/sendMessage.html">sendMessage</a></li>
+        <li><a href="../../flutterjanus/Session/sendSDP.html">sendSDP</a></li>
+        <li><a href="../../flutterjanus/Session/sendTrickleCandidate.html">sendTrickleCandidate</a></li>
+        <li><a href="../../flutterjanus/Session/streamsDone.html">streamsDone</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+        <li><a href="../../flutterjanus/Session/webrtcError.html">webrtcError</a></li>
+    
+        <li class="section-title inherited"><a href="../../flutterjanus/Session-class.html#operators">Operators</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+    
+    
+    
+    
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">prepareWebrtc</span> method </h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">dynamic</span>
+            <span class="name ">prepareWebrtc</span>
+(<wbr><ol class="parameter-list"><li><span class="parameter" id="prepareWebrtc-param-handleId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">handleId</span>, </span></li>
+<li><span class="parameter" id="prepareWebrtc-param-offer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">offer</span>, </span></li>
+<li><span class="parameter" id="prepareWebrtc-param-callbacks"><span class="type-annotation"><a href="../../flutterjanus/Callbacks-class.html">Callbacks</a></span> <span class="parameter-name">callbacks</span></span></li>
+</ol>)
+      
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">prepareWebrtc(int handleId, bool offer, Callbacks callbacks) {
+  RTCSessionDescription jsep;
+  if (callbacks.jsep != null) {
+    jsep =
+        RTCSessionDescription(callbacks.jsep[&#39;sdp&#39;], callbacks.jsep[&#39;type&#39;]);
+  }
+
+  if (offer &amp;&amp; jsep != null) {
+    Janus.error(&quot;Provided a JSEP to a createOffer&quot;);
+    callbacks.error(&quot;Provided a JSEP to a createOffer&quot;);
+    return;
+  } else if (!offer &amp;&amp;
+      (jsep == null || jsep.type == null || jsep.sdp == null)) {
+    Janus.error(&quot;A valid JSEP is required for createAnswer&quot;);
+    callbacks.error(&quot;A valid JSEP is required for createAnswer&quot;);
+    return;
+  }
+
+  &#47;* Check that callbacks.media is a (not null) Object *&#47;
+  callbacks.media = (callbacks.media != null)
+      ? callbacks.media
+      : {&#39;audio&#39;: true, &#39;video&#39;: true};
+  Map&lt;String, dynamic&gt; media = callbacks.media;
+  Plugin pluginHandle = this.pluginHandles[handleId.toString()];
+  if (pluginHandle == null) {
+    Janus.warn(&quot;Invalid handle&quot;);
+    callbacks.error(&quot;Invalid handle&quot;);
+    return;
+  }
+  pluginHandle.trickle = isTrickleEnabled(callbacks.trickle);
+  &#47;&#47; Are we updating a session?
+  if (pluginHandle.pc == null) {
+    &#47;&#47; Nope, new PeerConnection
+    media[&#39;update&#39;] = false;
+    media[&#39;keepAudio&#39;] = false;
+    media[&#39;keepVideo&#39;] = false;
+  } else {
+    Janus.log(&quot;Updating existing media session&quot;);
+    media[&#39;update&#39;] = true;
+    &#47;&#47; Check if there&#39;s anything to add&#47;remove&#47;replace, or if we
+    &#47;&#47; can go directly to preparing the new SDP offer or answer
+    if (callbacks.stream != null) {
+      &#47;&#47; External stream: is this the same as the one we were using before?
+      if (callbacks.stream != pluginHandle.myStream) {
+        Janus.log(&quot;Renegotiation involves a new external stream&quot;);
+      }
+    } else {
+      &#47;&#47; Check if there are changes on audio
+      if (media[&#39;addAudio&#39;]) {
+        media[&#39;keepAudio&#39;] = false;
+        media[&#39;replaceAudio&#39;] = false;
+        media[&#39;removeAudio&#39;] = false;
+        media[&#39;audioSend&#39;] = true;
+        if (pluginHandle.myStream != null &amp;&amp;
+            pluginHandle.myStream.getAudioTracks() != null &amp;&amp;
+            pluginHandle.myStream.getAudioTracks().length &gt; 0) {
+          Janus.error(&quot;Can&#39;t add audio stream, there already is one&quot;);
+          callbacks.error(&quot;Can&#39;t add audio stream, there already is one&quot;);
+          return;
+        }
+      } else if (media[&#39;removeAudio&#39;]) {
+        media[&#39;keepAudio&#39;] = false;
+        media[&#39;replaceAudio&#39;] = false;
+        media[&#39;addAudio&#39;] = false;
+        media[&#39;audioSend&#39;] = false;
+      } else if (media[&#39;replaceAudio&#39;]) {
+        media[&#39;keepAudio&#39;] = false;
+        media[&#39;addAudio&#39;] = false;
+        media[&#39;removeAudio&#39;] = false;
+        media[&#39;audioSend&#39;] = true;
+      }
+
+      if (pluginHandle.myStream == null) {
+        &#47;&#47; No media stream: if we were asked to replace, it&#39;s actually an &quot;add&quot;
+        if (media[&#39;replaceAudio&#39;]) {
+          media[&#39;keepAudio&#39;] = false;
+          media[&#39;replaceAudio&#39;] = false;
+          media[&#39;addAudio&#39;] = true;
+          media[&#39;audioSend&#39;] = true;
+        }
+        if (isAudioSendEnabled(media)) {
+          media[&#39;keepAudio&#39;] = false;
+          media[&#39;addAudio&#39;] = true;
+        }
+      } else {
+        if (pluginHandle.myStream.getAudioTracks() == null ||
+            pluginHandle.myStream.getAudioTracks().length == 0) {
+          &#47;&#47; No audio track: if we were asked to replace, it&#39;s actually an &quot;add&quot;
+          if (media[&#39;replaceAudio&#39;]) {
+            media[&#39;keepAudio&#39;] = false;
+            media[&#39;replaceAudio&#39;] = false;
+            media[&#39;addAudio&#39;] = true;
+            media[&#39;audioSend&#39;] = true;
+          }
+          if (isAudioSendEnabled(media)) {
+            media[&#39;keepAudio&#39;] = false;
+            media[&#39;addAudio&#39;] = true;
+          }
+        } else {
+          &#47;&#47; We have an audio track: should we keep it as it is?
+          if (isAudioSendEnabled(media) &amp;&amp;
+              !media[&#39;removeAudio&#39;] &amp;&amp;
+              !media[&#39;replaceAudio&#39;]) {
+            media[&#39;keepAudio&#39;] = true;
+          }
+        }
+      }
+      &#47;&#47; Check if there are changes on video
+      if (media[&#39;addVideo&#39;]) {
+        media[&#39;keepVideo&#39;] = false;
+        media[&#39;replaceVideo&#39;] = false;
+        media[&#39;removeVideo&#39;] = false;
+        media[&#39;videoSend&#39;] = true;
+        if (pluginHandle.myStream != null &amp;&amp;
+            pluginHandle.myStream.getVideoTracks() != null &amp;&amp;
+            pluginHandle.myStream.getVideoTracks().length &gt; 0) {
+          Janus.error(&quot;Can&#39;t add video stream, there already is one&quot;);
+          callbacks.error(&quot;Can&#39;t add video stream, there already is one&quot;);
+          return;
+        }
+      } else if (media[&#39;removeVideo&#39;]) {
+        media[&#39;keepVideo&#39;] = false;
+        media[&#39;replaceVideo&#39;] = false;
+        media[&#39;addVideo&#39;] = false;
+        media[&#39;videoSend&#39;] = false;
+      } else if (media[&#39;replaceVideo&#39;]) {
+        media[&#39;keepVideo&#39;] = false;
+        media[&#39;addVideo&#39;] = false;
+        media[&#39;removeVideo&#39;] = false;
+        media[&#39;videoSend&#39;] = true;
+      }
+      if (pluginHandle.myStream == null) {
+        &#47;&#47; No media stream: if we were asked to replace, it&#39;s actually an &quot;add&quot;
+        if (media[&#39;replaceVideo&#39;]) {
+          media[&#39;keepVideo&#39;] = false;
+          media[&#39;replaceVideo&#39;] = false;
+          media[&#39;addVideo&#39;] = true;
+          media[&#39;videoSend&#39;] = true;
+        }
+        if (isVideoSendEnabled(media)) {
+          media[&#39;keepVideo&#39;] = false;
+          media[&#39;addVideo&#39;] = true;
+        }
+      } else {
+        if (pluginHandle.myStream.getVideoTracks() == null ||
+            pluginHandle.myStream.getVideoTracks().length == 0) {
+          &#47;&#47; No video track: if we were asked to replace, it&#39;s actually an &quot;add&quot;
+          if (media[&#39;replaceVideo&#39;]) {
+            media[&#39;keepVideo&#39;] = false;
+            media[&#39;replaceVideo&#39;] = false;
+            media[&#39;addVideo&#39;] = true;
+            media[&#39;videoSend&#39;] = true;
+          }
+          if (isVideoSendEnabled(media)) {
+            media[&#39;keepVideo&#39;] = false;
+            media[&#39;addVideo&#39;] = true;
+          }
+        } else {
+          &#47;&#47; We have a video track: should we keep it as it is?
+          if (isVideoSendEnabled(media) &amp;&amp;
+              !media[&#39;removeVideo&#39;] &amp;&amp;
+              !media[&#39;replaceVideo&#39;]) {
+            media[&#39;keepVideo&#39;] = true;
+          }
+        }
+      }
+      &#47;&#47; Data channels can only be added
+      if (media[&#39;addData&#39;]) {
+        media[&#39;data&#39;] = true;
+      }
+    }
+    &#47;&#47; If we&#39;re updating and keeping all tracks, let&#39;s skip the getUserMedia part
+    if ((isAudioSendEnabled(media) &amp;&amp; media[&#39;keepAudio&#39;]) &amp;&amp;
+        (isVideoSendEnabled(media) &amp;&amp; media[&#39;keepVideo&#39;])) {
+      &#47;&#47; pluginHandle.consentDialog(false);
+      streamsDone(handleId, jsep, media, callbacks, pluginHandle.myStream);
+      return;
+    }
+  }
+
+  &#47;&#47; If we&#39;re updating, check if we need to remove&#47;replace one of the tracks
+  if (media[&#39;update&#39;] &amp;&amp; pluginHandle.streamExternal) {
+    if (media[&#39;removeAudio&#39;] || media[&#39;replaceAudio&#39;]) {
+      if (pluginHandle.myStream != null &amp;&amp;
+          pluginHandle.myStream.getAudioTracks() != null &amp;&amp;
+          pluginHandle.myStream.getAudioTracks().length &gt; 0) {
+        var at = pluginHandle.myStream.getAudioTracks()[0];
+        Janus.log(&quot;Removing audio track:&quot; + at.toString());
+        pluginHandle.myStream.removeTrack(at);
+        try {
+          &#47;&#47; at.stop();
+        } catch (e) {}
+      }
+      &#47;&#47; FIX ME
+      &#47;&#47; if (pluginHandle.pc.getSenders() &amp;&amp; pluginHandle.pc.getSenders().length) {
+      &#47;&#47;   var ra = true;
+      &#47;&#47;   if (media[&#39;replaceAudio&#39;] &amp;&amp; Janus.unifiedPlan) {
+      &#47;&#47;     &#47;&#47; We can use replaceTrack
+      &#47;&#47;     ra = false;
+      &#47;&#47;   }
+      &#47;&#47;   if (ra) {
+      &#47;&#47;     for (var asnd in pluginHandle.pc.getSenders()) {
+      &#47;&#47;       if (asnd != null &amp;&amp;
+      &#47;&#47;           asnd.track != null &amp;&amp;
+      &#47;&#47;           asnd.track.kind == &quot;audio&quot;) {
+      &#47;&#47;         Janus.log(&quot;Removing audio sender:&quot; + asnd.toString());
+      &#47;&#47;         pluginHandle.pc.removeTrack(asnd);
+      &#47;&#47;       }
+      &#47;&#47;     }
+      &#47;&#47;   }
+      &#47;&#47; }
+    }
+    if (media[&#39;removeVideo&#39;] || media[&#39;replaceVideo&#39;]) {
+      if (pluginHandle.myStream != null &amp;&amp;
+          pluginHandle.myStream.getVideoTracks() != null &amp;&amp;
+          pluginHandle.myStream.getVideoTracks().length &gt; 0) {
+        var vt = pluginHandle.myStream.getVideoTracks()[0];
+        Janus.log(&quot;Removing video track:&quot;, vt);
+        pluginHandle.myStream.removeTrack(vt);
+        try {
+          &#47;&#47; vt.stop();
+        } catch (e) {}
+      }
+      &#47;&#47; FIX ME
+      &#47;&#47; if (pluginHandle.pc.getSenders() &amp;&amp; pluginHandle.pc.getSenders().length) {
+      &#47;&#47;   var rv = true;
+      &#47;&#47;   if (media[&#39;replaceVideo&#39;] &amp;&amp; Janus.unifiedPlan) {
+      &#47;&#47;     &#47;&#47; We can use replaceTrack
+      &#47;&#47;     rv = false;
+      &#47;&#47;   }
+      &#47;&#47;   if (rv) {
+      &#47;&#47;     for (var vsnd in pc.getSenders()) {
+      &#47;&#47;       if (vsnd != null &amp;&amp;
+      &#47;&#47;           vsnd.track != null &amp;&amp;
+      &#47;&#47;           vsnd.track.kind == &quot;video&quot;) {
+      &#47;&#47;         Janus.log(&quot;Removing video sender:&quot;, vsnd);
+      &#47;&#47;         pluginHandle.pc.removeTrack(vsnd);
+      &#47;&#47;       }
+      &#47;&#47;     }
+      &#47;&#47;   }
+      &#47;&#47; }
+    }
+  }
+
+  &#47;&#47; Was a MediaStream object passed, or do we need to take care of that?
+  if (callbacks.stream != null) {
+    MediaStream stream = callbacks.stream;
+    Janus.log(&quot;MediaStream provided by the application&quot;);
+    Janus.debug(stream);
+    &#47;&#47; If this is an update, let&#39;s check if we need to release the previous stream
+    if (media[&#39;update&#39;]) {
+      if (pluginHandle.myStream != null &amp;&amp;
+          pluginHandle.myStream != callbacks.stream &amp;&amp;
+          pluginHandle.streamExternal) {
+        &#47;&#47; We&#39;re replacing a stream we captured ourselves with an external one
+        try {
+          &#47;&#47; Try a MediaStreamTrack.stop() for each track
+          &#47;&#47; List tracks = pluginHandle.myStream.getTracks();
+          &#47;&#47; for (MediaStreamTrack mst in tracks) {
+          &#47;&#47;   Janus.log(mst);
+          &#47;&#47;   if (mst != null) mst.dispose();
+          &#47;&#47; }
+        } catch (e) {
+          &#47;&#47; Do nothing if this fails
+        }
+        pluginHandle.myStream = null;
+      }
+    }
+    &#47;&#47; Skip the getUserMedia part
+    pluginHandle.streamExternal = true;
+    &#47;&#47; pluginHandle.consentDialog(false);
+    streamsDone(handleId, jsep, media, callbacks, stream);
+    return;
+  }
+
+  if (isAudioSendEnabled(media) || isVideoSendEnabled(media)) {
+    if (!Janus.isGetUserMediaAvailable()) {
+      callbacks.error(&quot;getUserMedia not available&quot;);
+      return;
+    }
+    Map&lt;String, dynamic&gt; constraints = {
+      &#39;mandatory&#39;: {},
+      &#39;optional&#39;: [
+        {&#39;DtlsSrtpKeyAgreement&#39;: true},
+      ]
+    };
+    &#47;&#47; pluginHandle.consentDialog(true);
+    bool audioSupport = isAudioSendEnabled(media);
+    if (audioSupport &amp;&amp; media != null &amp;&amp; media[&#39;audio&#39;] is bool)
+      bool audioSupport = media[&#39;audio&#39;];
+
+    bool videoSupport = isVideoSendEnabled(media);
+    if (videoSupport &amp;&amp; media != null) {
+      bool simulcast = (callbacks.simulcast == true);
+      bool simulcast2 = (callbacks.simulcast2 == true);
+      if ((simulcast || simulcast2) &amp;&amp; jsep == null &amp;&amp; !media[&#39;video&#39;])
+        media[&#39;video&#39;] = &quot;hires&quot;;
+      if (media[&#39;video&#39;] &amp;&amp;
+          media[&#39;video&#39;] != &#39;screen&#39; &amp;&amp;
+          media[&#39;video&#39;] != &#39;window&#39;) {
+        if (media[&#39;video&#39;] is String) {
+          videoSupport = media[&#39;video&#39;];
+        } else {
+          int width = 0;
+          int height = 0;
+          int maxHeight = 0;
+          if (media[&#39;video&#39;] == &#39;lowres&#39;) {
+            &#47;&#47; Small resolution, 4:3
+            height = 240;
+            maxHeight = 240;
+            width = 320;
+          } else if (media[&#39;video&#39;] == &#39;lowres-16:9&#39;) {
+            &#47;&#47; Small resolution, 16:9
+            height = 180;
+            maxHeight = 180;
+            width = 320;
+          } else if (media[&#39;video&#39;] == &#39;hires&#39; ||
+              media[&#39;video&#39;] == &#39;hires-16:9&#39; ||
+              media[&#39;video&#39;] == &#39;hdres&#39;) {
+            &#47;&#47; High(HD) resolution is only 16:9
+            height = 720;
+            maxHeight = 720;
+            width = 1280;
+          } else if (media[&#39;video&#39;] == &#39;fhdres&#39;) {
+            &#47;&#47; Full HD resolution is only 16:9
+            height = 1080;
+            maxHeight = 1080;
+            width = 1920;
+          } else if (media[&#39;video&#39;] == &#39;4kres&#39;) {
+            &#47;&#47; 4K resolution is only 16:9
+            height = 2160;
+            maxHeight = 2160;
+            width = 3840;
+          } else if (media[&#39;video&#39;] == &#39;stdres&#39;) {
+            &#47;&#47; Normal resolution, 4:3
+            height = 480;
+            maxHeight = 480;
+            width = 640;
+          } else if (media[&#39;video&#39;] == &#39;stdres-16:9&#39;) {
+            &#47;&#47; Normal resolution, 16:9
+            height = 360;
+            maxHeight = 360;
+            width = 640;
+          } else {
+            Janus.log(&quot;Default video setting is stdres 4:3&quot;);
+            height = 480;
+            maxHeight = 480;
+            width = 640;
+          }
+          Janus.log(&quot;Adding media constraint:&quot;, media[&#39;video&#39;].toString());
+          Map videoSupport = {
+            &#39;height&#39;: {&#39;ideal&#39;: height},
+            &#39;width&#39;: {&#39;ideal&#39;: width}
+          };
+          Janus.log(&quot;Adding video constraint:&quot;, videoSupport);
+        }
+      } else if (media[&#39;video&#39;] == &#39;screen&#39; || media[&#39;video&#39;] == &#39;window&#39;) {
+        if (MediaDevices != null &amp;&amp; MediaDevices.getDisplayMedia != null) {
+          &#47;&#47; The new experimental getDisplayMedia API is available, let&#39;s use that
+          &#47;&#47; https:&#47;&#47;groups.google.com&#47;forum&#47;#!topic&#47;discuss-webrtc&#47;Uf0SrR4uxzk
+          &#47;&#47; https:&#47;&#47;webrtchacks.com&#47;chrome-screensharing-getdisplaymedia&#47;
+          constraints[&#39;video&#39;] = {};
+          if (media[&#39;screenshareFrameRate&#39;] != null) {
+            constraints[&#39;video&#39;][&#39;frameRate&#39;] = media[&#39;screenshareFrameRate&#39;];
+          }
+          if (media[&#39;screenshareHeight&#39;] != null) {
+            constraints[&#39;video&#39;][&#39;height&#39;] = media[&#39;screenshareHeight&#39;];
+          }
+          if (media[&#39;screenshareWidth&#39;]) {
+            constraints[&#39;video&#39;][&#39;width&#39;] = media[&#39;screenshareWidth&#39;];
+          }
+          constraints[&#39;audio&#39;] = media[&#39;captureDesktopAudio&#39;];
+          MediaDevices.getDisplayMedia(constraints)
+              .then((MediaStream stream) {
+            &#47;&#47;pluginHandle.consentDialog(false);
+            if (isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]) {
+              MediaDevices.getUserMedia({&#39;audio&#39;: true, &#39;video&#39;: false})
+                  .then((MediaStream stream) {
+                &#47;&#47; stream.addTrack(stream.getAudioTracks()[0]);
+                streamsDone(handleId, jsep, media, callbacks, stream);
+              });
+            } else {
+              streamsDone(handleId, jsep, media, callbacks, stream);
+            }
+          }).catchError((error, StackTrace stackTrace) {
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error(error);
+          });
+          return;
+        }
+        &#47;&#47; We&#39;re going to try and use the extension for Chrome 34+, the old approach
+        &#47;&#47; for older versions of Chrome, or the experimental support in Firefox 33+
+        callbackUserMedia(error, stream) {
+          &#47;&#47; pluginHandle.consentDialog(false);
+          if (error) {
+            callbacks.error(error);
+          } else {
+            streamsDone(handleId, jsep, media, callbacks, stream);
+          }
+        }
+
+        getScreenMedia(constraints, gsmCallback, useAudio) {
+          Janus.log(&quot;Adding media constraint (screen capture)&quot;);
+          Janus.debug(constraints);
+          MediaDevices.getUserMedia(constraints).then((MediaStream stream) {
+            if (useAudio) {
+              MediaDevices.getUserMedia({&#39;audio&#39;: true, &#39;video&#39;: false})
+                  .then((audioStream) {
+                stream.addTrack(audioStream.getAudioTracks()[0]);
+                gsmCallback(null, stream);
+              });
+            } else {
+              gsmCallback(null, stream);
+            }
+          }).catchError((error, StackTrace stackTrace) {
+            &#47;&#47; pluginHandle.consentDialog(false);
+            gsmCallback(error);
+          });
+        }
+
+        if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &#39;chrome&#39;) {
+          var chromever = Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;version&#39;];
+          var maxver = 33;
+          Map&lt;String, dynamic&gt; window;
+          &#47;&#47; if (navigator.userAgent.match(&#39;Linux&#39;))
+          &#47;&#47;   maxver = 35; &#47;&#47; &quot;known&quot; crash in chrome 34 and 35 on linux
+          if (chromever &gt;= 26 &amp;&amp; chromever &lt;= maxver) {
+            &#47;&#47; Chrome 26-&gt;33 requires some awkward chrome:&#47;&#47;flags manipulation
+            constraints = {
+              &#39;video&#39;: {
+                &#39;mandatory&#39;: {
+                  &#39;googLeakyBucket&#39;: true,
+                  &#39;maxWidth&#39;: window[&#39;screen&#39;][&#39;width&#39;],
+                  &#39;maxHeight&#39;: window[&#39;screen&#39;][&#39;height&#39;],
+                  &#39;minFrameRate&#39;: media[&#39;screenshareFrameRate&#39;],
+                  &#39;maxFrameRate&#39;: media[&#39;screenshareFrameRate&#39;],
+                  &#39;chromeMediaSource&#39;: &#39;screen&#39;
+                }
+              },
+              &#39;audio&#39;: isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]
+            };
+            getScreenMedia(constraints, callbackUserMedia,
+                isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]);
+          } else {
+            &#47;&#47; Chrome 34+ requires an extension
+            &#47;&#47; Janus.extension.getScreen((error, sourceId) {
+            &#47;&#47;   if (error) {
+            &#47;&#47;     pluginHandle.consentDialog(false);
+            &#47;&#47;     return callbacks.error(error);
+            &#47;&#47;   }
+            &#47;&#47;   constraints = {
+            &#47;&#47;     &#39;audio&#39;: false,
+            &#47;&#47;     &#39;video&#39;: {
+            &#47;&#47;       &#39;mandatory&#39;: {
+            &#47;&#47;         &#39;chromeMediaSource&#39;: &#39;desktop&#39;,
+            &#47;&#47;         &#39;maxWidth&#39;: window[&#39;screen&#39;][&#39;width&#39;],
+            &#47;&#47;         &#39;maxHeight&#39;: window[&#39;screen&#39;][&#39;height&#39;],
+            &#47;&#47;         &#39;minFrameRate&#39;: media[&#39;screenshareFrameRate&#39;],
+            &#47;&#47;         &#39;maxFrameRate&#39;: media[&#39;screenshareFrameRate&#39;],
+            &#47;&#47;       },
+            &#47;&#47;       &#39;optional&#39;: [
+            &#47;&#47;         {&#39;googLeakyBucket&#39;: true},
+            &#47;&#47;         {&#39;googTemporalLayeredScreencast&#39;: true}
+            &#47;&#47;       ]
+            &#47;&#47;     }
+            &#47;&#47;   };
+            &#47;&#47;   constraints[&#39;video&#39;][&#39;mandatory&#39;][&#39;chromeMediaSourceId&#39;] =
+            &#47;&#47;       sourceId;
+            &#47;&#47;   getScreenMedia(constraints, callbackUserMedia,
+            &#47;&#47;       isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]);
+            &#47;&#47; });
+          }
+        } else if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] ==
+            &#39;firefox&#39;) {
+          if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;version&#39;] &gt;= 33) {
+            &#47;&#47; Firefox 33+ has experimental support for screen sharing
+            constraints = {
+              &#39;video&#39;: {
+                &#39;mozMediaSource&#39;: media[&#39;video&#39;],
+                &#39;mediaSource&#39;: media[&#39;video&#39;]
+              },
+              &#39;audio&#39;: isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]
+            };
+            getScreenMedia(constraints, (err, stream) {
+              callbackUserMedia(err, stream);
+              &#47;&#47; Workaround for https:&#47;&#47;bugzilla.mozilla.org&#47;show_bug.cgi?id=1045810
+              if (!err) {
+                var lastTime = stream.currentTime;
+                Timer polly = Timer(Duration(milliseconds: 500), () {});
+                if (!stream) polly.cancel();
+                if (stream.currentTime == lastTime) {
+                  polly.cancel();
+                  if (stream.onended) {
+                    stream.onended();
+                  }
+                }
+                lastTime = stream.currentTime;
+              }
+            }, isAudioSendEnabled(media) &amp;&amp; !media[&#39;keepAudio&#39;]);
+          } else {
+            Map&lt;String, String&gt; error = {&#39;type&#39;: &#39;NavigatorUserMediaError&#39;};
+            error[&#39;name&#39;] =
+                &#39;Your version of Firefox does not support screen sharing, please install Firefox 33 (or more recent versions)&#39;;
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error(error);
+            return;
+          }
+        }
+        return;
+      }
+    }
+
+    &#47;&#47; If we got here, we&#39;re not screensharing
+    if (media == null || media[&#39;video&#39;] != &#39;screen&#39;) {
+      &#47;&#47; Check whether all media sources are actually available or not
+      MediaDevices.getSources().then((devices) {
+        Janus.debug(devices.toString());
+        bool audioExist = devices.any((device) {
+          return device[&#39;kind&#39;] == &#39;audioinput&#39;;
+        });
+
+        bool videoExist = isScreenSendEnabled(media) ||
+            devices.any((device) {
+              return device[&#39;kind&#39;] == &#39;videoinput&#39;;
+            });
+
+        &#47;&#47; Check whether a missing device is really a problem
+        bool audioSend = isAudioSendEnabled(media);
+        bool videoSend = isVideoSendEnabled(media);
+        bool needAudioDevice = isAudioSendRequired(media);
+        bool needVideoDevice = isVideoSendRequired(media);
+
+        if (audioSend || videoSend || needAudioDevice || needVideoDevice) {
+          &#47;&#47; We need to send either audio or video
+          var haveAudioDevice = audioSend ? audioExist : false;
+          var haveVideoDevice = videoSend ? videoExist : false;
+          if (!haveAudioDevice &amp;&amp; !haveVideoDevice) {
+            &#47;&#47; FIXME Should we really give up, or just assume recvonly for both?
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error(&#39;No capture device found&#39;);
+            return false;
+          } else if (!haveAudioDevice &amp;&amp; needAudioDevice) {
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error(
+                &#39;Audio capture is required, but no capture device found&#39;);
+            return false;
+          } else if (!haveVideoDevice &amp;&amp; needVideoDevice) {
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error(
+                &#39;Video capture is required, but no capture device found&#39;);
+            return false;
+          }
+        }
+
+        Map&lt;String, dynamic&gt; gumConstraints = {
+          &#39;audio&#39;: (audioExist &amp;&amp; !media[&#39;keepAudio&#39;]) ? audioSupport : false,
+          &#39;video&#39;: (videoExist &amp;&amp; !media[&#39;keepVideo&#39;]) ? videoSupport : false
+        };
+        Janus.debug(&quot;getUserMedia constraints&quot;, gumConstraints.toString());
+        if (!gumConstraints[&#39;audio&#39;] &amp;&amp; !gumConstraints[&#39;video&#39;]) {
+          &#47;&#47; pluginHandle.consentDialog(false);
+          streamsDone(handleId, jsep, media, callbacks, callbacks.stream);
+        } else {
+          &#47;&#47; Override mediaConstraints
+          if (gumConstraints[&#39;video&#39;]) {
+            gumConstraints[&#39;video&#39;] = {
+              &quot;mandatory&quot;: {
+                &quot;minWidth&quot;:
+                    &#39;640&#39;, &#47;&#47; Provide your own width, height and frame rate here
+                &quot;minHeight&quot;: &#39;480&#39;,
+                &quot;minFrameRate&quot;: &#39;30&#39;,
+              },
+              &quot;facingMode&quot;: &quot;user&quot;,
+              &quot;optional&quot;: [],
+            };
+          }
+          Janus.debug(gumConstraints);
+          MediaDevices.getUserMedia(gumConstraints)
+              .then((MediaStream stream) {
+            &#47;&#47; pluginHandle.consentDialog(false);
+            streamsDone(handleId, jsep, media, callbacks, stream);
+          }).catchError((error, StackTrace stackTrace) {
+            Janus.log(error);
+            &#47;&#47; pluginHandle.consentDialog(false);
+            callbacks.error({
+              &#39;code&#39;: error.code,
+              &#39;name&#39;: error.name,
+              &#39;message&#39;: error.message
+            });
+          });
+        }
+      }).catchError((error, StackTrace stackTrace) {
+        &#47;&#47; pluginHandle.consentDialog(false);
+        Janus.log(error);
+        callbacks.error(&#39;enumerateDevices error&#39;, error);
+      });
+    }
+  } else {
+    &#47;&#47; No need to do a getUserMedia, create offer&#47;answer right away
+    streamsDone(handleId, jsep, media, callbacks, null);
+  }
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutterjanus
+      0.0.3
+  </span>
+
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../../static-assets/typeahead.bundle.min.js"></script>
+<script src="../../static-assets/highlight.pack.js"></script>
+<script src="../../static-assets/URI.js"></script>
+<script src="../../static-assets/script.js"></script>
+
+
+</body>
+
+</html>

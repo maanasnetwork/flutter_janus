@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the createAnswer method from the Session class, for the Dart programming language.">
+  <title>createAnswer method - Session class - flutterjanus library - Dart API</title>
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../../static-assets/github.css">
+  <link rel="stylesheet" href="../../static-assets/styles.css">
+  <link rel="icon" href="../../static-assets/favicon.png">
+
+</head>
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+    <li class="self-crumb">createAnswer method</li>
+  </ol>
+  <div class="self-name">createAnswer</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="../../index.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+      <li class="self-crumb">createAnswer method</li>
+    </ol>
+    
+    <h5>Session class</h5>
+    <ol>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#constructors">Constructors</a></li>
+        <li><a href="../../flutterjanus/Session/Session.html">Session</a></li>
+    
+        <li class="section-title">
+            <a href="../../flutterjanus/Session-class.html#instance-properties">Properties</a>
+        </li>
+        <li><a href="../../flutterjanus/Session/apiSecret.html">apiSecret</a></li>
+        <li><a href="../../flutterjanus/Session/bundlePolicy.html">bundlePolicy</a></li>
+        <li><a href="../../flutterjanus/Session/connected.html">connected</a></li>
+        <li><a href="../../flutterjanus/Session/destroyOnUnload.html">destroyOnUnload</a></li>
+        <li><a href="../../flutterjanus/Session/gatewayCallbacks.html">gatewayCallbacks</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+        <li><a href="../../flutterjanus/Session/iceServers.html">iceServers</a></li>
+        <li><a href="../../flutterjanus/Session/iceTransportPolicy.html">iceTransportPolicy</a></li>
+        <li><a href="../../flutterjanus/Session/ipv6Support.html">ipv6Support</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlivePeriod.html">keepAlivePeriod</a></li>
+        <li><a href="../../flutterjanus/Session/longPollTimeout.html">longPollTimeout</a></li>
+        <li><a href="../../flutterjanus/Session/maxev.html">maxev</a></li>
+        <li><a href="../../flutterjanus/Session/maxPollEvents.html">maxPollEvents</a></li>
+        <li><a href="../../flutterjanus/Session/pluginHandles.html">pluginHandles</a></li>
+        <li><a href="../../flutterjanus/Session/protocols.html">protocols</a></li>
+        <li><a href="../../flutterjanus/Session/retries.html">retries</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+        <li><a href="../../flutterjanus/Session/server.html">server</a></li>
+        <li><a href="../../flutterjanus/Session/servers.html">servers</a></li>
+        <li><a href="../../flutterjanus/Session/serversIndex.html">serversIndex</a></li>
+        <li><a href="../../flutterjanus/Session/sessionId.html">sessionId</a></li>
+        <li><a href="../../flutterjanus/Session/token.html">token</a></li>
+        <li><a href="../../flutterjanus/Session/transactions.html">transactions</a></li>
+        <li><a href="../../flutterjanus/Session/websockets.html">websockets</a></li>
+        <li><a href="../../flutterjanus/Session/withCredentials.html">withCredentials</a></li>
+        <li><a href="../../flutterjanus/Session/ws.html">ws</a></li>
+        <li><a href="../../flutterjanus/Session/wsHandlers.html">wsHandlers</a></li>
+        <li><a href="../../flutterjanus/Session/wsKeepaliveTimeoutId.html">wsKeepaliveTimeoutId</a></li>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#instance-methods">Methods</a></li>
+        <li><a href="../../flutterjanus/Session/attach.html">attach</a></li>
+        <li><a href="../../flutterjanus/Session/cleanupWebrtc.html">cleanupWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/createAnswer.html">createAnswer</a></li>
+        <li><a href="../../flutterjanus/Session/createDataChannel.html">createDataChannel</a></li>
+        <li><a href="../../flutterjanus/Session/createHandle.html">createHandle</a></li>
+        <li><a href="../../flutterjanus/Session/createOffer.html">createOffer</a></li>
+        <li><a href="../../flutterjanus/Session/createSession.html">createSession</a></li>
+        <li><a href="../../flutterjanus/Session/destroy.html">destroy</a></li>
+        <li><a href="../../flutterjanus/Session/destroyHandle.html">destroyHandle</a></li>
+        <li><a href="../../flutterjanus/Session/destroySession.html">destroySession</a></li>
+        <li><a href="../../flutterjanus/Session/eventHandler.html">eventHandler</a></li>
+        <li><a href="../../flutterjanus/Session/getBitrate.html">getBitrate</a></li>
+        <li><a href="../../flutterjanus/Session/getMaxBitrates.html">getMaxBitrates</a></li>
+        <li><a href="../../flutterjanus/Session/getServer.html">getServer</a></li>
+        <li><a href="../../flutterjanus/Session/getSessionId.html">getSessionId</a></li>
+        <li><a href="../../flutterjanus/Session/getVolume.html">getVolume</a></li>
+        <li><a href="../../flutterjanus/Session/handleEvent.html">handleEvent</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioRecvEnabled.html">isAudioRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendEnabled.html">isAudioSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendRequired.html">isAudioSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/isConnected.html">isConnected</a></li>
+        <li><a href="../../flutterjanus/Session/isDataEnabled.html">isDataEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isMuted.html">isMuted</a></li>
+        <li><a href="../../flutterjanus/Session/isScreenSendEnabled.html">isScreenSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isTrickleEnabled.html">isTrickleEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoRecvEnabled.html">isVideoRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendEnabled.html">isVideoSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendRequired.html">isVideoSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlive.html">keepAlive</a></li>
+        <li><a href="../../flutterjanus/Session/mungeSdpForSimulcasting.html">mungeSdpForSimulcasting</a></li>
+        <li><a href="../../flutterjanus/Session/mute.html">mute</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtc.html">prepareWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtcPeer.html">prepareWebrtcPeer</a></li>
+        <li><a href="../../flutterjanus/Session/reconnect.html">reconnect</a></li>
+        <li><a href="../../flutterjanus/Session/sendData.html">sendData</a></li>
+        <li><a href="../../flutterjanus/Session/sendDtmf.html">sendDtmf</a></li>
+        <li><a href="../../flutterjanus/Session/sendMessage.html">sendMessage</a></li>
+        <li><a href="../../flutterjanus/Session/sendSDP.html">sendSDP</a></li>
+        <li><a href="../../flutterjanus/Session/sendTrickleCandidate.html">sendTrickleCandidate</a></li>
+        <li><a href="../../flutterjanus/Session/streamsDone.html">streamsDone</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+        <li><a href="../../flutterjanus/Session/webrtcError.html">webrtcError</a></li>
+    
+        <li class="section-title inherited"><a href="../../flutterjanus/Session-class.html#operators">Operators</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+    
+    
+    
+    
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">createAnswer</span> method </h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">dynamic</span>
+            <span class="name ">createAnswer</span>
+(<wbr><ol class="parameter-list"><li><span class="parameter" id="createAnswer-param-handleId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">handleId</span>, </span></li>
+<li><span class="parameter" id="createAnswer-param-media"><span class="type-annotation">dynamic</span> <span class="parameter-name">media</span>, </span></li>
+<li><span class="parameter" id="createAnswer-param-callbacks"><span class="type-annotation">dynamic</span> <span class="parameter-name">callbacks</span>, </span></li>
+<li><span class="parameter" id="createAnswer-param-customizedSdp"><span class="type-annotation">dynamic</span> <span class="parameter-name">customizedSdp</span></span></li>
+</ol>)
+      
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">createAnswer(int handleId, media, callbacks, customizedSdp) {
+  Plugin pluginHandle = this.pluginHandles[handleId.toString()];
+  if (pluginHandle == null) {
+    Janus.warn(&quot;Invalid handle&quot;);
+    callbacks.error(&quot;Invalid handle&quot;);
+    return;
+  }
+  bool simulcast = callbacks.simulcast == true;
+  if (!simulcast) {
+    Janus.log(
+        &quot;Creating answer (iceDone=&quot; + pluginHandle.iceDone.toString() + &quot;)&quot;);
+  } else {
+    Janus.log(&quot;Creating answer (iceDone=&quot; +
+        pluginHandle.iceDone.toString() +
+        &quot;, simulcast=&quot; +
+        simulcast.toString() +
+        &quot;)&quot;);
+  }
+  var mediaConstraints;
+  if (Janus.unifiedPlan) {
+    &#47;&#47; We can use Transceivers
+    mediaConstraints = {};
+    var audioTransceiver;
+    var videoTransceiver;
+    &#47;&#47; FIX ME no equivalent call
+    &#47;&#47; var transceivers = pluginHandle.pc.getTransceivers();
+    &#47;&#47; if (transceivers != null &amp;&amp; transceivers.length &gt; 0) {
+    &#47;&#47;   for (var t in transceivers) {
+    &#47;&#47;     if ((t[&#39;sender&#39;] &amp;&amp;
+    &#47;&#47;             t[&#39;sender&#39;].track &amp;&amp;
+    &#47;&#47;             t[&#39;sender&#39;].track.kind == &quot;audio&quot;) ||
+    &#47;&#47;         (t[&#39;receiver&#39;] &amp;&amp;
+    &#47;&#47;             t[&#39;receiver&#39;].track &amp;&amp;
+    &#47;&#47;             t[&#39;receiver&#39;].track.kind == &quot;audio&quot;)) {
+    &#47;&#47;       if (!audioTransceiver) audioTransceiver = t;
+    &#47;&#47;       continue;
+    &#47;&#47;     }
+    &#47;&#47;     if ((t[&#39;sender&#39;] &amp;&amp;
+    &#47;&#47;             t[&#39;sender&#39;].track &amp;&amp;
+    &#47;&#47;             t[&#39;sender&#39;].track.kind == &quot;video&quot;) ||
+    &#47;&#47;         (t[&#39;receiver&#39;] &amp;&amp;
+    &#47;&#47;             t[&#39;receiver&#39;].track &amp;&amp;
+    &#47;&#47;             t[&#39;receiver&#39;].track.kind == &quot;video&quot;)) {
+    &#47;&#47;       if (!videoTransceiver) videoTransceiver = t;
+    &#47;&#47;       continue;
+    &#47;&#47;     }
+    &#47;&#47;   }
+    &#47;&#47; }
+    &#47;&#47; Handle audio (and related changes, if any)
+    var audioSend = isAudioSendEnabled(media);
+    var audioRecv = isAudioRecvEnabled(media);
+    if (!audioSend &amp;&amp; !audioRecv) {
+      &#47;&#47; Audio disabled: have we removed it?
+      if (media[&#39;removeAudio&#39;] &amp;&amp; audioTransceiver) {
+        try {
+          if (audioTransceiver.setDirection != null) {
+            audioTransceiver.setDirection(&quot;inactive&quot;);
+          } else {
+            audioTransceiver.direction = &quot;inactive&quot;;
+          }
+          Janus.log(
+              &quot;Setting audio transceiver to inactive:&quot;, audioTransceiver);
+        } catch (e) {
+          Janus.error(e);
+        }
+      }
+    } else {
+      &#47;&#47; Take care of audio m-line
+      if (audioSend &amp;&amp; audioRecv) {
+        if (audioTransceiver != null) {
+          try {
+            if (audioTransceiver.setDirection != null) {
+              audioTransceiver.setDirection(&quot;sendrecv&quot;);
+            } else {
+              audioTransceiver.direction = &quot;sendrecv&quot;;
+            }
+            Janus.log(
+                &quot;Setting audio transceiver to sendrecv:&quot;, audioTransceiver);
+          } catch (e) {
+            Janus.error(e);
+          }
+        }
+      } else if (audioSend &amp;&amp; !audioRecv) {
+        try {
+          if (audioTransceiver != null) {
+            if (audioTransceiver.setDirection != null) {
+              audioTransceiver.setDirection(&quot;sendonly&quot;);
+            } else {
+              audioTransceiver.direction = &quot;sendonly&quot;;
+            }
+            Janus.log(
+                &quot;Setting audio transceiver to sendonly:&quot;, audioTransceiver);
+          }
+        } catch (e) {
+          Janus.error(e);
+        }
+      } else if (!audioSend &amp;&amp; audioRecv) {
+        if (audioTransceiver != null) {
+          try {
+            if (audioTransceiver.setDirection != null) {
+              audioTransceiver.setDirection(&quot;recvonly&quot;);
+            } else {
+              audioTransceiver.direction = &quot;recvonly&quot;;
+            }
+            Janus.log(
+                &quot;Setting audio transceiver to recvonly:&quot;, audioTransceiver);
+          } catch (e) {
+            Janus.error(e);
+          }
+        } else {
+          &#47;&#47; In theory, this is the only case where we might not have a transceiver yet
+          &#47;&#47; FIX ME no addTransceiver call
+          &#47;&#47; audioTransceiver =
+          &#47;&#47;     pc.addTransceiver(&quot;audio&quot;, {&#39;direction&#39;: &quot;recvonly&quot;});
+          &#47;&#47; Janus.log(&quot;Adding recvonly audio transceiver:&quot;, audioTransceiver);
+          Janus.log(&quot;No addTransceiver call&quot;);
+        }
+      }
+    }
+    &#47;&#47; Handle video (and related changes, if any)
+    var videoSend = isVideoSendEnabled(media);
+    var videoRecv = isVideoRecvEnabled(media);
+    if (!videoSend &amp;&amp; !videoRecv) {
+      &#47;&#47; Video disabled: have we removed it?
+      if (media[&#39;removeVideo&#39;] &amp;&amp; videoTransceiver != null) {
+        try {
+          if (videoTransceiver.setDirection != null) {
+            videoTransceiver.setDirection(&quot;inactive&quot;);
+          } else {
+            videoTransceiver.direction = &quot;inactive&quot;;
+          }
+          Janus.log(
+              &quot;Setting video transceiver to inactive:&quot;, videoTransceiver);
+        } catch (e) {
+          Janus.error(e);
+        }
+      }
+    } else {
+      &#47;&#47; Take care of video m-line
+      if (videoSend &amp;&amp; videoRecv) {
+        if (videoTransceiver != null) {
+          try {
+            if (videoTransceiver.setDirection != null) {
+              videoTransceiver.setDirection(&quot;sendrecv&quot;);
+            } else {
+              videoTransceiver.direction = &quot;sendrecv&quot;;
+            }
+            Janus.log(
+                &quot;Setting video transceiver to sendrecv:&quot;, videoTransceiver);
+          } catch (e) {
+            Janus.error(e);
+          }
+        }
+      } else if (videoSend &amp;&amp; !videoRecv) {
+        if (videoTransceiver != null) {
+          try {
+            if (videoTransceiver.setDirection != null) {
+              videoTransceiver.setDirection(&quot;sendonly&quot;);
+            } else {
+              videoTransceiver.direction = &quot;sendonly&quot;;
+            }
+            Janus.log(
+                &quot;Setting video transceiver to sendonly:&quot;, videoTransceiver);
+          } catch (e) {
+            Janus.error(e);
+          }
+        }
+      } else if (!videoSend &amp;&amp; videoRecv) {
+        if (videoTransceiver != null) {
+          try {
+            if (videoTransceiver.setDirection != null) {
+              videoTransceiver.setDirection(&quot;recvonly&quot;);
+            } else {
+              videoTransceiver.direction = &quot;recvonly&quot;;
+            }
+            Janus.log(
+                &quot;Setting video transceiver to recvonly:&quot;, videoTransceiver);
+          } catch (e) {
+            Janus.error(e);
+          }
+        } else {
+          &#47;&#47; In theory, this is the only case where we might not have a transceiver yet
+          &#47;&#47; FIX ME
+          &#47;&#47; videoTransceiver =
+          &#47;&#47;     pc.addTransceiver(&quot;video&quot;, {&#39;direction&#39;: &quot;recvonly&quot;});
+          &#47;&#47; Janus.log(&quot;Adding recvonly video transceiver:&quot;, videoTransceiver);
+          Janus.log(&quot;No addTransciever call&quot;);
+        }
+      }
+    }
+  } else {
+    if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;firefox&quot; ||
+        Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;edge&quot;) {
+      mediaConstraints = {
+        &#39;offerToReceiveAudio&#39;: isAudioRecvEnabled(media),
+        &#39;offerToReceiveVideo&#39;: isVideoRecvEnabled(media)
+      };
+    } else {
+      mediaConstraints = {
+        &#39;mandatory&#39;: {
+          &#39;OfferToReceiveAudio&#39;: isAudioRecvEnabled(media),
+          &#39;OfferToReceiveVideo&#39;: isVideoRecvEnabled(media)
+        }
+      };
+    }
+  }
+  Janus.debug(mediaConstraints);
+  &#47;&#47; Check if this is Firefox and we&#39;ve been asked to do simulcasting
+  var sendVideo = isVideoSendEnabled(media);
+  if (sendVideo &amp;&amp;
+      simulcast &amp;&amp;
+      Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;firefox&quot;) {
+    &#47;&#47; FIXME Based on https:&#47;&#47;gist.github.com&#47;voluntas&#47;088bc3cc62094730647b
+    Janus.log(&quot;Enabling Simulcasting for Firefox (RID)&quot;);
+    &#47;&#47; FIX ME no equivalent call
+    &#47;&#47; var sender = pc.getSenders()[1];
+    &#47;&#47; Janus.log(sender);
+    &#47;&#47; var parameters = sender.getParameters();
+    &#47;&#47; Janus.log(parameters);
+
+    &#47;&#47; var maxBitrates = getMaxBitrates(callbacks.simulcastMaxBitrates);
+    &#47;&#47; sender.setParameters({
+    &#47;&#47;   &#39;encodings&#39;: [
+    &#47;&#47;     {
+    &#47;&#47;       &#39;rid&#39;: &quot;high&quot;,
+    &#47;&#47;       &#39;active&#39;: true,
+    &#47;&#47;       &#39;priority&#39;: &quot;high&quot;,
+    &#47;&#47;       &#39;maxBitrate&#39;: maxBitrates[&#39;high&#39;]
+    &#47;&#47;     },
+    &#47;&#47;     {
+    &#47;&#47;       &#39;rid&#39;: &quot;medium&quot;,
+    &#47;&#47;       &#39;active&#39;: true,
+    &#47;&#47;       &#39;priority&#39;: &quot;medium&quot;,
+    &#47;&#47;       &#39;maxBitrate&#39;: maxBitrates[&#39;medium&#39;]
+    &#47;&#47;     },
+    &#47;&#47;     {
+    &#47;&#47;       &#39;rid&#39;: &quot;low&quot;,
+    &#47;&#47;       &#39;active&#39;: true,
+    &#47;&#47;       &#39;priority&#39;: &quot;low&quot;,
+    &#47;&#47;       &#39;maxBitrate&#39;: maxBitrates[&#39;low&#39;]
+    &#47;&#47;     }
+    &#47;&#47;   ]
+    &#47;&#47; });
+  }
+  pluginHandle.pc
+      .createAnswer(mediaConstraints)
+      .then((RTCSessionDescription answer) {
+    Janus.debug(answer.toString());
+    &#47;&#47; JSON.stringify doesn&#39;t work on some WebRTC objects anymore
+    &#47;&#47; See https:&#47;&#47;code.google.com&#47;p&#47;chromium&#47;issues&#47;detail?id=467366
+    RTCSessionDescription jsep =
+        RTCSessionDescription(answer.sdp, answer.type);
+    &#47;&#47; FIX ME
+    &#47;&#47; if (callbacks.customizeSdp != null &amp;&amp; callbacks.customizeSdp is Function)
+    &#47;&#47; callbacks.customizeSdp(jsep);
+    answer.sdp = jsep.sdp;
+    Janus.log(&quot;Setting local description&quot;);
+    if (sendVideo &amp;&amp; simulcast) {
+      &#47;&#47; This SDP munging only works with Chrome
+      if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] == &quot;chrome&quot;) {
+        &#47;&#47; FIXME Apparently trying to simulcast when answering breaks video in Chrome...
+        &#47;&#47;~ Janus.log(&quot;Enabling Simulcasting for Chrome (SDP munging)&quot;);
+        &#47;&#47;~ answer.sdp = mungeSdpForSimulcasting(answer.sdp);
+        Janus.warn(
+            &quot;simulcast=true, but this is an answer, and video breaks in Chrome if we enable it&quot;);
+      } else if (Janus.webRTCAdapter[&#39;browserDetails&#39;][&#39;browser&#39;] !=
+          &quot;firefox&quot;) {
+        Janus.warn(
+            &quot;simulcast=true, but this is not Chrome nor Firefox, ignoring&quot;);
+      }
+    }
+    pluginHandle.mySdp = answer.sdp;
+    pluginHandle.pc.setLocalDescription(answer).catchError(callbacks.error);
+    pluginHandle.mediaConstraints = mediaConstraints;
+    if (pluginHandle.iceDone == null &amp;&amp; pluginHandle.trickle == null) {
+      &#47;&#47; Don&#39;t do anything until we have all candidates
+      Janus.log(&quot;Waiting for all candidates...&quot;);
+      return;
+    }
+    callbacks.success(answer);
+  }).catchError((error, StackTrace stackTrace) {
+    callbacks.error(error);
+  });
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutterjanus
+      0.0.3
+  </span>
+
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../../static-assets/typeahead.bundle.min.js"></script>
+<script src="../../static-assets/highlight.pack.js"></script>
+<script src="../../static-assets/URI.js"></script>
+<script src="../../static-assets/script.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the handleEvent method from the Session class, for the Dart programming language.">
+  <title>handleEvent method - Session class - flutterjanus library - Dart API</title>
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../../static-assets/github.css">
+  <link rel="stylesheet" href="../../static-assets/styles.css">
+  <link rel="icon" href="../../static-assets/favicon.png">
+
+</head>
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+    <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+    <li class="self-crumb">handleEvent method</li>
+  </ol>
+  <div class="self-name">handleEvent</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="../../index.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+      <li><a href="../../flutterjanus/Session-class.html">Session</a></li>
+      <li class="self-crumb">handleEvent method</li>
+    </ol>
+    
+    <h5>Session class</h5>
+    <ol>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#constructors">Constructors</a></li>
+        <li><a href="../../flutterjanus/Session/Session.html">Session</a></li>
+    
+        <li class="section-title">
+            <a href="../../flutterjanus/Session-class.html#instance-properties">Properties</a>
+        </li>
+        <li><a href="../../flutterjanus/Session/apiSecret.html">apiSecret</a></li>
+        <li><a href="../../flutterjanus/Session/bundlePolicy.html">bundlePolicy</a></li>
+        <li><a href="../../flutterjanus/Session/connected.html">connected</a></li>
+        <li><a href="../../flutterjanus/Session/destroyOnUnload.html">destroyOnUnload</a></li>
+        <li><a href="../../flutterjanus/Session/gatewayCallbacks.html">gatewayCallbacks</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
+        <li><a href="../../flutterjanus/Session/iceServers.html">iceServers</a></li>
+        <li><a href="../../flutterjanus/Session/iceTransportPolicy.html">iceTransportPolicy</a></li>
+        <li><a href="../../flutterjanus/Session/ipv6Support.html">ipv6Support</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlivePeriod.html">keepAlivePeriod</a></li>
+        <li><a href="../../flutterjanus/Session/longPollTimeout.html">longPollTimeout</a></li>
+        <li><a href="../../flutterjanus/Session/maxev.html">maxev</a></li>
+        <li><a href="../../flutterjanus/Session/maxPollEvents.html">maxPollEvents</a></li>
+        <li><a href="../../flutterjanus/Session/pluginHandles.html">pluginHandles</a></li>
+        <li><a href="../../flutterjanus/Session/protocols.html">protocols</a></li>
+        <li><a href="../../flutterjanus/Session/retries.html">retries</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
+        <li><a href="../../flutterjanus/Session/server.html">server</a></li>
+        <li><a href="../../flutterjanus/Session/servers.html">servers</a></li>
+        <li><a href="../../flutterjanus/Session/serversIndex.html">serversIndex</a></li>
+        <li><a href="../../flutterjanus/Session/sessionId.html">sessionId</a></li>
+        <li><a href="../../flutterjanus/Session/token.html">token</a></li>
+        <li><a href="../../flutterjanus/Session/transactions.html">transactions</a></li>
+        <li><a href="../../flutterjanus/Session/websockets.html">websockets</a></li>
+        <li><a href="../../flutterjanus/Session/withCredentials.html">withCredentials</a></li>
+        <li><a href="../../flutterjanus/Session/ws.html">ws</a></li>
+        <li><a href="../../flutterjanus/Session/wsHandlers.html">wsHandlers</a></li>
+        <li><a href="../../flutterjanus/Session/wsKeepaliveTimeoutId.html">wsKeepaliveTimeoutId</a></li>
+    
+        <li class="section-title"><a href="../../flutterjanus/Session-class.html#instance-methods">Methods</a></li>
+        <li><a href="../../flutterjanus/Session/attach.html">attach</a></li>
+        <li><a href="../../flutterjanus/Session/cleanupWebrtc.html">cleanupWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/createAnswer.html">createAnswer</a></li>
+        <li><a href="../../flutterjanus/Session/createDataChannel.html">createDataChannel</a></li>
+        <li><a href="../../flutterjanus/Session/createHandle.html">createHandle</a></li>
+        <li><a href="../../flutterjanus/Session/createOffer.html">createOffer</a></li>
+        <li><a href="../../flutterjanus/Session/createSession.html">createSession</a></li>
+        <li><a href="../../flutterjanus/Session/destroy.html">destroy</a></li>
+        <li><a href="../../flutterjanus/Session/destroyHandle.html">destroyHandle</a></li>
+        <li><a href="../../flutterjanus/Session/destroySession.html">destroySession</a></li>
+        <li><a href="../../flutterjanus/Session/eventHandler.html">eventHandler</a></li>
+        <li><a href="../../flutterjanus/Session/getBitrate.html">getBitrate</a></li>
+        <li><a href="../../flutterjanus/Session/getMaxBitrates.html">getMaxBitrates</a></li>
+        <li><a href="../../flutterjanus/Session/getServer.html">getServer</a></li>
+        <li><a href="../../flutterjanus/Session/getSessionId.html">getSessionId</a></li>
+        <li><a href="../../flutterjanus/Session/getVolume.html">getVolume</a></li>
+        <li><a href="../../flutterjanus/Session/handleEvent.html">handleEvent</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioRecvEnabled.html">isAudioRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendEnabled.html">isAudioSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isAudioSendRequired.html">isAudioSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/isConnected.html">isConnected</a></li>
+        <li><a href="../../flutterjanus/Session/isDataEnabled.html">isDataEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isMuted.html">isMuted</a></li>
+        <li><a href="../../flutterjanus/Session/isScreenSendEnabled.html">isScreenSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isTrickleEnabled.html">isTrickleEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoRecvEnabled.html">isVideoRecvEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendEnabled.html">isVideoSendEnabled</a></li>
+        <li><a href="../../flutterjanus/Session/isVideoSendRequired.html">isVideoSendRequired</a></li>
+        <li><a href="../../flutterjanus/Session/keepAlive.html">keepAlive</a></li>
+        <li><a href="../../flutterjanus/Session/mungeSdpForSimulcasting.html">mungeSdpForSimulcasting</a></li>
+        <li><a href="../../flutterjanus/Session/mute.html">mute</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtc.html">prepareWebrtc</a></li>
+        <li><a href="../../flutterjanus/Session/prepareWebrtcPeer.html">prepareWebrtcPeer</a></li>
+        <li><a href="../../flutterjanus/Session/reconnect.html">reconnect</a></li>
+        <li><a href="../../flutterjanus/Session/sendData.html">sendData</a></li>
+        <li><a href="../../flutterjanus/Session/sendDtmf.html">sendDtmf</a></li>
+        <li><a href="../../flutterjanus/Session/sendMessage.html">sendMessage</a></li>
+        <li><a href="../../flutterjanus/Session/sendSDP.html">sendSDP</a></li>
+        <li><a href="../../flutterjanus/Session/sendTrickleCandidate.html">sendTrickleCandidate</a></li>
+        <li><a href="../../flutterjanus/Session/streamsDone.html">streamsDone</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></li>
+        <li><a href="../../flutterjanus/Session/webrtcError.html">webrtcError</a></li>
+    
+        <li class="section-title inherited"><a href="../../flutterjanus/Session-class.html#operators">Operators</a></li>
+        <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></li>
+    
+    
+    
+    
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">handleEvent</span> method </h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">dynamic</span>
+            <span class="name ">handleEvent</span>
+(<wbr><ol class="parameter-list"><li><span class="parameter" id="handleEvent-param-json"><span class="type-annotation">dynamic</span> <span class="parameter-name">json</span>, </span></li>
+<li><span class="parameter" id="handleEvent-param-skipTimeout">[<span class="type-annotation">dynamic</span> <span class="parameter-name">skipTimeout</span>]</span></li>
+</ol>)
+      
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">handleEvent(json, [skipTimeout]) {
+  retries = 0;
+  if (!this.websockets &amp;&amp; this.sessionId != null &amp;&amp; skipTimeout != true)
+    eventHandler();
+  if (!this.websockets &amp;&amp; Janus.isArray(json)) {
+    &#47;&#47; We got an array: it means we passed a maxev &gt; 1, iterate on all objects
+    for (var i = 0; i &lt; json.length; i++) {
+      handleEvent(json[i], true);
+    }
+    return;
+  }
+  if (json[&quot;janus&quot;] == &quot;keepalive&quot;) {
+    &#47;&#47; Nothing happened
+    Janus.debug(&quot;Got a keepalive on session &quot; + this.sessionId.toString());
+    return;
+  } else if (json[&quot;janus&quot;] == &quot;ack&quot;) {
+    &#47;&#47; Just an ack, we can probably ignore
+    Janus.debug(&quot;Got an ack on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String transaction = json[&quot;transaction&quot;];
+    if (transaction != null) {
+      Function reportSuccess = this.transactions[transaction];
+      if (reportSuccess is Function) reportSuccess(json);
+      this.transactions.remove(transaction);
+    }
+    return;
+  } else if (json[&quot;janus&quot;] == &quot;success&quot;) {
+    &#47;&#47; Success!
+    if (this.sessionId != null)
+      Janus.debug(&quot;Got a success on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String transaction = json[&quot;transaction&quot;];
+    if (transaction != null) {
+      Function reportSuccess = this.transactions[transaction];
+      if (reportSuccess is Function) reportSuccess(json);
+      this.transactions.remove(transaction);
+    }
+    return;
+  } else if (json[&quot;janus&quot;] == &quot;trickle&quot;) {
+    &#47;&#47; We got a trickle candidate from Janus
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.debug(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+
+    Map&lt;String, dynamic&gt; candidateMap = json[&quot;candidate&quot;];
+    Janus.debug(candidateMap.toString());
+    RTCIceCandidate candidate = RTCIceCandidate(candidateMap[&#39;candidate&#39;],
+        candidateMap[&#39;sdpMid&#39;], candidateMap[&#39;sdpMlineIndex&#39;]);
+    Janus.debug(
+        &quot;Got a trickled candidate on session &quot; + this.sessionId.toString());
+    Janus.debug(candidate.toMap());
+    if (pluginHandle.pc != null &amp;&amp; pluginHandle.remoteSdp != null) {
+      &#47;&#47; Add candidate right now
+      Janus.debug(&quot;Adding remote candidate:&quot; + candidate.toString());
+      if (candidate == null ||
+          candidateMap[&#39;candidate&#39;][&#39;completed&#39;] == true) {
+        &#47;&#47; end-of-candidates
+        pluginHandle.pc.addCandidate(Janus.endOfCandidates);
+      } else {
+        &#47;&#47; New candidate
+        pluginHandle.pc.addCandidate(candidate);
+      }
+    } else {
+      &#47;&#47; We didn&#39;t do setRemoteDescription (trickle got here before the offer?)
+      Janus.debug(
+          &quot;We didn&#39;t do setRemoteDescription (trickle got here before the offer?), caching candidate&quot;);
+      pluginHandle.candidates.add(candidate);
+      Janus.debug(pluginHandle.candidates.toString());
+    }
+  } else if (json[&quot;janus&quot;] == &quot;webrtcup&quot;) {
+    &#47;&#47; The PeerConnection with the server is up! Notify this
+    Janus.debug(
+        &quot;Got a webrtcup event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.debug(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+    pluginHandle.webrtcState(true);
+    return;
+  } else if (json[&quot;janus&quot;] == &quot;hangup&quot;) {
+    &#47;&#47; A plugin asked the core to hangup a PeerConnection on one of our handles
+    Janus.debug(&quot;Got a hangup event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.debug(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+    pluginHandle.webrtcState(false, json[&quot;reason&quot;]);
+    pluginHandle.hangup(true);
+  } else if (json[&quot;janus&quot;] == &quot;detached&quot;) {
+    &#47;&#47; A plugin asked the core to detach one of our handles
+    Janus.debug(
+        &quot;Got a detached event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      &#47;&#47; Don&#39;t warn here because destroyHandle causes this situation.
+      return;
+    }
+    pluginHandle.detached = true;
+    pluginHandle.onDetached();
+    pluginHandle.detach(null);
+  } else if (json[&quot;janus&quot;] == &quot;media&quot;) {
+    &#47;&#47; Media started&#47;stopped flowing
+    Janus.debug(&quot;Got a media event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.debug(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+    pluginHandle.mediaState(json[&quot;type&quot;], json[&quot;receiving&quot;]);
+  } else if (json[&quot;janus&quot;] == &quot;slowlink&quot;) {
+    Janus.debug(
+        &quot;Got a slowlink event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    &#47;&#47; Trouble uplink or downlink
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.debug(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+    pluginHandle.slowLink(json[&quot;uplink&quot;], json[&quot;lost&quot;]);
+  } else if (json[&quot;janus&quot;] == &quot;error&quot;) {
+    &#47;&#47; Oops, something wrong happened
+    Janus.error(&quot;Ooops: &quot; +
+        json[&quot;error&quot;][&quot;code&quot;].toString() +
+        &quot; &quot; +
+        json[&quot;error&quot;][&quot;reason&quot;]);
+    Janus.debug(json);
+    String transaction = json[&quot;transaction&quot;];
+    if (transaction != null) {
+      Function reportSuccess = this.transactions[transaction];
+      if (reportSuccess is Function) reportSuccess(json);
+      this.transactions.remove(transaction);
+    }
+    return;
+  } else if (json[&quot;janus&quot;] == &quot;event&quot;) {
+    Janus.debug(&quot;Got a plugin event on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    String sender = json[&quot;sender&quot;].toString();
+    if (sender == null) {
+      Janus.warn(&quot;Missing sender...&quot;);
+      return;
+    }
+    var plugindata = json[&quot;plugindata&quot;];
+    if (plugindata == null) {
+      Janus.warn(&quot;Missing plugindata...&quot;);
+      return;
+    }
+    Janus.debug(&quot;  -- Event is coming from &quot; +
+        sender.toString() +
+        &quot; (&quot; +
+        plugindata[&quot;plugin&quot;] +
+        &quot;)&quot;);
+    var data = plugindata[&quot;data&quot;];
+    Janus.debug(data);
+    Plugin pluginHandle = this.pluginHandles[sender.toString()];
+    if (pluginHandle == null) {
+      Janus.warn(&quot;This handle is not attached to this session&quot;);
+      return;
+    }
+
+    var jsep = json[&quot;jsep&quot;];
+    if (jsep != null) {
+      Janus.debug(&quot;Handling SDP as well...&quot;);
+      Janus.debug(jsep);
+    }
+    var callback = pluginHandle.onMessage;
+    if (callback is Function) {
+      Janus.debug(&quot;Notifying application...&quot;);
+      &#47;&#47; Send to callback specified when attaching plugin handle
+      Janus.log(data);
+      callback(data, jsep);
+    } else {
+      &#47;&#47; Send to generic callback (?)
+      Janus.debug(&quot;No provided notification callback&quot;);
+    }
+  } else if (json[&quot;janus&quot;] == &quot;timeout&quot;) {
+    Janus.error(&quot;Timeout on session &quot; + this.sessionId.toString());
+    Janus.debug(json);
+    if (this.websockets) {
+      this.ws.close();
+    }
+    return;
+  } else {
+    Janus.warn(&quot;Unknown message&#47;event  &#39;&quot; +
+        json[&quot;janus&quot;] +
+        &quot;&#39; on session &quot; +
+        this.sessionId.toString());
+    Janus.debug(json);
+  }
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutterjanus
+      0.0.3
+  </span>
+
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../../static-assets/typeahead.bundle.min.js"></script>
+<script src="../../static-assets/highlight.pack.js"></script>
+<script src="../../static-assets/URI.js"></script>
+<script src="../../static-assets/script.js"></script>
+
+
+</body>
+
+</html>

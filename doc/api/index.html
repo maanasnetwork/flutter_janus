@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="generator" content="made with love by dartdoc 0.34.0">
+  <meta name="description" content="flutterjanus API docs, for the Dart programming language.">
+  <title>flutterjanus - Dart API docs</title>
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="static-assets/github.css">
+  <link rel="stylesheet" href="static-assets/styles.css">
+  <link rel="icon" href="static-assets/favicon.png">
+
+</head>
+
+<body data-base-href=""
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="https://github.com/maanasnetwork/flutter_janus">flutterjanus package</a></li>
+  </ol>
+  <div class="self-name">flutterjanus</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="https://github.com/maanasnetwork/flutter_janus">flutterjanus package</a></li>
+    </ol>
+    
+    <h5 class="hidden-xs"><span class="package-name">flutterjanus</span> <span class="package-kind">package</span></h5>
+    <ol>
+          <li class="section-title">Libraries</li>
+          <li><a href="flutterjanus/flutterjanus-library.html">flutterjanus</a></li>
+    </ol>
+  </div>
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <section class="desc markdown">
+        <h1 id="flutterjanus">flutterjanus</h1>
+<p>Flutter plugin for Janus Gateway. flutterjanus is port of janus.js. All the functions and calls are mapped in flutter to make things easy for porting an existing javascript app for flutter. The calls are modified only to suit the static typing of the flutter.</p>
+<h2 id="organisation">Organisation</h2>
+<p>The code is organised in four files</p>
+<ul>
+<li>janus.dart - This file contains the static calls and basic transport mechanism with the backend janus server</li>
+<li>session.dart - This file is the heart of the whole plugin. All the janus.js calls are mapped in this file with same nomenclature. Some of the code inside the files are commented with // FIX ME to take care of the flutter requirements. A lot of code inside this file is not required as those are browser specific which will be cleaned at later date when all the tests are working properly.</li>
+<li>plugin.dart - This file defines the template plugin which is initialised when a webrtc session is set. In janus.js this is defined a dictionary one time for websocet and one time for the http. This has been moved to seperate file to provide a template strucutre and also to enable static type checking in flutter.</li>
+<li>callbacks.dart - This file defines the template callbacks which are used in janus.js. A single point definition of the callback structure enables better code checking in flutter.</li>
+</ul>
+<h2 id="status">Status</h2>
+<table><thead><tr><th>Feature</th><th>Support</th><th>Well Tested</th></tr></thead><tbody><tr><td>WebSocket</td><td>Yes</td><td>Yes</td></tr><tr><td>Rest/Http API</td><td>Yes</td><td>Yes</td></tr><tr><td>Echotest Plugin</td><td>Yes</td><td>No</td></tr><tr><td>Videocall Plugin</td><td>Yes</td><td>No</td></tr><tr><td>Sipcall Plugin</td><td>Yes</td><td>No</td></tr><tr><td>Videoroom Plugin</td><td>WIP</td><td>No</td></tr></tbody></table>
+<p>For SIP call, please modify the registerUsername function in janus_demo_sip_call.dart. I will be adding the code for UI shortly.</p>
+<pre class="language-dart"><code>registerUsername(username) {
+    if (sipcall != null) {
+      final _body = {
+        "authuser": "authUser",
+        "display_name": "displayName",
+        "request": "register",
+        "username": "sip:authUser@sipServer",
+        "secret": "secret"
+      };
+      Callbacks callbacks = Callbacks();
+      callbacks.message = _body;
+      sipcall.send(callbacks);
+    }
+}
+</code></pre>
+<h2 id="getting-started">Getting Started</h2>
+<p>Clone the repository and then update the janus server url in the examples/lib/janus_demo_echo.dart file. Build and you should be able to run the janus.js echotest example.</p>
+<h2 id="road-ahead">Road Ahead</h2>
+<ul>
+<li>I will be porting the other janus examples also to create one to one mapping with janus.js</li>
+<li>Test out the plugin on desktop</li>
+<li>Clean up the code base to remove the browser specific code</li>
+<li>Set up development cycle to match janus.js</li>
+</ul>
+<h2 id="test--bugs">Test &amp; Bugs</h2>
+<p>The code is ready to use but will have some bug, please open issue when you spot any issue or bugs.</p>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li><a href="https://github.com/flutter-webrtc/flutter-webrtc">flutter-webrtc</a></li>
+</ul>
+      </section>
+      
+        <section class="summary">
+            <h2>Libraries</h2>
+          <dl>
+            <dt id="flutterjanus">
+              <span class="name"><a href="flutterjanus/flutterjanus-library.html">flutterjanus</a></span>             
+            </dt>
+            <dd>
+               
+            </dd>
+          </dl>
+        </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div>
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutterjanus
+      0.0.3
+  </span>
+
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="static-assets/typeahead.bundle.min.js"></script>
+<script src="static-assets/highlight.pack.js"></script>
+<script src="static-assets/URI.js"></script>
+<script src="static-assets/script.js"></script>
+
+
+</body>
+
+</html>
