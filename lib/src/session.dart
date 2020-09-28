@@ -2772,7 +2772,9 @@ class Session {
       // See https://code.google.com/p/chromium/issues/detail?id=467366
       RTCSessionDescription jsep =
           RTCSessionDescription(answer.sdp, answer.type);
-      callbacks.customizeSdp(jsep);
+      // FIX ME
+      // if (callbacks.customizeSdp != null && callbacks.customizeSdp is Function)
+      // callbacks.customizeSdp(jsep);
       answer.sdp = jsep.sdp;
       Janus.log("Setting local description");
       if (sendVideo && simulcast) {
