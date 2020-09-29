@@ -883,7 +883,7 @@ class Session {
           return;
         } else if (json["janus"] != "ack") {
           // Not a success and not an ack, must be an error
-          if (json["error"]) {
+          if (json["error"] != null) {
             Janus.error("Ooops: " +
                 json["error"]["code"].toString() +
                 " " +
