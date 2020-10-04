@@ -66,10 +66,8 @@ class _JanusVideoCallState extends State<JanusVideoCall> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)), //this right here
-            child: Container(
+          return AlertDialog(
+            content: Container(
               height: 200,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),

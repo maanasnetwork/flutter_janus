@@ -1,11 +1,10 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 import 'src/api_test/api_test_menu.dart';
 import 'src/route_item.dart';
-import 'src/janus_demo/janus_demo_menu.dart';
+import 'src/janus/menu.dart';
 
 void main() => runApp(new MyApp());
 

@@ -8,11 +8,14 @@ PODS:
     - Flutter
   - GoogleWebRTC (1.1.29400)
   - Libyuv (1703)
+  - shared_preferences (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - flutterjanus (from `.symlinks/plugins/flutterjanus/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
   trunk:
@@ -26,6 +29,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
   flutterjanus:
     :path: ".symlinks/plugins/flutterjanus/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
@@ -33,6 +38,7 @@ SPEC CHECKSUMS:
   flutterjanus: 9a5e27002c4b049811d5f0f0dda9cdd5971934ec
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
+  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
 
 PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
 

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
+import '../widgets/sip_settings.dart';
+import '../utils/shared_preferences.dart';
 
 class JanusSipCall extends StatefulWidget {
   JanusSipCall({Key key}) : super(key: key);
@@ -63,49 +65,6 @@ class _JanusSipCallState extends State<JanusSipCall> {
     if (session != null) session.destroy();
   }
 
-  registerDialog() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)), //this right here
-            child: Container(
-              height: 200,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Register as username ...'),
-                      controller: textController,
-                    ),
-                    SizedBox(
-                      width: 320.0,
-                      child: RaisedButton(
-                        onPressed: () {
-                          registerUsername(textController.text);
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          "Register",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        color: Colors.green,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          );
-        });
-  }
-
   showAlert(String title, String text) {
     showDialog(
       context: context,
@@ -141,7 +100,7 @@ class _JanusSipCallState extends State<JanusSipCall> {
             children: [
               Text("Wait for user to call you."),
               TextFormField(
-                decoration: InputDecoration(labelText: "or Call user"),
+                decoration: InputDecoration(labelText: "or Call user / number"),
                 controller: textController,
               ),
               RaisedButton(
@@ -192,10 +151,23 @@ class _JanusSipCallState extends State<JanusSipCall> {
     );
   }
 
-  registerUsername(username) {
+  registerSip() async {
     if (sipcall != null) {
+      String _settings = await JanusSharedPreferences.getSipSettings();
+      Map<String, dynamic> sipSettings = jsonDecode(_settings);
+      Janus.log(sipSettings);
+      final _body = {
+        "authuser": sipSettings['sip_username'],
+        "display_name": sipSettings['display_name'],
+        "request": "register",
+        "username": "sip:" +
+            sipSettings['sip_username'] +
+            "@" +
+            sipSettings['sip_server'],
+        "secret": sipSettings['sip_password']
+      };
       Callbacks callbacks = Callbacks();
-      callbacks.message = {"request": "register", "username": username};
+      callbacks.message = _body;
       sipcall.send(callbacks);
     }
   }
@@ -348,8 +320,23 @@ class _JanusSipCallState extends State<JanusSipCall> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Videocall Test'),
-        actions: <Widget>[],
+        title: new Text('Sipcall Test'),
+        actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => new SipSettingsForm()));
+                },
+                child: Icon(
+                  Icons.settings,
+                  size: 26.0,
+                ),
+              )),
+        ],
       ),
       body: new OrientationBuilder(
         builder: (context, orientation) {
@@ -389,9 +376,8 @@ class _JanusSipCallState extends State<JanusSipCall> {
         },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _registered
-            ? (_inCalling ? _hangUp : makeCallDialog)
-            : registerDialog,
+        onPressed:
+            _registered ? (_inCalling ? _hangUp : makeCallDialog) : registerSip,
         tooltip: _registered ? (_inCalling ? 'Hangup' : 'Call') : 'Register',
         child: new Icon(_registered
             ? (_inCalling ? Icons.call_end : Icons.phone)

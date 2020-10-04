@@ -20,6 +20,10 @@ dependencies:
   random_string: ^2.0.1
   # The following install the logger package to the application
   logger: ^0.9.1
+  # The following install the shared_preferences package to the application
+  shared_preferences: ^0.4.2
+  # The following install the validator package to the application
+  validators: ^2.0.0+1
   # The following install the sdp_transform package to the application
   sdp_transform: ^0.2.0
 

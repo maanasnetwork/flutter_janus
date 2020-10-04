@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
 import '../route_item.dart';
-import 'janus_demo_echo.dart';
-import 'janus_demo_video_call.dart';
-import 'janus_demo_sip_call.dart';
-import 'janus_demo_video_room.dart';
+import 'echo.dart';
+import 'video_call.dart';
+import 'sip_call.dart';
+import 'video_room.dart';
+import '../widgets/janus_settings.dart';
 
 typedef void RouteCallback(BuildContext context);
 
@@ -117,6 +118,7 @@ class JanusDemoMenu extends StatefulWidget {
 
 class _JanusDemoMenuState extends State<JanusDemoMenu> {
   // GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+
   @override
   initState() {
     super.initState();
@@ -143,6 +145,22 @@ class _JanusDemoMenuState extends State<JanusDemoMenu> {
     return new Scaffold(
         appBar: new AppBar(
           title: new Text('Janus Demo'),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => new JanusSettingsForm()));
+                  },
+                  child: Icon(
+                    Icons.settings,
+                    size: 26.0,
+                  ),
+                )),
+          ],
         ),
         body: new ListView.builder(
             shrinkWrap: true,
