@@ -107,8 +107,8 @@ class Janus {
       'cache': 'no-cache'
     };
     Janus.debug(options.toString());
-    if (options['withCredentials']) {
-      if ((options['withCredentials']).length > 0) {
+    if (options['withCredentials'] != null) {
+      if (options['withCredentials']) {
         fetchOptions['credentials'] = 'include';
       } else {
         fetchOptions['credentials'] = 'omit';
