@@ -33,7 +33,11 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer1 = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer2 = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer3 = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer4 = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer5 = new RTCVideoRenderer();
   bool _inCalling = false;
   bool _registered = false;
 
@@ -50,16 +54,24 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   initRenderers() async {
     await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
+    await _remoteRenderer1.initialize();
+    await _remoteRenderer2.initialize();
+    await _remoteRenderer3.initialize();
+    await _remoteRenderer4.initialize();
+    await _remoteRenderer5.initialize();
     _connect();
   }
 
   @override
   void deactivate() {
     super.deactivate();
-    if (session != null) session.destroy();
     _localRenderer.dispose();
-    _remoteRenderer.dispose();
+    _remoteRenderer1.dispose();
+    _remoteRenderer2.dispose();
+    _remoteRenderer3.dispose();
+    _remoteRenderer4.dispose();
+    _remoteRenderer5.dispose();
+    if (session != null) session.destroy();
   }
 
   registerDialog() {
@@ -354,42 +366,63 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Videocall Test'),
+        title: new Text('Videoroom Test'),
         actions: <Widget>[],
       ),
       body: new OrientationBuilder(
         builder: (context, orientation) {
-          return new Center(
-            child: new Container(
-              decoration: new BoxDecoration(color: Colors.white),
-              child: new Stack(
-                children: <Widget>[
-                  new Align(
-                    alignment: orientation == Orientation.portrait
-                        ? const FractionalOffset(0.5, 0.1)
-                        : const FractionalOffset(0.0, 0.5),
-                    child: new Container(
-                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                      width: 320.0,
-                      height: 240.0,
+          return Container(
+            decoration: BoxDecoration(color: Colors.white),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(_localRenderer),
-                      decoration: new BoxDecoration(color: Colors.black54),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
                     ),
-                  ),
-                  new Align(
-                    alignment: orientation == Orientation.portrait
-                        ? const FractionalOffset(0.5, 0.9)
-                        : const FractionalOffset(1.0, 0.5),
-                    child: new Container(
-                      margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                      width: 320.0,
-                      height: 240.0,
-                      child: new RTCVideoView(_remoteRenderer),
+                    Container(
                       decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(_remoteRenderer1),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
                     ),
-                  ),
-                ],
-              ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(_remoteRenderer2),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(_remoteRenderer3),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
+                    ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(_remoteRenderer4),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
+                    ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(_remoteRenderer5),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
+                    ),
+                  ],
+                )
+              ],
             ),
           );
         },
@@ -485,7 +518,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   _onRemoteStream(MediaStream stream) {
     Janus.debug(" ::: Got a remote stream :::");
-    _remoteRenderer.srcObject = stream;
+    _remoteRenderer1.srcObject = stream;
   }
 
   _onDataOpen(data) {
@@ -505,7 +538,11 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       GatewayCallbacks gatewayCallbacks;
       session.destroy(gatewayCallbacks: gatewayCallbacks);
       _localRenderer.srcObject = null;
-      _remoteRenderer.srcObject = null;
+      _remoteRenderer1.srcObject = null;
+      _remoteRenderer2.srcObject = null;
+      _remoteRenderer3.srcObject = null;
+      _remoteRenderer4.srcObject = null;
+      _remoteRenderer5.srcObject = null;
     } catch (e) {
       print(e.toString());
     }
