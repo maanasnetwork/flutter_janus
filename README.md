@@ -21,25 +21,9 @@ The code is organised in four files
 | Videocall Plugin | Yes     | No          |
 | Sipcall Plugin   | Yes     | No          |
 | Videoroom Plugin | WIP     | No          |
-
-For SIP call, please modify the registerUsername function in janus_demo_sip_call.dart. I will be adding the code for UI shortly.
-
-```
-registerUsername(username) {
-    if (sipcall != null) {
-      final _body = {
-        "authuser": "authUser",
-        "display_name": "displayName",
-        "request": "register",
-        "username": "sip:authUser@sipServer",
-        "secret": "secret"
-      };
-      Callbacks callbacks = Callbacks();
-      callbacks.message = _body;
-      sipcall.send(callbacks);
-    }
-}
-```
+| Audioroom Plugin | WIP     | No          |
+| Textroom Plugin  | Planned | No          |
+| Screen Sharing   | Planned | No          |
 
 ## Getting Started
 
@@ -47,7 +31,6 @@ Clone the repository and then update the janus server url in the examples/lib/ja
 
 ## Road Ahead
 
-- I will be porting the other janus examples also to create one to one mapping with janus.js
 - Test out the plugin on desktop
 - Clean up the code base to remove the browser specific code
 - Set up development cycle to match janus.js

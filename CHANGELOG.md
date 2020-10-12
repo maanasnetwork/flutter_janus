@@ -1,3 +1,9 @@
+[0.0.5] - 2020-010-12
+
+- Bug fix withCredentials in httpCallback
+- Add form for settings and sip settings
+- Added remainig plugins work in progress
+
 [0.0.4] - 2020-09-27
 
 - Bug fix incomingcall jsep
