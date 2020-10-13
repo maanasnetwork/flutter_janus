@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -20,24 +21,28 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   bool audioEnabled = false;
   bool videoEnabled = false;
 
+  String myRoom = "1234"; // Demo room
   String myUsername;
-  String yourUsername;
-  Map<String, dynamic> peers;
+  String myId;
+  MediaStream myStream;
+  String myPvtId; // We use this other ID just to map our subscriptions to us
+  Map<String, dynamic> feeds;
+  Map<String, dynamic> list;
 
   bool doSimulcast = false;
   bool doSimulcast2 = false;
   bool simulcastStarted = false;
 
   Session session;
-  Plugin videoroom;
+  Plugin sfutest;
 
-  MediaStream _localStream;
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer1 = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer2 = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer3 = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer4 = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer5 = new RTCVideoRenderer();
+
   bool _inCalling = false;
   bool _registered = false;
 
@@ -139,87 +144,22 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
     );
   }
 
-  makeCallDialog() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-          title: Text("Call"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Wait for user to call you."),
-              TextFormField(
-                decoration: InputDecoration(labelText: "or Call user"),
-                controller: textController,
-              ),
-              RaisedButton(
-                color: Colors.green,
-                textColor: Colors.white,
-                onPressed: () {
-                  doCall(textController.text);
-                  Navigator.of(context).pop();
-                },
-                child: Text("Call"),
-              ),
-              new FlatButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ));
-  }
-
-  answerCallDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Incoming call'),
-          content: Text("Incoming call from " + yourUsername + "!"),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("Yes"),
-              onPressed: () {
-                answerCall();
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text("No"),
-              onPressed: () {
-                //Put your code here which you want to execute on No button click.
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text("Cancel"),
-              onPressed: () {
-                //Put your code here which you want to execute on Cancel button click.
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   registerUsername(username) {
-    if (videoroom != null) {
+    if (sfutest != null) {
       Callbacks callbacks = Callbacks();
-      callbacks.message = {"request": "register", "username": username};
-      videoroom.send(callbacks);
+      callbacks.message = {
+        "request": "join",
+        "room": myRoom,
+        "ptype": "publisher",
+        "displat": username
+      };
+      myUsername = username;
+      sfutest.send(callbacks);
     }
   }
 
-  doCall(String username) {
-    if (videoroom != null) {
+  publishOwnFeed(useAudio) {
+    if (sfutest != null) {
       Callbacks callbacks = Callbacks();
       callbacks.media["data"] = false;
       callbacks.simulcast = doSimulcast;
@@ -227,10 +167,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       callbacks.success = (RTCSessionDescription jsep) {
         Janus.debug("Got SDP!");
         Janus.debug(jsep.toMap());
-        Map<String, dynamic> body = {"request": "call", "username": username};
+        Map<String, dynamic> body = {
+          "request": "call",
+        };
         callbacks.message = body;
         callbacks.jsep = jsep.toMap();
-        videoroom.send(callbacks);
+        sfutest.send(callbacks);
         setState(() {
           _inCalling = true;
         });
@@ -240,11 +182,23 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         Janus.log("WebRTC error... " + jsonEncode(error));
       };
       Janus.debug("Trying a createOffer too (audio/video sendrecv)");
-      videoroom.createOffer(callbacks: callbacks);
+      sfutest.createOffer(callbacks: callbacks);
     }
   }
 
-  answerCall() {
+  unpublishOwnFeed() {
+    if (sfutest != null) {
+      Callbacks callbacks = Callbacks();
+      callbacks.message = {
+        "request": "unpublish",
+      };
+      sfutest.send(callbacks);
+    }
+  }
+
+  newRemoteFeed(id, display, audio, video) {
+    var remoteFeed;
+
     Callbacks callbacks = Callbacks();
     callbacks.media["data"] = false;
     callbacks.simulcast = doSimulcast;
@@ -254,7 +208,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       Janus.debug(jsep.toMap());
       callbacks.message = {"request": "accept"};
       callbacks.jsep = jsep.toMap();
-      videoroom.send(callbacks);
+      sfutest.send(callbacks);
       setState(() {
         _inCalling = true;
       });
@@ -263,14 +217,14 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       Janus.error("WebRTC error:", error);
       Janus.log("WebRTC error... " + jsonEncode(error));
     };
-    videoroom.createAnswer(callbacks);
+    sfutest.createAnswer(callbacks);
   }
 
   updateCall(jsep) {
     Callbacks callbacks = Callbacks();
     callbacks.jsep = jsep;
     if (jsep.type == 'answer') {
-      videoroom.handleRemoteJsep(callbacks);
+      sfutest.handleRemoteJsep(callbacks);
     } else {
       callbacks.media["data"] = false;
       callbacks.simulcast = doSimulcast;
@@ -280,85 +234,155 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         Janus.debug(jsep.toMap());
         callbacks.message = {"request": "set"};
         callbacks.jsep = jsep.toMap();
-        videoroom.send(callbacks);
+        sfutest.send(callbacks);
       };
       callbacks.error = (error) {
         Janus.error("WebRTC error:", error);
         Janus.log("WebRTC error... " + jsonEncode(error));
       };
-      videoroom.createAnswer(callbacks);
+      sfutest.createAnswer(callbacks);
     }
   }
 
   getRegisteredUsers() {
     Callbacks callbacks = Callbacks();
     callbacks.message = {"request": "list"};
-    videoroom.send(callbacks);
+    sfutest.send(callbacks);
   }
 
-  _onMessage(msg, jsep) {
+  _onMessage(Map<String, dynamic> msg, jsep) {
     Janus.debug(" ::: Got a message :::");
     Janus.debug(msg);
-    Map<String, dynamic> result = msg["result"];
-    if (result != null) {
-      if (result["list"] != null) {
-        peers = result["list"];
-        Janus.debug("Got a list of registered peers:");
-        Janus.debug(peers.toString());
-      } else if (result["event"] != null) {
-        String event = result["event"];
-        if (event == 'registered') {
-          setState(() {
-            _registered = true;
-          });
+    String event = msg["videoroom"];
+    Janus.debug("Event: " + event.toString());
 
-          myUsername = result["username"];
-          Janus.log("Successfully registered as " + myUsername + "!");
-          showAlert(
-              "Registered", "Successfully registered as " + myUsername + "!");
-          // Get a list of available peers, just for fun
-          getRegisteredUsers();
-          // TODO Enable buttons to call now
-        } else if (event == 'calling') {
-          Janus.log("Waiting for the peer to answer...");
-          // TODO Any ringtone?
-          showAlert('Calling', "Waiting for the peer to answer...");
-        } else if (event == 'incomingcall') {
-          Janus.log("Incoming call from " + result["username"] + "!");
-          yourUsername = result["username"];
-          // Notify user
-          answerCallDialog();
-        } else if (event == 'accepted') {
-          if (result["username"] == null) {
-            Janus.log("Call started!");
+    if (event != null) {
+      if (event == "joined") {
+        // Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
+        myId = msg["id"];
+        myPvtId = msg["private_id"];
+        Janus.log("Successfully joined room " +
+            msg["room"].toString() +
+            " with ID " +
+            myId.toString());
+        publishOwnFeed(true);
+        // Any new feed to attach to?
+        if (msg["publishers"] != null) {
+          list = msg["publishers"];
+          Janus.debug("Got a list of available publishers/feeds:");
+          Janus.debug(list.toString());
+          list.forEach((key, value) {
+            var id = value["id"];
+            var display = value["display"];
+            var audio = value["audio_codec"];
+            var video = value["video_coded"];
+            Janus.debug("  >> [" +
+                id.toString() +
+                "] " +
+                display.toString() +
+                " (audio: " +
+                audio.toString() +
+                ", video: " +
+                video.toString() +
+                ")");
+            newRemoteFeed(id, display, audio, video);
+          });
+        }
+      } else if (event == 'destroyed') {
+        // The room has been destroyed
+        Janus.warn("The room has been destroyed!");
+      } else if (event == "event") {
+        // Any new feed to attach to?
+        if (msg["publishers"] != null) {
+          list = msg["publishers"];
+          Janus.debug("Got a list of available publishers/feeds:");
+          Janus.debug(list.toString());
+          list.forEach((key, value) {
+            var id = value["id"];
+            var display = value["display"];
+            var audio = value["audio_codec"];
+            var video = value["video_coded"];
+            Janus.debug("  >> [" +
+                id.toString() +
+                "] " +
+                display.toString() +
+                " (audio: " +
+                audio.toString() +
+                ", video: " +
+                video.toString() +
+                ")");
+            newRemoteFeed(id, display, audio, video);
+          });
+        } else if (msg["leaving"] != null) {
+          var leaving = msg["leaving"];
+          Janus.log("Publisher left: " + leaving.toString());
+          var remoteFeed = null;
+          for (int i = 1; i < 6; i++) {
+            if (feeds[i] != null && feeds[i]["rfid"] == leaving) {
+              remoteFeed = feeds[i];
+            }
+          }
+          if (remoteFeed != null) {
+            Janus.debug("Feed " +
+                remoteFeed.rfid.toString() +
+                " (" +
+                remoteFeed.rfdisplay.toString() +
+                ") has left the room, detaching");
+            feeds[remoteFeed["rfindex"]] = null;
+            remoteFeed.detach();
+          }
+        } else if (msg["unpublished"] != null) {
+          var unpublished = msg["unpublished"];
+          Janus.log("Publisher left: " + unpublished.toString());
+          if (unpublished == 'ok') {
+            // That's us
+            sfutest.hangup(false);
+            return;
+          }
+          var remoteFeed = null;
+          for (int i = 1; i < 6; i++) {
+            if (feeds[i] != null && feeds[i]["rfid"] == unpublished) {
+              remoteFeed = feeds[i];
+            }
+          }
+          if (remoteFeed != null) {
+            Janus.debug("Feed " +
+                remoteFeed.rfid.toString() +
+                " (" +
+                remoteFeed.rfdisplay.toString() +
+                ") has left the room, detaching");
+            feeds[remoteFeed["rfindex"]] = null;
+            remoteFeed.detach();
+          }
+        } else if (msg["error"] != null) {
+          if (msg["error_code"] == 426) {
+            // This is a "no such room" error: give a more meaningful description
+            Janus.error("No such room exists");
           } else {
-            yourUsername = result["username"];
-            Janus.log(yourUsername + " accepted the call!");
+            Janus.error("Unknown Error: " + msg["error"].toString());
           }
-          // Video call can start
-          if (jsep != null) {
-            Callbacks callbacks = Callbacks();
-            callbacks.jsep = jsep;
-            videoroom.handleRemoteJsep(callbacks);
-          }
-        } else if (event == 'update') {
-          if (jsep != null) {
-            updateCall(jsep);
-          }
-        } else if (event == 'hangup') {
-          Janus.log("Call hung up by " +
-              result["username"] +
-              " (" +
-              result["reason"] +
-              ")!");
-          videoroom.hangup(false);
-          _hangUp();
         }
       }
-    } else {
-      var error = msg["error"];
-      showAlert("Error", error.toString());
-      _hangUp();
+    }
+
+    if (jsep != null) {
+      Janus.debug("Handling SDP as well...");
+      Janus.debug(jsep);
+      Callbacks callbacks = Callbacks();
+      callbacks.jsep = jsep;
+      sfutest.handleRemoteJsep(callbacks);
+      var audio = msg["audio_codec"];
+      if (myStream != null &&
+          myStream.getAudioTracks().length > 0 &&
+          audio == null) {
+        Janus.log("Our audio stream has been rejected, viewers won't hear us");
+      }
+      var video = msg["audio_codec"];
+      if (myStream != null &&
+          myStream.getVideoTracks().length > 0 &&
+          video == null) {
+        Janus.log("Our video stream has been rejected, viewers won't see us");
+      }
     }
   }
 
@@ -428,10 +452,8 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _registered
-            ? (_inCalling ? _hangUp : makeCallDialog)
-            : registerDialog,
-        tooltip: _registered ? (_inCalling ? 'Hangup' : 'Call') : 'Register',
+        onPressed: _registered ? _hangUp : registerDialog,
+        tooltip: _registered ? 'Hangup' : 'Register',
         child: new Icon(_registered
             ? (_inCalling ? Icons.call_end : Icons.phone)
             : Icons.verified_user),
@@ -471,11 +493,11 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   }
 
   _success(Plugin pluginHandle) {
-    videoroom = pluginHandle;
+    sfutest = pluginHandle;
     Janus.log("Plugin attached! (" +
-        this.videoroom.getPlugin() +
+        this.sfutest.getPlugin() +
         ", id=" +
-        videoroom.getId().toString() +
+        sfutest.getId().toString() +
         ")");
   }
 
@@ -512,13 +534,13 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   _onLocalStream(MediaStream stream) {
     Janus.debug(" ::: Got a local stream :::");
-    _localStream = stream;
-    _localRenderer.srcObject = stream;
+    myStream = stream;
+    _localRenderer.srcObject = myStream;
   }
 
   _onRemoteStream(MediaStream stream) {
+    // The publisher stream is sendonly, we don't expect anything here
     Janus.debug(" ::: Got a remote stream :::");
-    _remoteRenderer1.srcObject = stream;
   }
 
   _onDataOpen(data) {
