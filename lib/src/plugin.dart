@@ -29,6 +29,10 @@ class Plugin {
   List<RTCIceCandidate> candidates;
   var pendingData;
 
+  int remoteFeedIndex = 0;
+  var remoteFeedId;
+  String remoteFeedDisplay;
+
   final Session session;
   final Callbacks callbacks;
   final String plugin;
