@@ -19,7 +19,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   bool audioEnabled = false;
   bool videoEnabled = false;
 
-  String myRoom = "1234"; // Demo room
+  int myRoom = 1234; // Demo room
   String myUsername;
   String myId;
   MediaStream myStream;
@@ -60,12 +60,9 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   initRenderers() async {
     await localRenderer.initialize();
-    Janus.log("reached");
     for (int i = 0; i < 5; i++) {
       await remoteRenderer[i].initialize();
     }
-    Janus.log("reaching here");
-    Janus.log(remoteRenderer[1]);
     _connect();
   }
 
@@ -566,19 +563,19 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(localRenderer),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[0]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[1]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                   ],
                 ),
@@ -589,19 +586,19 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[2]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[3]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[4]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                   ],
                 )
@@ -613,9 +610,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _registered ? _hangUp : registerDialog,
         tooltip: _registered ? 'Hangup' : 'Register',
-        child: new Icon(_registered
-            ? (_inCalling ? Icons.call_end : Icons.phone)
-            : Icons.verified_user),
+        child: new Icon(_registered ? Icons.call_end : Icons.phone),
       ),
     );
   }
