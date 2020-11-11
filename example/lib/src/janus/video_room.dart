@@ -36,7 +36,13 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   Plugin sfutest;
 
   RTCVideoRenderer localRenderer = new RTCVideoRenderer();
-  List<RTCVideoRenderer> remoteRenderer;
+  List<RTCVideoRenderer> remoteRenderer = [
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer()
+  ];
 
   bool _inCalling = false;
   bool _registered = false;
@@ -54,10 +60,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   initRenderers() async {
     await localRenderer.initialize();
-    for (int i = 1; i < 6; i++) {
-      remoteRenderer[i] = new RTCVideoRenderer();
+    Janus.log("reached");
+    for (int i = 0; i < 5; i++) {
       await remoteRenderer[i].initialize();
     }
+    Janus.log("reaching here");
+    Janus.log(remoteRenderer[1]);
     _connect();
   }
 
@@ -562,13 +570,13 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[1]),
+                      child: new RTCVideoView(remoteRenderer[0]),
                       width: MediaQuery.of(context).size.width / 2.1,
                       height: MediaQuery.of(context).size.height / 4.0,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[2]),
+                      child: new RTCVideoView(remoteRenderer[1]),
                       width: MediaQuery.of(context).size.width / 2.1,
                       height: MediaQuery.of(context).size.height / 4.0,
                     ),
@@ -579,6 +587,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                   children: [
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(remoteRenderer[2]),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.0,
+                    ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[3]),
                       width: MediaQuery.of(context).size.width / 2.1,
                       height: MediaQuery.of(context).size.height / 4.0,
@@ -586,12 +600,6 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[4]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[5]),
                       width: MediaQuery.of(context).size.width / 2.1,
                       height: MediaQuery.of(context).size.height / 4.0,
                     ),
