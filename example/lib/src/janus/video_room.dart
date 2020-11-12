@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -21,11 +22,11 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   int myRoom = 1234; // Demo room
   String myUsername;
-  String myId;
+  int myId;
   MediaStream myStream;
-  String myPvtId; // We use this other ID just to map our subscriptions to us
-  List<Plugin> feeds;
-  Map<String, dynamic> list;
+  int myPvtId; // We use this other ID just to map our subscriptions to us
+  List<Plugin> feeds = [];
+  List<dynamic> list = [];
   Map<String, dynamic> bitrateTimer;
 
   bool doSimulcast = false;
@@ -36,13 +37,8 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   Plugin sfutest;
 
   RTCVideoRenderer localRenderer = new RTCVideoRenderer();
-  List<RTCVideoRenderer> remoteRenderer = [
-    new RTCVideoRenderer(),
-    new RTCVideoRenderer(),
-    new RTCVideoRenderer(),
-    new RTCVideoRenderer(),
-    new RTCVideoRenderer()
-  ];
+  Future<String> hasInitRenderers;
+  List<RTCVideoRenderer> remoteRenderer = [];
 
   bool _inCalling = false;
   bool _registered = false;
@@ -55,13 +51,15 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   void initState() {
     super.initState();
     Janus.init(options: {"debug": "all"}, callback: null);
-    initRenderers();
+    hasInitRenderers = initRenderers();
   }
 
-  initRenderers() async {
+  Future<String> initRenderers() async {
     await localRenderer.initialize();
     for (int i = 0; i < 5; i++) {
-      await remoteRenderer[i].initialize();
+      RTCVideoRenderer rend = new RTCVideoRenderer();
+      remoteRenderer.add(rend);
+      await rend.initialize();
     }
     _connect();
   }
@@ -70,7 +68,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   void deactivate() {
     super.deactivate();
     localRenderer.dispose();
-    for (int i = 1; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
       remoteRenderer[i].dispose();
     }
     if (session != null) session.destroy();
@@ -149,7 +147,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
     callbacks.success = (Plugin pluginHandle) {
       remoteFeed = pluginHandle;
       Janus.log("Plugin attached! (" +
-          remoteFeed.getPlugin() +
+          remoteFeed.getPlugin().toString() +
           ", id=" +
           remoteFeed.getId().toString() +
           ")");
@@ -158,7 +156,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         "request": "join",
         "room": myRoom,
         "ptype": "subscriber",
-        "feed": myId,
+        "feed": id,
         "private_id": myPvtId
       };
       // You can force a specific codec to use when publishing by using the
@@ -185,12 +183,9 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       } else if (event != null) {
         if (event == "attached") {
           // Subscriber created and attached
-          for (int i = 1; i < 6; i++) {
-            if (feeds[i] != null) {
-              remoteFeed.remoteFeedIndex = i;
-              feeds[i] = remoteFeed;
-              break;
-            }
+          if (feeds.length < 5) {
+            feeds.add(remoteFeed);
+            remoteFeed.remoteFeedIndex = feeds.length - 1;
           }
           remoteFeed.remoteFeedId = msg["id"];
           remoteFeed.remoteFeedDisplay = msg["display"];
@@ -199,7 +194,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
               " (" +
               remoteFeed.remoteFeedDisplay +
               ") in room " +
-              msg["room"]);
+              msg["room"].toString());
         } else if (event == "event") {
           // Check if we got an event on a simulcast-related event from this publisher
           var substream = msg["substream"];
@@ -226,6 +221,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           Janus.error("WebRTC error:", error);
           Janus.log("WebRTC error... " + jsonEncode(error));
         };
+        remoteFeed.createAnswer(callbacks);
       }
     };
     callbacks.onLocalStream = () {
@@ -243,9 +239,6 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           remoteFeed.remoteFeedId.toString() +
           ") :::");
       remoteRenderer[remoteFeed.remoteFeedIndex].srcObject = null;
-      remoteFeed.remoteFeedDisplay = null;
-      remoteFeed.remoteFeedId = null;
-      remoteFeed.remoteFeedIndex = null;
     };
     this.session.attach(callbacks: callbacks);
   }
@@ -340,10 +333,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         "Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
   }
 
-  _webrtcState(bool on) {
+  _webrtcState(bool on, [List<dynamic> extra]) {
+    //sometimes we get extra here? an error?
     Janus.log("Janus says our WebRTC PeerConnection is " +
         (on ? "up" : "down") +
         " now");
+    Janus.debug('WebRTC state message, had extra: ${extra.toString()}');
   }
 
   // onMessage is main application flow control
@@ -368,7 +363,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           list = msg["publishers"];
           Janus.debug("Got a list of available publishers/feeds:");
           Janus.debug(list.toString());
-          list.forEach((key, value) {
+          list.forEach((value) {
             var id = value["id"];
             var display = value["display"];
             var audio = value["audio_codec"];
@@ -394,7 +389,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           list = msg["publishers"];
           Janus.debug("Got a list of available publishers/feeds:");
           Janus.debug(list.toString());
-          list.forEach((key, value) {
+          list.forEach((value) {
             var id = value["id"];
             var display = value["display"];
             var audio = value["audio_codec"];
@@ -414,19 +409,20 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           var leaving = msg["leaving"];
           Janus.log("Publisher left: " + leaving.toString());
           Plugin remoteFeed;
-          for (int i = 1; i < 6; i++) {
-            if (feeds[i] != null && feeds[i].remoteFeedId == leaving) {
-              remoteFeed = feeds[i];
+
+          feeds.forEach((element) {
+            if (element.getId() == leaving) {
+              remoteFeed = element;
             }
-          }
+          });
           if (remoteFeed != null) {
             Janus.debug("Feed " +
                 remoteFeed.remoteFeedId.toString() +
                 " (" +
-                remoteFeed.remoteFeedDisplay.toString() +
+                remoteFeed.remoteFeedDisplay +
                 ") has left the room, detaching");
-            feeds[remoteFeed.remoteFeedIndex] = null;
-            remoteFeed.detach(false);
+            feeds.remove(remoteFeed);
+            remoteFeed.getPlugin().detach({});
           }
         } else if (msg["unpublished"] != null) {
           var unpublished = msg["unpublished"];
@@ -436,21 +432,20 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
             sfutest.hangup(false);
             return;
           }
-          var remoteFeed;
-          for (int i = 1; i < 6; i++) {
-            if (feeds[i] != null &&
-                feeds[i].remoteFeedId.toString() == unpublished) {
-              remoteFeed = feeds[i];
+          Plugin remoteFeed;
+          feeds.forEach((element) {
+            if (element.getId() == unpublished) {
+              remoteFeed = element;
             }
-          }
+          });
           if (remoteFeed != null) {
             Janus.debug("Feed " +
-                remoteFeed.rfid.toString() +
+                remoteFeed.remoteFeedId.toString() +
                 " (" +
-                remoteFeed.rfdisplay.toString() +
+                remoteFeed.remoteFeedDisplay +
                 ") has left the room, detaching");
-            feeds[remoteFeed["rfindex"]] = null;
-            remoteFeed.detach();
+            feeds.remove(remoteFeed);
+            remoteFeed.getPlugin().detach({});
           }
         } else if (msg["error"] != null) {
           if (msg["error_code"] == 426) {
@@ -522,7 +517,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       GatewayCallbacks gatewayCallbacks;
       session.destroy(gatewayCallbacks: gatewayCallbacks);
       localRenderer.srcObject = null;
-      for (int i = 1; i < 6; i++) {
+      for (int i = 0; i < 5; i++) {
         remoteRenderer[i].srcObject = null;
       }
     } catch (e) {
@@ -549,64 +544,95 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         title: new Text('Videoroom Test'),
         actions: <Widget>[],
       ),
-      body: new OrientationBuilder(
-        builder: (context, orientation) {
-          return Container(
-            decoration: BoxDecoration(color: Colors.white),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(localRenderer),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[0]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[1]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[2]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[3]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[4]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.1,
-                    ),
-                  ],
-                )
-              ],
-            ),
-          );
-        },
-      ),
+      body: new FutureBuilder(
+          future: hasInitRenderers,
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+                return new Text('loading...');
+              default:
+                if (snapshot.hasError)
+                  return new Text('Error: ${snapshot.error}');
+                else
+                  return new OrientationBuilder(
+                    builder: (context, orientation) {
+                      return Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(localRenderer),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(remoteRenderer[0]),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(remoteRenderer[1]),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(remoteRenderer[2]),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(remoteRenderer[3]),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                                Container(
+                                  decoration:
+                                      new BoxDecoration(color: Colors.black54),
+                                  child: new RTCVideoView(remoteRenderer[4]),
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.1,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.1,
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  );
+            }
+          }),
       floatingActionButton: new FloatingActionButton(
         onPressed: _registered ? _hangUp : registerDialog,
         tooltip: _registered ? 'Hangup' : 'Register',
