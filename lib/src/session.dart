@@ -1186,9 +1186,8 @@ class Session {
         gap.toString() +
         "ms)");
     // FIX ME the upstream flutter_webrtc call name is not in compliance with WebRTC
-    // pluginHandle.dtmfSender.insertDTMF(tones, duration, gap);
-    pluginHandle.dtmfSender
-        .sendDtmf(tones, duration: duration, interToneGap: gap);
+    pluginHandle.dtmfSender.insertDTMF(tones, duration: duration, interToneGap: gap);
+    //pluginHandle.dtmfSender.sendDtmf(tones, duration: duration, interToneGap: gap);
     callbacks.success();
   }
 
@@ -1325,16 +1324,16 @@ class Session {
             audioTransceiver['sender'].replaceTrack(stream.getAudioTracks()[0]);
           } else {
             // FIX ME (unimplemented in flutter-webrtc)
-            //pluginHandle.pc.addTrack(stream.getAudioTracks()[0], [stream]);
-            pluginHandle.pc.addStream(stream);
+            pluginHandle.pc.addTrack(stream.getAudioTracks()[0], [stream]);
+            //pluginHandle.pc.addStream(stream);
           }
         } else {
           Janus.log((media['replaceAudio'] ? "Replacing" : "Adding") +
               " audio track:" +
               stream.getAudioTracks()[0].toString());
           // FIX ME (unimplemented in flutter-webrtc)
-          //pluginHandle.pc.addTrack(stream.getAudioTracks()[0], [stream]);
-          pluginHandle.pc.addStream(stream);
+          pluginHandle.pc.addTrack(stream.getAudioTracks()[0], [stream]);
+          //pluginHandle.pc.addStream(stream);
         }
       }
       if (((!media['update'] && isVideoSendEnabled(media)) ||
@@ -1377,8 +1376,8 @@ class Session {
               " video track:" +
               stream.getVideoTracks()[0].toString());
           // FIX ME
-          //pluginHandle.pc.addTrack(stream.getVideoTracks()[0], [stream]);
-          pluginHandle.pc.addStream(stream);
+          pluginHandle.pc.addTrack(stream.getVideoTracks()[0], [stream]);
+          //pluginHandle.pc.addStream(stream);
         }
       }
     }
