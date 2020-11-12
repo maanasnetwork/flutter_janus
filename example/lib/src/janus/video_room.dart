@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutterjanus/flutterjanus.dart';
@@ -20,7 +19,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   bool audioEnabled = false;
   bool videoEnabled = false;
 
-  String myRoom = "1234"; // Demo room
+  int myRoom = 1234; // Demo room
   String myUsername;
   String myId;
   MediaStream myStream;
@@ -37,7 +36,13 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   Plugin sfutest;
 
   RTCVideoRenderer localRenderer = new RTCVideoRenderer();
-  List<RTCVideoRenderer> remoteRenderer;
+  List<RTCVideoRenderer> remoteRenderer = [
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer(),
+    new RTCVideoRenderer()
+  ];
 
   bool _inCalling = false;
   bool _registered = false;
@@ -55,8 +60,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
 
   initRenderers() async {
     await localRenderer.initialize();
-    for (int i = 1; i < 6; i++) {
-      remoteRenderer[i] = new RTCVideoRenderer();
+    for (int i = 0; i < 5; i++) {
       await remoteRenderer[i].initialize();
     }
     _connect();
@@ -86,13 +90,13 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
     }
   }
 
-  publishOwnFeed(bool useAudio=true) {
+  publishOwnFeed({bool useAudio = true}) {
     if (sfutest != null) {
       Callbacks callbacks = Callbacks();
-      callbacks.media = { 
-        "audioRecv" : false, 
-        "videoRecv": false, 
-        "audioSend": useAudio, 
+      callbacks.media = {
+        "audioRecv": false,
+        "videoRecv": false,
+        "audioSend": useAudio,
         "videoSend": true
       };
       callbacks.simulcast = doSimulcast;
@@ -106,10 +110,10 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           "video": true
         };
         // You can force a specific codec to use when publishing by using the
-				// audiocodec and videocodec properties, for instance:
-				// 		publish["audiocodec"] = "opus"
-				// to force Opus as the audio codec to use, or:
-				// 		publish["videocodec"] = "vp9"
+        // audiocodec and videocodec properties, for instance:
+        // 		publish["audiocodec"] = "opus"
+        // to force Opus as the audio codec to use, or:
+        // 		publish["videocodec"] = "vp9"
         callbacks.message = publish;
         callbacks.jsep = jsep.toMap();
         sfutest.send(callbacks);
@@ -144,8 +148,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
     callbacks.opaqueId = opaqueId;
     callbacks.success = (Plugin pluginHandle) {
       remoteFeed = pluginHandle;
-      Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId().toString() + ")");
-			Janus.log("  -- This is a subscriber");
+      Janus.log("Plugin attached! (" +
+          remoteFeed.getPlugin() +
+          ", id=" +
+          remoteFeed.getId().toString() +
+          ")");
+      Janus.log("  -- This is a subscriber");
       Map<String, dynamic> subscribe = {
         "request": "join",
         "room": myRoom,
@@ -167,12 +175,12 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
     callbacks.mediaState = _mediaState;
     callbacks.webrtcState = _webrtcState;
     callbacks.slowLink = _slowLink;
-    callbacks.onMessage = (Map<String, dynamic> msg, jsep){
+    callbacks.onMessage = (Map<String, dynamic> msg, jsep) {
       Janus.debug(" ::: Got a message (subscriber) :::");
       Janus.debug(msg);
       String event = msg["videoroom"];
       Janus.debug("Event: " + event.toString());
-      if(msg["error"] != null){
+      if (msg["error"] != null) {
         Janus.error(msg["error"]);
       } else if (event != null) {
         if (event == "attached") {
@@ -186,16 +194,19 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           }
           remoteFeed.remoteFeedId = msg["id"];
           remoteFeed.remoteFeedDisplay = msg["display"];
-          Janus.log("Successfully attached to feed " + remoteFeed.remoteFeedId.toString()+ " (" + remoteFeed.remoteFeedDisplay + ") in room " + msg["room"]);
-        
+          Janus.log("Successfully attached to feed " +
+              remoteFeed.remoteFeedId.toString() +
+              " (" +
+              remoteFeed.remoteFeedDisplay +
+              ") in room " +
+              msg["room"]);
         } else if (event == "event") {
           // Check if we got an event on a simulcast-related event from this publisher
           var substream = msg["substream"];
           var temporal = msg["temporal"];
-          if (substream != null || temporal != null){
+          if (substream != null || temporal != null) {
             Janus.log("Feed supports simulcast");
           }
-          
         }
       }
       if (jsep != null) {
@@ -203,10 +214,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
         Janus.debug(jsep);
         Callbacks callbacks = Callbacks();
         callbacks.jsep = jsep;
-        callbacks.media = {
-          "audioSend": false,
-          "videoSend": false
-        };
+        callbacks.media = {"audioSend": false, "videoSend": false};
         callbacks.success = (RTCSessionDescription jsep) {
           Janus.debug("Got SDP!");
           Janus.debug(jsep.toMap());
@@ -224,21 +232,22 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       // The subscriber stream is recvonly, we don't expect anything here
       Janus.log("The subscriber stream is receive only.");
     };
-    callbacks.onRemoteStream = (MediaStream stream){
+    callbacks.onRemoteStream = (MediaStream stream) {
       Janus.debug("Remote feed #" + remoteFeed.remoteFeedId.toString());
       remoteRenderer[remoteFeed.remoteFeedIndex].srcObject = stream;
     };
     callbacks.onDataOpen = _onDataOpen;
     callbacks.onData = _onData;
-    callbacks.onCleanup = (){
-      Janus.log(" ::: Got a cleanup notification (remote feed " + remoteFeed.remoteFeedId.toString() + ") :::");
+    callbacks.onCleanup = () {
+      Janus.log(" ::: Got a cleanup notification (remote feed " +
+          remoteFeed.remoteFeedId.toString() +
+          ") :::");
       remoteRenderer[remoteFeed.remoteFeedIndex].srcObject = null;
       remoteFeed.remoteFeedDisplay = null;
       remoteFeed.remoteFeedId = null;
       remoteFeed.remoteFeedIndex = null;
     };
     this.session.attach(callbacks: callbacks);
-
   }
 
   updateCall(jsep) {
@@ -353,7 +362,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
             msg["room"].toString() +
             " with ID " +
             myId.toString());
-        publishOwnFeed(true);
+        publishOwnFeed(useAudio: true);
         // Any new feed to attach to?
         if (msg["publishers"] != null) {
           list = msg["publishers"];
@@ -406,18 +415,18 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           Janus.log("Publisher left: " + leaving.toString());
           Plugin remoteFeed;
           for (int i = 1; i < 6; i++) {
-            if (feeds[i] != null && feeds[i].remoteFeedId"] == leaving) {
+            if (feeds[i] != null && feeds[i].remoteFeedId == leaving) {
               remoteFeed = feeds[i];
             }
           }
           if (remoteFeed != null) {
             Janus.debug("Feed " +
-                remoteFeed.rfid.toString() +
+                remoteFeed.remoteFeedId.toString() +
                 " (" +
-                remoteFeed.rfdisplay.toString() +
+                remoteFeed.remoteFeedDisplay.toString() +
                 ") has left the room, detaching");
-            feeds[remoteFeed["rfindex"]] = null;
-            remoteFeed.detach();
+            feeds[remoteFeed.remoteFeedIndex] = null;
+            remoteFeed.detach(false);
           }
         } else if (msg["unpublished"] != null) {
           var unpublished = msg["unpublished"];
@@ -429,7 +438,8 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
           }
           var remoteFeed;
           for (int i = 1; i < 6; i++) {
-            if (feeds[i] != null && feeds[i]["rfid"] == unpublished) {
+            if (feeds[i] != null &&
+                feeds[i].remoteFeedId.toString() == unpublished) {
               remoteFeed = feeds[i];
             }
           }
@@ -504,14 +514,14 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
   _onCleanup() {
     Janus.log(" ::: Got a cleanup notification :::");
     myStream = null;
-    _localRenderer.srcObject = null;
+    localRenderer.srcObject = null;
   }
 
   _hangUp() async {
     try {
       GatewayCallbacks gatewayCallbacks;
       session.destroy(gatewayCallbacks: gatewayCallbacks);
-      _localRenderer.srcObject = null;
+      localRenderer.srcObject = null;
       for (int i = 1; i < 6; i++) {
         remoteRenderer[i].srcObject = null;
       }
@@ -553,19 +563,19 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(localRenderer),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
+                    ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(remoteRenderer[0]),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[1]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[2]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                   ],
                 ),
@@ -574,21 +584,21 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
                   children: [
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
+                      child: new RTCVideoView(remoteRenderer[2]),
+                      width: MediaQuery.of(context).size.width / 2.1,
+                      height: MediaQuery.of(context).size.height / 4.1,
+                    ),
+                    Container(
+                      decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[3]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                     Container(
                       decoration: new BoxDecoration(color: Colors.black54),
                       child: new RTCVideoView(remoteRenderer[4]),
                       width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
-                    ),
-                    Container(
-                      decoration: new BoxDecoration(color: Colors.black54),
-                      child: new RTCVideoView(remoteRenderer[5]),
-                      width: MediaQuery.of(context).size.width / 2.1,
-                      height: MediaQuery.of(context).size.height / 4.0,
+                      height: MediaQuery.of(context).size.height / 4.1,
                     ),
                   ],
                 )
@@ -600,9 +610,7 @@ class _JanusVideoRoomState extends State<JanusVideoRoom> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _registered ? _hangUp : registerDialog,
         tooltip: _registered ? 'Hangup' : 'Register',
-        child: new Icon(_registered
-            ? (_inCalling ? Icons.call_end : Icons.phone)
-            : Icons.verified_user),
+        child: new Icon(_registered ? Icons.call_end : Icons.phone),
       ),
     );
   }
