@@ -20,10 +20,11 @@ The code is organised in four files
 | Echotest Plugin  | Yes     | No          |
 | Videocall Plugin | Yes     | No          |
 | Sipcall Plugin   | Yes     | No          |
-| Videoroom Plugin | WIP     | No          |
+| Videoroom Plugin | Yes     | No          |
 | Audioroom Plugin | WIP     | No          |
 | Textroom Plugin  | Planned | No          |
 | Screen Sharing   | Planned | No          |
+| Unified Plan     | WIP     | No          |
 
 ## Getting Started
 
