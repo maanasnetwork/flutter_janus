@@ -12,9 +12,7 @@ class JanusVideoRoom extends StatefulWidget {
 }
 
 class _JanusVideoRoomState extends State<JanusVideoRoom> {
-  String server = "https://janus.rob5underscores.co.uk/api/";
-
-  //String server = "wss://janutter.tzty.net:7007";
+  String server = "wss://janutter.tzty.net:7007";
   // String server = "https://janutter.tzty.net:8008/janus";
 
   String opaqueId = "videoroomtest-" + Janus.randomString(12);
